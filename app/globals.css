@@ -94,6 +94,24 @@
   background-image: linear-gradient(135deg, #5b6ef5 0%, #8b5cf6 50%, #ec4899 100%);
 }
 
+/* Static hero backdrop: the always-painted layer under the shader canvas.
+   Serves as loading state, reduced-motion state, and no-WebGL fallback.
+   color-mix + raw vars keep it correct in both themes. */
+.hero-fallback {
+  background:
+    radial-gradient(
+      ellipse 75% 65% at 74% 36%,
+      color-mix(in oklab, var(--accent-primary) 20%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 55% 50% at 88% 70%,
+      color-mix(in oklab, var(--accent-violet) 13%, transparent),
+      transparent 65%
+    ),
+    var(--bg-base);
+}
+
 /* Semantic z-scale (DESIGN.md): header 40 < scroll-progress 45 <
    mobile-nav overlay 50 < custom cursor 60. No other z values. */
 
@@ -128,14 +146,59 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Entrance choreography (hero, page template): pure CSS so the first paint
+   needs no hydration (LCP) and still works with JS disabled. `both` fill
+   keeps elements hidden through their delay; reduced-motion removes the
+   animation entirely, leaving content visible and static.
+--------------------------------------------------------------------------- */
+@keyframes char-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.5em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.anim-char {
+  display: inline-block;
+  will-change: transform;
+  animation: char-rise 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.anim-rise {
+  animation: rise-in 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.page-enter {
+  animation: rise-in 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
 
-  /* Safety net: JS hooks handle Motion/GSAP; this kills CSS-driven loops. */
+  /* Safety net: JS hooks handle Motion/GSAP; this kills CSS-driven motion. */
   .animate-marquee,
-  .animate-pulse-dot {
+  .animate-pulse-dot,
+  .anim-char,
+  .anim-rise,
+  .page-enter {
     animation: none;
   }
 }

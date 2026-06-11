@@ -42,6 +42,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${jakarta.variable} font-body`}>
+        {/* Below-fold sections use Motion whileInView reveals (data-reveal).
+            Without JS those would stay at opacity 0 — force them visible. */}
+        <noscript>
+          <style>{`[data-reveal]{opacity:1!important;transform:none!important}`}</style>
+        </noscript>
         <ThemeProvider>
           {/* Skip link: first focusable element on every page (a11y spec) */}
           <a
