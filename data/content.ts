@@ -80,8 +80,12 @@ export type ProcessStep = {
 
 export type TechItem = {
   name: string;
-  /** devicon slug for CDN icon (https://cdn.jsdelivr.net/gh/devicons/devicon/icons/{slug}/{slug}-original.svg); undefined = text fallback */
+  /** devicon slug for CDN icon (https://cdn.jsdelivr.net/gh/devicons/devicon/icons/{slug}/{slug}-{variant}.svg); undefined = text fallback */
   icon?: string;
+  /** devicon variant; defaults to "original" (AWS only ships wordmarks). */
+  iconVariant?: string;
+  /** Dark/monochrome marks (GitHub, AWS) need inverting on the dark theme. */
+  iconInvertDark?: boolean;
 };
 
 export type TimelineEntry = {
@@ -431,7 +435,7 @@ export const projects: Project[] = [
 
 export const testimonials: Testimonial[] = [
   {
-    name: "Placeholder — Client A",
+    name: "Client A (placeholder)",
     company: "SaaS startup",
     platform: "via Upwork",
     quote:
@@ -440,7 +444,7 @@ export const testimonials: Testimonial[] = [
     isPlaceholder: true,
   },
   {
-    name: "Placeholder — Client B",
+    name: "Client B (placeholder)",
     company: "E-commerce company",
     platform: "via LinkedIn",
     quote:
@@ -449,7 +453,7 @@ export const testimonials: Testimonial[] = [
     isPlaceholder: true,
   },
   {
-    name: "Placeholder — Client C",
+    name: "Client C (placeholder)",
     company: "Agency partner",
     platform: "Direct referral",
     quote:
@@ -497,13 +501,13 @@ export const techStack: Record<string, TechItem[]> = {
     { name: "LangGraph" },
     { name: "LlamaIndex" },
     { name: "agency-swarm" },
-    { name: "Hugging Face", icon: "huggingface" },
+    { name: "Hugging Face" }, // not in devicon; text fallback
     { name: "PyTorch", icon: "pytorch" },
   ],
   Backend: [
     { name: "Python", icon: "python" },
     { name: "FastAPI", icon: "fastapi" },
-    { name: "Flask", icon: "flask" },
+    { name: "Flask", icon: "flask", iconInvertDark: true },
     { name: "Pydantic" },
     { name: "Redis", icon: "redis" },
     { name: "APScheduler" },
@@ -531,10 +535,15 @@ export const techStack: Record<string, TechItem[]> = {
     { name: "Tailwind CSS", icon: "tailwindcss" },
   ],
   "Cloud & DevOps": [
-    { name: "AWS", icon: "amazonwebservices" },
+    {
+      name: "AWS",
+      icon: "amazonwebservices",
+      iconVariant: "plain-wordmark",
+      iconInvertDark: true,
+    },
     { name: "Azure", icon: "azure" },
     { name: "Docker", icon: "docker" },
-    { name: "GitHub CI/CD", icon: "github" },
+    { name: "GitHub CI/CD", icon: "github", iconInvertDark: true },
     { name: "DigitalOcean", icon: "digitalocean" },
     { name: "Railway" },
     { name: "pm2" },

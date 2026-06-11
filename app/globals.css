@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Dark is the default theme (:root); next-themes adds .light. This variant
+   lets utilities target light mode: e.g. `invert light:invert-0`. */
+@custom-variant light (&:where(.light, .light *));
+
 /* ---------------------------------------------------------------------------
    Design tokens (see DESIGN.md). Raw vars switch at runtime via next-themes:
    dark is the default (:root), .light overrides on <html>.
