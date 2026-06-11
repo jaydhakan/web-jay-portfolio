@@ -58,6 +58,10 @@
 }
 
 @theme {
+  /* Solid CTA fill: one step deeper than accent-primary so white labels pass
+     WCAG AA (5.08:1 vs 4.2:1). Same value in both themes by design. */
+  --color-accent-solid: #4a5cf4;
+
   --shadow-glow: 0 0 20px rgba(91, 110, 245, 0.2);
 
   --animate-marquee: marquee 30s linear infinite;
