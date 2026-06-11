@@ -1,37 +1,93 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* ---------------------------------------------------------------------------
-   Design tokens (see DESIGN.md). RGB triplets so Tailwind can apply alpha.
-   Dark is the default theme; .light is applied by next-themes.
+   Design tokens (see DESIGN.md). Raw vars switch at runtime via next-themes:
+   dark is the default (:root), .light overrides on <html>.
 --------------------------------------------------------------------------- */
 :root {
-  --bg-base: 10 10 15; /* #0A0A0F */
-  --bg-surface: 17 17 24; /* #111118 */
-  --bg-elevated: 26 26 38; /* #1A1A26 */
-  --accent-primary: 91 110 245; /* #5B6EF5 */
-  --accent-violet: 139 92 246; /* #8B5CF6 */
-  --accent-warm: 236 72 153; /* #EC4899 */
-  --text-primary: 240 240 255; /* #F0F0FF */
-  --text-secondary: 138 138 168; /* #8A8AA8 */
-  --text-muted: 74 74 106; /* #4A4A6A */
-  --success: 34 197 94; /* #22C55E */
+  --bg-base: #0a0a0f;
+  --bg-surface: #111118;
+  --bg-elevated: #1a1a26;
+  --accent-primary: #5b6ef5;
+  --accent-violet: #8b5cf6;
+  --accent-warm: #ec4899;
+  --text-primary: #f0f0ff;
+  --text-secondary: #8a8aa8;
+  --text-muted: #4a4a6a;
+  --success: #22c55e;
+  --error: #f87171;
   --border-token: rgba(255, 255, 255, 0.07);
 }
 
 .light {
-  --bg-base: 248 248 255; /* #F8F8FF */
-  --bg-surface: 255 255 255; /* #FFFFFF */
-  --bg-elevated: 239 239 248; /* #EFEFF8 */
-  --accent-primary: 74 92 244; /* #4A5CF4 — adjusted for light contrast */
-  --accent-violet: 124 77 239; /* #7C4DEF */
-  --accent-warm: 219 39 119; /* #DB2777 */
-  --text-primary: 10 10 26; /* #0A0A1A */
-  --text-secondary: 90 90 120; /* #5A5A78 */
-  --text-muted: 152 152 176; /* #9898B0 */
-  --success: 22 163 74; /* #16A34A */
+  --bg-base: #f8f8ff;
+  --bg-surface: #ffffff;
+  --bg-elevated: #efeff8;
+  --accent-primary: #4a5cf4; /* adjusted for light contrast */
+  --accent-violet: #7c4def;
+  --accent-warm: #db2777;
+  --text-primary: #0a0a1a;
+  --text-secondary: #5a5a78;
+  --text-muted: #9898b0;
+  --success: #16a34a;
+  --error: #dc2626;
   --border-token: rgba(10, 10, 26, 0.08);
+}
+
+/* Theme-switching tokens reference the raw vars directly (inline). Utility
+   class names match the old v3 config: bg-base, text-secondary, border-token… */
+@theme inline {
+  --color-*: initial;
+  --color-base: var(--bg-base);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-muted: var(--text-muted);
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-violet: var(--accent-violet);
+  --color-accent-warm: var(--accent-warm);
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --color-token: var(--border-token);
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-transparent: transparent;
+  --font-display: var(--font-jakarta), system-ui, sans-serif;
+  --font-body: var(--font-jakarta), system-ui, sans-serif;
+}
+
+@theme {
+  --shadow-glow: 0 0 20px rgba(91, 110, 245, 0.2);
+
+  --animate-marquee: marquee 30s linear infinite;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.4;
+      transform: scale(0.85);
+    }
+  }
+}
+
+/* CTA banner tint + OG image only (no v4 namespace for background-image). */
+@utility bg-gradient-hero {
+  background-image: linear-gradient(135deg, #5b6ef5 0%, #8b5cf6 50%, #ec4899 100%);
 }
 
 @layer base {

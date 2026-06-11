@@ -1,7 +1,7 @@
-import type { Transition, Variants } from "framer-motion";
+import type { Transition, Variants } from "motion/react";
 
 /**
- * Shared Framer Motion variants. Use with the shared `transition` below.
+ * Shared Motion variants. Use with the shared `transition` below.
  * Components must gate motion behind useReducedMotion() — when reduced,
  * render the `visible` state directly (initial={false}) instead of animating.
  */
