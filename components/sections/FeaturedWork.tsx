@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { projects, sections } from "@/data/content";
+import { publicImageExists } from "@/lib/images";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { ProjectCard } from "@/components/ui/ProjectCard";
 import { Reveal, RevealGroup, RevealItem } from "@/components/ui/Reveal";
@@ -34,12 +35,20 @@ export function FeaturedWork() {
 
         <RevealGroup className="mt-12 grid gap-6 lg:grid-cols-5">
           <RevealItem className="lg:col-span-3">
-            <ProjectCard project={lead} size="featured-large" />
+            <ProjectCard
+              project={lead}
+              hasCover={publicImageExists(lead.coverImage)}
+              size="featured-large"
+            />
           </RevealItem>
           <div className="flex flex-col gap-6 lg:col-span-2">
             {side.map((project) => (
               <RevealItem key={project.slug} className="flex-1">
-                <ProjectCard project={project} size="featured-small" />
+                <ProjectCard
+                  project={project}
+                  hasCover={publicImageExists(project.coverImage)}
+                  size="featured-small"
+                />
               </RevealItem>
             ))}
           </div>

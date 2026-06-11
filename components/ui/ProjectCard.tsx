@@ -2,12 +2,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight, TrendingUp } from "lucide-react";
 import type { Project } from "@/data/content";
-import { publicImageExists } from "@/lib/images";
 import { Tag } from "@/components/ui/Tag";
 import { cn } from "@/lib/utils";
 
 type ProjectCardProps = {
   project: Project;
+  /** Computed by server callers via publicImageExists (fs is server-only). */
+  hasCover: boolean;
   /** featured-large: bento lead. featured-small: bento side. grid: /work index. */
   size?: "featured-large" | "featured-small" | "grid";
   priority?: boolean;
@@ -17,8 +18,12 @@ type ProjectCardProps = {
  * Whole card is one link. Cover renders the real file when it exists in
  * /public; until then a designed placeholder slot (no fake screenshots).
  */
-export function ProjectCard({ project, size = "grid", priority = false }: ProjectCardProps) {
-  const hasImage = publicImageExists(project.coverImage);
+export function ProjectCard({
+  project,
+  hasCover,
+  size = "grid",
+  priority = false,
+}: ProjectCardProps) {
   const isLarge = size === "featured-large";
 
   return (
@@ -37,7 +42,7 @@ export function ProjectCard({ project, size = "grid", priority = false }: Projec
           isLarge ? "aspect-[16/10]" : "aspect-video",
         )}
       >
-        {hasImage ? (
+        {hasCover ? (
           <Image
             src={project.coverImage}
             alt={`${project.title}: ${project.description}`}

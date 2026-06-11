@@ -7,8 +7,8 @@
  * resume bullet. Items needing Jay's confirmation are marked `TODO(JAY)`.
  *
  * ─── OPEN QUESTIONS (also summarized in the build checkpoint) ───────────────
- * TODO(JAY): Resume_2 says "2+ yrs" & BotPro "2023–present". Resume_4 says
- *            "4+ yrs", BotPro "2021–2024", VRSEN "2024–2025". Which is right?
+ * TODO(JAY): Resume_2 says "2+ yrs" & BotPro "2023-present". Resume_4 says
+ *            "4+ yrs", BotPro "2021-2024", VRSEN "2024-2025". Which is right?
  * TODO(JAY): Positioning: resumes say "Python & AI/ML Engineer"; the brief
  *            says "full-stack developer (web, mobile, SaaS)". Site currently
  *            uses the resume positioning. Confirm or adjust.
@@ -555,13 +555,13 @@ export const techStack: Record<string, TechItem[]> = {
 
 export const timeline: TimelineEntry[] = [
   {
-    period: "2019 – 2023",
+    period: "2019-2023",
     title: "B.Tech in AI, Marwadi University",
     description:
       "Bachelor of Technology specialized in Artificial Intelligence. CGPA 8.02.",
   },
   {
-    period: "2021 – 2024", // TODO(JAY): Resume_2 says 2023–present instead
+    period: "2021-2024", // TODO(JAY): Resume_2 says 2023-present instead
     title: "Python Developer, BotPro Solutions",
     description:
       "Led a 4-person platform squad. Cut a 17-hour legacy job to 80 minutes, halved SaaS costs, and shipped the 1-click chatbot creator.",
@@ -573,13 +573,13 @@ export const timeline: TimelineEntry[] = [
       "Youngest winner of the 2024 award for quality and on-time delivery.",
   },
   {
-    period: "2024 – 2025",
+    period: "2024-2025",
     title: "Python & AI/ML Engineer, VRSEN",
     description:
       "Built AI agents for research, content, code, and deployment. Shipped the Prompt-to-Site Studio and healthcare automation for CinqCare.",
   },
   {
-    period: "2025 – Now",
+    period: "2025-Now",
     title: "Independent. Building for clients worldwide.", // TODO(JAY): confirm current status
     description:
       "Taking on AI, data, and full-stack projects directly: no middlemen, no handoffs.",
@@ -664,8 +664,8 @@ export const contact = {
   availability: "Currently accepting new projects", // shown with pulsing dot
   budgetOptions: [
     "Under $1k",
-    "$1k – $5k",
-    "$5k – $15k",
+    "$1k-$5k",
+    "$5k-$15k",
     "$15k+",
     "Let's discuss",
   ],
