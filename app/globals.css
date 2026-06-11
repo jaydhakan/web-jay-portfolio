@@ -94,6 +94,16 @@
   background-image: linear-gradient(135deg, #5b6ef5 0%, #8b5cf6 50%, #ec4899 100%);
 }
 
+/* Semantic z-scale (DESIGN.md): header 40 < scroll-progress 45 <
+   mobile-nav overlay 50 < custom cursor 60. No other z values. */
+
+/* Native cursor hidden only while CustomCursor is mounted (fine pointer,
+   motion allowed). Touch + reduced-motion users keep the real cursor. */
+.has-custom-cursor,
+.has-custom-cursor * {
+  cursor: none !important;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
