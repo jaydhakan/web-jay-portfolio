@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   Design tokens (see DESIGN.md). RGB triplets so Tailwind can apply alpha.
+   Dark is the default theme; .light is applied by next-themes.
+--------------------------------------------------------------------------- */
+:root {
+  --bg-base: 10 10 15; /* #0A0A0F */
+  --bg-surface: 17 17 24; /* #111118 */
+  --bg-elevated: 26 26 38; /* #1A1A26 */
+  --accent-primary: 91 110 245; /* #5B6EF5 */
+  --accent-violet: 139 92 246; /* #8B5CF6 */
+  --accent-warm: 236 72 153; /* #EC4899 */
+  --text-primary: 240 240 255; /* #F0F0FF */
+  --text-secondary: 138 138 168; /* #8A8AA8 */
+  --text-muted: 74 74 106; /* #4A4A6A */
+  --success: 34 197 94; /* #22C55E */
+  --border-token: rgba(255, 255, 255, 0.07);
+}
+
+.light {
+  --bg-base: 248 248 255; /* #F8F8FF */
+  --bg-surface: 255 255 255; /* #FFFFFF */
+  --bg-elevated: 239 239 248; /* #EFEFF8 */
+  --accent-primary: 74 92 244; /* #4A5CF4 — adjusted for light contrast */
+  --accent-violet: 124 77 239; /* #7C4DEF */
+  --accent-warm: 219 39 119; /* #DB2777 */
+  --text-primary: 10 10 26; /* #0A0A1A */
+  --text-secondary: 90 90 120; /* #5A5A78 */
+  --text-muted: 152 152 176; /* #9898B0 */
+  --success: 22 163 74; /* #16A34A */
+  --border-token: rgba(10, 10, 26, 0.08);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-base font-body text-primary antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    @apply bg-accent-primary/30 text-primary;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* Safety net: JS hooks handle Motion/GSAP; this kills CSS-driven loops. */
+  .animate-marquee,
+  .animate-pulse-dot {
+    animation: none;
+  }
+}
