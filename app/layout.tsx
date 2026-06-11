@@ -28,9 +28,22 @@ export const metadata: Metadata = {
     description: siteConfig.tagline,
     url: siteUrl,
     siteName: siteConfig.name,
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Jay Dhakan, Python & AI/ML Engineer. I build products that actually ship.",
+      },
+    ],
     locale: "en_US",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${siteConfig.name} | ${siteConfig.role}`,
+    description: siteConfig.tagline,
+    images: ["/og-image.png"],
   },
 };
 
