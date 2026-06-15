@@ -48,12 +48,18 @@ export function RevealGroup({ children, className }: RevealProps) {
   );
 }
 
-export function RevealItem({ children, className }: RevealProps) {
+export function RevealItem({
+  children,
+  className,
+  as = "div",
+}: RevealProps & { as?: "div" | "li" }) {
   const reduceMotion = useReducedMotion();
-  if (reduceMotion) return <div className={className}>{children}</div>;
+  const Tag = as;
+  if (reduceMotion) return <Tag className={className}>{children}</Tag>;
+  const MotionTag = as === "li" ? motion.li : motion.div;
   return (
-    <motion.div data-reveal className={className} variants={fadeUp}>
+    <MotionTag data-reveal className={className} variants={fadeUp}>
       {children}
-    </motion.div>
+    </MotionTag>
   );
 }

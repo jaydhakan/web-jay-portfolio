@@ -70,6 +70,7 @@ export function WorkGrid({ projects, covers, filters }: WorkGridProps) {
                   hasCover={covers[project.slug] ?? false}
                   size={i === 0 ? "featured-large" : "grid"}
                   priority={i === 0}
+                  headingLevel="h2"
                 />
               </motion.li>
             ))}

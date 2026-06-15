@@ -1,5 +1,4 @@
 import { hero, siteConfig } from "@/data/content";
-import { AnimatedText } from "@/components/ui/AnimatedText";
 import { Button } from "@/components/ui/Button";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { HeroBackground } from "@/components/sections/HeroBackground";
@@ -26,28 +25,27 @@ export function Hero() {
             {siteConfig.availabilityNote}
           </p>
 
+          {/* H1 ships server-rendered at opacity:1 and is never hidden -- this
+              is the LCP element (non-negotiable / D-9). Its runtime motion is the
+              GSAP masked-line reveal added in Phase 8, behind the preloader. */}
           <h1 className="mt-6 font-display text-5xl font-bold leading-[1.08] tracking-tight text-primary sm:text-6xl lg:text-7xl">
             <span className="sr-only">
               {hero.h1Line1} {hero.h1Line2}
             </span>
-            <span aria-hidden className="block">
-              <AnimatedText text={hero.h1Line1} delay={0.15} stagger={0.022} />
-            </span>
-            <span aria-hidden className="block">
-              <AnimatedText text={hero.h1Line2} delay={0.45} stagger={0.022} />
-            </span>
+            <span aria-hidden className="block">{hero.h1Line1}</span>
+            <span aria-hidden className="block">{hero.h1Line2}</span>
           </h1>
 
           <p
             className="anim-rise mt-6 max-w-lg text-base leading-relaxed text-secondary sm:text-lg"
-            style={{ animationDelay: "0.75s" }}
+            style={{ animationDelay: "0.4s" }}
           >
             {hero.subheading}
           </p>
 
           <div
             className="anim-rise mt-10 flex flex-wrap items-center gap-4"
-            style={{ animationDelay: "0.9s" }}
+            style={{ animationDelay: "0.55s" }}
           >
             <MagneticButton>
               <Button href={hero.ctaPrimary.href} size="lg">

@@ -95,18 +95,16 @@ export default function AboutPage() {
           <RevealGroup className="mt-12">
             <ol className="relative space-y-12 border-l border-token pl-8">
               {timeline.map((entry) => (
-                <RevealItem key={entry.title} className="relative">
-                  <li>
-                    <span
-                      aria-hidden
-                      className="absolute -left-[37.5px] top-1.5 block size-[11px] rounded-full border-2 border-accent-primary bg-base"
-                    />
-                    <p className="text-sm font-medium tabular-nums text-muted">{entry.period}</p>
-                    <h3 className="mt-1.5 text-xl font-semibold text-primary">{entry.title}</h3>
-                    <p className="mt-2 max-w-xl text-sm leading-relaxed text-secondary">
-                      {entry.description}
-                    </p>
-                  </li>
+                <RevealItem key={entry.title} as="li" className="relative">
+                  <span
+                    aria-hidden
+                    className="absolute -left-[37.5px] top-1.5 block size-[11px] rounded-full border-2 border-accent-primary bg-base"
+                  />
+                  <p className="text-sm font-medium tabular-nums text-secondary">{entry.period}</p>
+                  <h3 className="mt-1.5 text-xl font-semibold text-primary">{entry.title}</h3>
+                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-secondary">
+                    {entry.description}
+                  </p>
                 </RevealItem>
               ))}
             </ol>

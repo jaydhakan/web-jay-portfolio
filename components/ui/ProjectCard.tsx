@@ -12,6 +12,9 @@ type ProjectCardProps = {
   /** featured-large: bento lead. featured-small: bento side. grid: /work index. */
   size?: "featured-large" | "featured-small" | "grid";
   priority?: boolean;
+  /** Heading level so the card nests correctly: h3 under a section h2 (home),
+      h2 directly under the page h1 (/work index). Keeps axe heading-order valid. */
+  headingLevel?: "h2" | "h3";
 };
 
 /**
@@ -23,8 +26,10 @@ export function ProjectCard({
   hasCover,
   size = "grid",
   priority = false,
+  headingLevel = "h3",
 }: ProjectCardProps) {
   const isLarge = size === "featured-large";
+  const Heading = headingLevel;
 
   return (
     <Link
@@ -80,16 +85,16 @@ export function ProjectCard({
       <div className={cn("flex flex-1 flex-col", isLarge ? "p-7" : "p-6")}>
         <div className="flex items-center gap-3">
           <Tag>{project.industry}</Tag>
-          <span className="text-xs text-muted">{project.year}</span>
+          <span className="text-xs text-secondary">{project.year}</span>
         </div>
-        <h3
+        <Heading
           className={cn(
             "mt-4 font-display font-semibold text-primary",
             isLarge ? "text-2xl lg:text-3xl" : "text-xl",
           )}
         >
           {project.title}
-        </h3>
+        </Heading>
         <p className="mt-2 text-sm leading-relaxed text-secondary">{project.description}</p>
         <div className="mt-auto pt-5">
           <div className="flex flex-wrap gap-2">

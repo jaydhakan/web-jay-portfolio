@@ -71,7 +71,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
             <header>
               <div className="flex items-center gap-3">
                 <Tag>{project.industry}</Tag>
-                <span className="text-xs text-muted">{project.year}</span>
+                <span className="text-xs text-secondary">{project.year}</span>
               </div>
               <h1 className="mt-5 font-display text-4xl font-bold tracking-tight text-primary md:text-5xl">
                 {project.title}
@@ -83,7 +83,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
               <dl className="mt-9 grid grid-cols-2 gap-x-6 gap-y-5 border-y border-token py-6 sm:grid-cols-4">
                 {meta.map((item) => (
                   <div key={item.label}>
-                    <dt className="text-xs font-medium text-muted">{item.label}</dt>
+                    <dt className="text-xs font-medium text-secondary">{item.label}</dt>
                     <dd className="mt-1.5 text-sm font-medium text-primary">{item.value}</dd>
                   </div>
                 ))}
@@ -177,7 +177,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
             </p>
 
             <nav aria-label="Next project" className="mt-16 border-t border-token pt-8">
-              <p className="text-xs font-medium text-muted">Next project</p>
+              <p className="text-xs font-medium text-secondary">Next project</p>
               <Link
                 href={`/work/${next.slug}`}
                 className="group mt-2 inline-flex items-center gap-2 rounded font-display text-xl font-semibold text-primary transition-colors duration-200 hover:text-accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base"

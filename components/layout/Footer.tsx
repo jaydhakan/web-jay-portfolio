@@ -78,7 +78,7 @@ export function Footer() {
         </div>
 
         <div className="mt-14 border-t border-token pt-6">
-          <p className="text-xs text-muted">
+          <p className="text-xs text-secondary">
             &copy; {year} Jay Dhakan. Built with Next.js, deployed on Vercel.
           </p>
         </div>
