@@ -5,10 +5,18 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 /**
- * Liquid monochrome-indigo hero background. One full-screen quad, one draw
- * call, no postprocessing: a domain-warped fbm field blends base -> accent ->
- * accent-solid with subtle pointer parallax. Color energy lives top-right so
- * the left text column keeps AAA contrast.
+ * "The Field" — the signature hero shader (D-6). A monochrome-indigo flowing
+ * contour field read as a gradient-descent / loss-landscape: nested iso-lines
+ * are the level sets of an objective surface, crowding on steep gradients
+ * (the descent picture) and easing apart on the flats. A slow band of light
+ * travels through the level sets toward the basin, like an optimizer stepping
+ * downhill. One full-screen quad, one draw call, no postprocessing.
+ *
+ * Perf budget is held byte-identical to the prior shader: 2 fbm = 6 simplex
+ * evals, one exp() blob, one hash dither, plus two scalar fwidth for crisp
+ * resolution-independent lines (no trig, no extra noise tap, no extra pass).
+ * Energy concentrates upper-right so the left text column + header band keep
+ * AAA contrast; portrait viewports dim and lift the focus.
  */
 
 const vertexShader = /* glsl */ `
@@ -74,31 +82,57 @@ const fragmentShader = /* glsl */ `
     float aspectX = uResolution.x / uResolution.y;
     vec2 p = uv * vec2(aspectX, 1.0) * 0.9;
 
-    float t = uTime * 0.05;
+    float t = uTime * 0.04;
     vec2 drift = uMouse * 0.1;
 
-    // Slow domain warp: large soft forms, not marble texture.
+    // Height field = the loss surface. Slow domain warp reshapes the terrain
+    // over time. 2 fbm = 6 simplex evals, the same budget as before.
     float warp = fbm(p * 0.8 + t + drift);
-    float n = fbm(p + warp * 0.9 - t * 0.5 + drift);
+    float h = fbm(p + warp * 0.9 - t * 0.5 + drift);
+    h = h * 0.5 + 0.5; // -> ~[0,1] elevation
 
-    // Energy is one soft gaussian blob upper-right; portrait viewports push
-    // it higher and dim it so mobile copy never sits on color.
+    // Energy: one soft gaussian basin upper-right; portrait pushes it higher
+    // and dims it so mobile copy never sits on color.
     float portrait = step(aspectX, 0.85);
     vec2 focus = vec2(0.76 + uMouse.x * 0.04, 0.7 + portrait * 0.2 + uMouse.y * 0.04);
     vec2 d = (uv - focus) * vec2(max(aspectX, 1.0), 1.35);
     float blob = exp(-dot(d, d) * (3.6 + portrait * 2.4));
-    // Hard protection for the left text column and the header band.
-    float sideFade = smoothstep(0.2, 0.6, uv.x + portrait * 0.25);
-    float topFade = smoothstep(1.0, 0.86, uv.y);
+    // Hard protection for the left text column and the header band. Thresholds
+    // are tuned to the real layout: the H1 (max-w-3xl, left-set in a centered
+    // max-w-7xl) reaches ~uv.x 0.55-0.59 on a wide viewport, so the fade must
+    // stay dark through there.
+    float sideFade = smoothstep(0.3, 0.66, uv.x + portrait * 0.25);
+    float topFade = smoothstep(1.0, 0.84, uv.y);
     float energy = blob * sideFade * topFade * mix(1.0, 0.5, portrait);
 
-    // Sparse fields: only noise peaks glow, so the form stays soft.
-    float fieldA = smoothstep(0.3, 1.0, n * 0.5 + 0.5);
-    float fieldB = smoothstep(0.58, 1.05, (n + warp * 0.5) * 0.5 + 0.5);
+    // Iso-contours from the single height field. Crisp, resolution-independent
+    // lines via fwidth (clamped so flats don't sparkle on low-power / dpr 1).
+    // Lines crowd where |grad h| is large -> the steep valley walls.
+    float aw = max(fwidth(h), 1e-3);
+    float MINOR = 20.0;
+    float fm = abs(fract(h * MINOR - 0.5) - 0.5);
+    float minorLine = 1.0 - smoothstep(0.0, aw * MINOR + 0.0015, fm);
+    float MAJOR = MINOR / 5.0; // every 5th ring is a brighter "major" contour
+    float fM = abs(fract(h * MAJOR - 0.5) - 0.5);
+    float majorLine = 1.0 - smoothstep(0.0, aw * MAJOR + 0.0010, fM);
 
+    float steep = smoothstep(0.0, 0.06, aw); // 0 on flats, 1 on steep walls
+
+    // Valley-floor wash so the basin reads as depth, not just outline.
+    float basin = (1.0 - smoothstep(0.25, 0.62, h)) * energy;
+
+    // Descent cue: a slow band of light travels through the level sets toward
+    // the basin (period ~17s), brightening lines that are already drawn -> an
+    // optimizer stepping downhill. Gated by energy so it stays upper-right.
+    float descend = 1.0 - smoothstep(0.0, 0.15, abs(h - fract(uTime * 0.06)));
+
+    // Compose, monochrome indigo only.
     vec3 col = uBase;
-    col = mix(col, uColorA, fieldA * energy * uIntensity);
-    col = mix(col, uColorB, fieldB * energy * uIntensity * 0.8);
+    col = mix(col, uColorB, basin * 0.18 * uIntensity);
+    float minorE = minorLine * energy * (0.55 + 0.3 * steep) * (1.0 + 0.25 * descend);
+    col = mix(col, uColorA, minorE * uIntensity);
+    float majorE = majorLine * energy * (0.7 + 0.3 * steep);
+    col = mix(col, uColorB, majorE * uIntensity * 0.9);
 
     // Dither to stop gradient banding on the dark base.
     col += (hash(gl_FragCoord.xy) - 0.5) / 255.0 * 3.0;
