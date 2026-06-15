@@ -15,13 +15,13 @@ type ContactFormProps = {
 };
 
 const fieldClasses =
-  "w-full rounded-xl border border-token bg-surface px-4 py-3 text-sm text-primary " +
-  "placeholder:text-secondary transition-colors duration-200 " +
-  "hover:border-accent-primary/30 focus:border-accent-primary focus:outline-none " +
-  "focus:ring-2 focus:ring-accent-primary/40";
+  "w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink " +
+  "placeholder:text-ink-dim transition-colors duration-200 " +
+  "hover:border-accent/30 focus:border-accent focus:outline-none " +
+  "focus:ring-2 focus:ring-accent/40";
 
-const labelClasses = "block text-sm font-medium text-primary";
-const errorClasses = "mt-2 text-sm text-error";
+const labelClasses = "block text-sm font-medium text-ink";
+const errorClasses = "mt-2 text-sm text-err";
 
 export function ContactForm({ defaultBudget }: ContactFormProps) {
   const reduceMotion = useReducedMotion();
@@ -59,18 +59,18 @@ export function ContactForm({ defaultBudget }: ContactFormProps) {
             initial={reduceMotion ? false : { opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: "spring", duration: 0.5, bounce: 0.2 }}
-            className="flex min-h-96 flex-col items-center justify-center rounded-2xl border border-token bg-surface p-10 text-center"
+            className="flex min-h-96 flex-col items-center justify-center rounded-2xl border border-line bg-surface p-10 text-center"
             role="status"
           >
-            <CircleCheck aria-hidden className="size-12 text-success" />
-            <h2 className="mt-5 font-display text-2xl font-semibold text-primary">
+            <CircleCheck aria-hidden className="size-12 text-ok" />
+            <h2 className="mt-5 font-display text-2xl font-semibold text-ink">
               Message sent!
             </h2>
-            <p className="mt-2 max-w-sm text-sm leading-relaxed text-secondary">
+            <p className="mt-2 max-w-sm text-sm leading-relaxed text-ink-dim">
               {contact.responseTime}. If it&apos;s urgent, reach me at{" "}
               <a
                 href={`mailto:${siteConfig.email}`}
-                className="font-medium text-accent-primary hover:text-primary"
+                className="font-medium text-accent hover:text-ink"
               >
                 {siteConfig.email}
               </a>
@@ -216,7 +216,7 @@ export function ContactForm({ defaultBudget }: ContactFormProps) {
             </div>
 
             {serverError && (
-              <p role="alert" className="text-sm text-error">
+              <p role="alert" className="text-sm text-err">
                 {serverError}
               </p>
             )}
@@ -225,10 +225,10 @@ export function ContactForm({ defaultBudget }: ContactFormProps) {
               type="submit"
               disabled={isPending}
               className={cn(
-                "inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-accent-solid",
+                "focus-pill inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-accent-solid",
                 "text-base font-semibold text-white transition duration-200 ease-out",
                 "hover:shadow-glow hover:brightness-110 active:scale-[0.98]",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base",
+                "focus-visible:outline-none",
                 "disabled:pointer-events-none disabled:opacity-60",
               )}
             >

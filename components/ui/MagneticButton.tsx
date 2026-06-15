@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
+import { gsap, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 
 type MagneticButtonProps = {
@@ -11,54 +11,50 @@ type MagneticButtonProps = {
   strength?: number;
 };
 
-const springConfig = { stiffness: 200, damping: 18, mass: 0.4 };
-
 /**
- * Magnetic hover wrapper for CTAs. Springs toward the cursor via motion
- * values (no React re-renders), releases with momentum on leave.
- * Inert for touch pointers and under reduced motion.
+ * Magnetic hover wrapper for CTAs (catalog #23). The element eases toward the
+ * cursor via gsap.quickTo (off the render cycle, expo.out — no bounce, honoring
+ * the locked motion vocabulary) and springs back on leave. Hover + fine pointer
+ * + motion-allowed only; inert (and untouched) everywhere else.
  */
-export function MagneticButton({
-  children,
-  className,
-  strength = 12,
-}: MagneticButtonProps) {
-  const reduceMotion = useReducedMotion();
+export function MagneticButton({ children, className, strength = 14 }: MagneticButtonProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const springX = useSpring(x, springConfig);
-  const springY = useSpring(y, springConfig);
 
-  if (reduceMotion) {
-    return <div className={cn("inline-block", className)}>{children}</div>;
-  }
+  useGSAP(
+    () => {
+      const el = ref.current;
+      if (!el) return;
+      const mm = gsap.matchMedia();
+      mm.add("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)", () => {
+        const xTo = gsap.quickTo(el, "x", { duration: 0.5, ease: "expo.out" });
+        const yTo = gsap.quickTo(el, "y", { duration: 0.5, ease: "expo.out" });
 
-  function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
-    if (e.pointerType !== "mouse") return;
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const relX = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
-    const relY = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
-    x.set(relX * strength);
-    y.set(relY * strength);
-  }
+        const onMove = (e: PointerEvent) => {
+          const r = el.getBoundingClientRect();
+          const relX = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+          const relY = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+          xTo(relX * strength);
+          yTo(relY * strength);
+        };
+        const onLeave = () => {
+          xTo(0);
+          yTo(0);
+        };
 
-  function handlePointerLeave() {
-    x.set(0);
-    y.set(0);
-  }
+        el.addEventListener("pointermove", onMove, { passive: true });
+        el.addEventListener("pointerleave", onLeave);
+        return () => {
+          el.removeEventListener("pointermove", onMove);
+          el.removeEventListener("pointerleave", onLeave);
+        };
+      });
+    },
+    { scope: ref },
+  );
 
   return (
-    <motion.div
-      ref={ref}
-      style={{ x: springX, y: springY }}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-      className={cn("inline-block", className)}
-    >
+    <div ref={ref} className={cn("inline-block", className)}>
       {children}
-    </motion.div>
+    </div>
   );
 }

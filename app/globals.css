@@ -66,6 +66,12 @@ html {
   --color-ok:            var(--ok);
   --color-err:           var(--err);
   --color-line:          var(--line);
+  /* Keywords reset by `--color-*: initial` above — restore them or text-white /
+     bg-white/[x] / ring-white/[x] (primary buttons, bezel cards) resolve to an
+     invalid color and fall back to black. */
+  --color-white:         #ffffff;
+  --color-black:         #000000;
+  --color-transparent:   transparent;
   /* Legacy aliases for components not yet renamed (removed in Phase 9) */
   --color-primary:        var(--ink);
   --color-secondary:      var(--ink-dim);
