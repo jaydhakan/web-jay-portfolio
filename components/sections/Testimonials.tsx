@@ -1,120 +1,47 @@
-"use client";
-
-import { useRef, useState } from "react";
-import { motion, useAnimationFrame, useMotionValue, useReducedMotion, useTransform } from "motion/react";
-import { Star } from "lucide-react";
-import { testimonials, sections, type Testimonial } from "@/data/content";
-import { Card } from "@/components/ui/Card";
-
-const SPEED_PX_S = 38;
-
-function wrapValue(min: number, max: number, value: number) {
-  const range = max - min;
-  return ((((value - min) % range) + range) % range) + min;
-}
-
-function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
-  return (
-    <div className="h-full w-[min(85vw,380px)] shrink-0">
-      <Card interactive={false} className="flex h-full flex-col p-8">
-        <div className="flex gap-1" aria-hidden>
-          {Array.from({ length: testimonial.rating }, (_, i) => (
-            <Star key={i} className="size-4 fill-accent-primary text-accent-primary" />
-          ))}
-        </div>
-        <span className="sr-only">Rated {testimonial.rating} out of 5</span>
-        <blockquote className="mt-5 flex-1 text-base leading-relaxed text-primary">
-          &ldquo;{testimonial.quote}&rdquo;
-        </blockquote>
-        <footer className="mt-6">
-          <p className="text-sm font-semibold text-primary">{testimonial.name}</p>
-          <p className="mt-0.5 text-xs text-secondary">
-            {testimonial.company}, {testimonial.platform}
-          </p>
-        </footer>
-      </Card>
-    </div>
-  );
-}
+import { testimonials, sections } from "@/data/content";
+import { RevealText } from "@/components/motion/RevealText";
 
 /**
- * Auto-scrolling, drag-to-explore loop (no visible controls per spec).
- * Position is a motion value mutated per frame; dragging feeds deltas into
- * the same value (the track itself is pinned by zero-size constraints).
- * Pauses while hovered, focused, or dragged. Reduced motion: static grid.
+ * Calm testimonial grid (catalog #1). The Motion auto-scroll carousel is gone
+ * (three quotes don't earn a carousel, and it carried a stale-resize bug); each
+ * quote now reveals line-by-line behind masks as the row enters — the section's
+ * one motion moment. A large accent quote mark anchors each card instead of
+ * review-site stars. Server component; reveals live in the RevealText leaves.
  */
 export function Testimonials() {
-  const reduceMotion = useReducedMotion();
-  const trackRef = useRef<HTMLDivElement>(null);
-  const baseX = useMotionValue(0);
-  const [paused, setPaused] = useState(false);
-  const halfWidth = useRef(0);
-
-  useAnimationFrame((_, delta) => {
-    if (paused || reduceMotion) return;
-    const el = trackRef.current;
-    if (!el) return;
-    if (halfWidth.current === 0) halfWidth.current = el.scrollWidth / 2;
-    baseX.set(baseX.get() - (SPEED_PX_S * delta) / 1000);
-  });
-
-  const x = useTransform(baseX, (v) =>
-    halfWidth.current > 0 ? wrapValue(-halfWidth.current, 0, v) : v,
-  );
-
-  const heading = (
-    <h2 className="font-display text-4xl font-bold tracking-tight text-primary md:text-5xl">
-      {sections.testimonials.heading}
-    </h2>
-  );
-
-  if (reduceMotion) {
-    return (
-      <section className="py-24">
-        <div className="mx-auto max-w-7xl px-6">
-          {heading}
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {testimonials.map((t) => (
-              <TestimonialCard key={t.name} testimonial={t} />
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section className="overflow-hidden py-24">
-      <div className="mx-auto max-w-7xl px-6">{heading}</div>
-      <div
-        role="region"
-        aria-label="Client testimonials"
-        className="mt-12"
-        onPointerEnter={() => setPaused(true)}
-        onPointerLeave={() => setPaused(false)}
-        onFocus={() => setPaused(true)}
-        onBlur={() => setPaused(false)}
-      >
-        <motion.div
-          ref={trackRef}
-          className="flex w-max cursor-grab gap-6 px-6 active:cursor-grabbing"
-          style={{ x }}
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0}
-          dragMomentum={false}
-          onDragStart={() => setPaused(true)}
-          onDrag={(_, info) => baseX.set(baseX.get() + info.delta.x)}
-          onDragEnd={() => setPaused(false)}
+    <section className="py-24 lg:py-32">
+      <div className="mx-auto max-w-7xl px-6">
+        <RevealText
+          as="h2"
+          className="font-display text-4xl font-bold tracking-tight text-ink md:text-5xl"
         >
-          {[0, 1].map((copy) => (
-            <div key={copy} className="flex shrink-0 gap-6" aria-hidden={copy === 1}>
-              {testimonials.map((t) => (
-                <TestimonialCard key={t.name} testimonial={t} />
-              ))}
-            </div>
+          {sections.testimonials.heading}
+        </RevealText>
+
+        <ul className="mt-14 grid gap-6 md:grid-cols-3">
+          {testimonials.map((t) => (
+            <li
+              key={t.name}
+              className="flex flex-col rounded-2xl bg-surface p-8 ring-1 ring-line"
+            >
+              <span aria-hidden className="font-display text-5xl leading-[0.5] text-accent/40">
+                &ldquo;
+              </span>
+              <blockquote className="mt-5 flex-1">
+                <RevealText as="p" className="text-base leading-relaxed text-ink">
+                  {t.quote}
+                </RevealText>
+              </blockquote>
+              <footer className="mt-6 border-t border-line pt-5">
+                <p className="text-sm font-semibold text-ink">{t.name}</p>
+                <p className="mt-0.5 text-xs text-ink-dim">
+                  {t.company}, {t.platform}
+                </p>
+              </footer>
+            </li>
           ))}
-        </motion.div>
+        </ul>
       </div>
     </section>
   );
