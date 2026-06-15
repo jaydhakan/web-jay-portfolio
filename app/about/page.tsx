@@ -10,9 +10,12 @@ import { howIWork, profile, sections, seo, siteConfig, timeline } from "@/data/c
 import { publicImageExists } from "@/lib/images";
 import { GitHubIcon, LinkedInIcon, UpworkIcon } from "@/components/ui/BrandIcon";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { Card } from "@/components/ui/Card";
 import { Tag } from "@/components/ui/Tag";
-import { Reveal, RevealGroup, RevealItem } from "@/components/ui/Reveal";
+import { RevealText } from "@/components/motion/RevealText";
+import { Teleprompter } from "@/components/motion/Teleprompter";
+import { ClipReveal } from "@/components/motion/ClipReveal";
+import { LineDraw } from "@/components/motion/LineDraw";
+import { ExperienceTimeline } from "@/components/sections/ExperienceTimeline";
 import { CTABanner } from "@/components/sections/CTABanner";
 
 export const metadata: Metadata = {
@@ -40,102 +43,108 @@ export default function AboutPage() {
   return (
     <main id="main-content" className="pt-32">
       <div className="mx-auto max-w-7xl px-6">
-        <header className="max-w-2xl">
+        <header className="max-w-3xl">
           <SectionLabel>{sections.aboutPage.eyebrow}</SectionLabel>
-          <h1 className="mt-3 font-display text-4xl font-bold tracking-tight text-primary md:text-6xl">
+          <RevealText
+            as="h1"
+            className="mt-4 font-display text-4xl font-bold tracking-tight text-ink md:text-6xl"
+          >
             {sections.aboutPage.heading}
-          </h1>
-          <p className="mt-5 text-base leading-relaxed text-secondary sm:text-lg">
-            {sections.aboutPage.subheading}
-          </p>
+          </RevealText>
         </header>
 
-        <Reveal className="mt-14">
-          <Card interactive={false} className="p-8 md:p-10">
-            <div className="flex flex-col gap-8 md:flex-row md:items-start">
-              <div className="relative size-32 shrink-0 overflow-hidden rounded-full ring-2 ring-accent-primary ring-offset-4 ring-offset-surface md:size-40">
-                {hasPhoto ? (
-                  <Image
-                    src={profile.photo}
-                    alt={`Portrait of ${profile.name}`}
-                    fill
-                    sizes="160px"
-                    className="object-cover"
-                  />
-                ) : (
-                  // TODO(JAY): drop a 400x400+ photo at public/images/profile/jay.jpg
-                  <div className="flex size-full items-center justify-center bg-elevated">
-                    <span className="font-display text-3xl font-bold text-accent-primary">
-                      JD
-                    </span>
-                  </div>
-                )}
+        {/* Identity row */}
+        <div className="mt-14 flex flex-col gap-8 sm:flex-row sm:items-center">
+          <div className="relative size-28 shrink-0 overflow-hidden rounded-2xl ring-1 ring-line">
+            {hasPhoto ? (
+              <Image
+                src={profile.photo}
+                alt={`Portrait of ${profile.name}`}
+                fill
+                sizes="112px"
+                className="object-cover"
+              />
+            ) : (
+              // TODO(JAY): drop a 400x400+ photo at public/images/profile/jay.jpg
+              <div className="flex size-full items-center justify-center bg-elevated">
+                <span className="font-display text-3xl font-bold text-accent">JD</span>
               </div>
-              <div className="min-w-0">
-                <h2 className="font-display text-3xl font-bold text-primary">{profile.name}</h2>
-                <p className="mt-1.5 text-sm text-secondary">
-                  {profile.role} · {profile.location}
-                </p>
-                <p className="mt-5 max-w-2xl leading-relaxed text-secondary">{profile.bio}</p>
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {profile.skills.map((skill) => (
-                    <Tag key={skill}>{skill}</Tag>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </Card>
-        </Reveal>
-
-        <section className="py-24">
-          <SectionLabel>{sections.aboutPage.storyEyebrow}</SectionLabel>
-          <h2 className="mt-3 font-display text-4xl font-bold tracking-tight text-primary">
-            The Short Version
-          </h2>
-          <RevealGroup className="mt-12">
-            <ol className="relative space-y-12 border-l border-token pl-8">
-              {timeline.map((entry) => (
-                <RevealItem key={entry.title} as="li" className="relative">
-                  <span
-                    aria-hidden
-                    className="absolute -left-[37.5px] top-1.5 block size-[11px] rounded-full border-2 border-accent-primary bg-base"
-                  />
-                  <p className="text-sm font-medium tabular-nums text-secondary">{entry.period}</p>
-                  <h3 className="mt-1.5 text-xl font-semibold text-primary">{entry.title}</h3>
-                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-secondary">
-                    {entry.description}
-                  </p>
-                </RevealItem>
+            )}
+          </div>
+          <div className="min-w-0">
+            <h2 className="font-display text-2xl font-bold text-ink">{profile.name}</h2>
+            <p className="mt-1 text-sm text-ink-dim">
+              {profile.role}, {profile.location}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {profile.skills.map((skill) => (
+                <Tag key={skill}>{skill}</Tag>
               ))}
-            </ol>
-          </RevealGroup>
+            </div>
+          </div>
+        </div>
+
+        {/* Teleprompter bio statement */}
+        <Teleprompter className="mt-14 max-w-4xl font-display text-2xl font-medium leading-snug text-ink sm:text-3xl">
+          {profile.bio}
+        </Teleprompter>
+
+        {/* Contour divider — the D4 SVG line-draw moment (echo of The Field) */}
+        <div className="my-20 flex items-center gap-5">
+          <span aria-hidden className="h-px flex-1 bg-line" />
+          <LineDraw viewBox="0 0 48 48" scrub className="size-11 shrink-0 text-accent">
+            <circle data-draw cx="24" cy="24" r="7" stroke="currentColor" strokeWidth="1.5" fill="none" />
+            <circle data-draw cx="24" cy="24" r="14" stroke="currentColor" strokeWidth="1.25" fill="none" />
+            <circle data-draw cx="24" cy="24" r="22" stroke="currentColor" strokeWidth="1" fill="none" />
+          </LineDraw>
+          <span aria-hidden className="h-px flex-1 bg-line" />
+        </div>
+
+        {/* Experience timeline (the only timeline on the site) */}
+        <section className="pb-24">
+          <SectionLabel>{sections.aboutPage.storyEyebrow}</SectionLabel>
+          <RevealText
+            as="h2"
+            className="mt-3 font-display text-4xl font-bold tracking-tight text-ink"
+          >
+            The Short Version
+          </RevealText>
+          <ExperienceTimeline entries={timeline} />
         </section>
 
+        {/* How I Work — staggered left-wipe reveal + hover treatment */}
         <section className="pb-24">
-          <h2 className="font-display text-4xl font-bold tracking-tight text-primary">
+          <RevealText
+            as="h2"
+            className="font-display text-4xl font-bold tracking-tight text-ink"
+          >
             How I Work
-          </h2>
-          <RevealGroup className="mt-12 grid gap-10 md:grid-cols-3">
+          </RevealText>
+          <ClipReveal as="ul" stagger={0.12} className="mt-12 grid gap-10 md:grid-cols-3">
             {howIWork.map((value) => {
               const Icon = howIconMap[value.icon];
               return (
-                <RevealItem key={value.title}>
-                  {Icon && <Icon aria-hidden className="size-6 text-accent-primary" />}
-                  <h3 className="mt-4 text-lg font-semibold text-primary">{value.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-secondary">
-                    {value.description}
-                  </p>
-                </RevealItem>
+                <li key={value.title} className="group">
+                  {Icon && (
+                    <Icon
+                      aria-hidden
+                      strokeWidth={1.5}
+                      className="size-6 text-accent transition-transform duration-300 ease-out group-hover:-translate-y-0.5"
+                    />
+                  )}
+                  <h3 className="mt-4 text-lg font-semibold text-ink transition-[letter-spacing] duration-300 ease-out group-hover:tracking-wide">
+                    {value.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-ink-dim">{value.description}</p>
+                </li>
               );
             })}
-          </RevealGroup>
+          </ClipReveal>
         </section>
 
-        <section className="border-t border-token py-14">
+        <section className="border-t border-line py-14">
           <div className="flex flex-wrap items-center justify-between gap-6">
-            <p className="text-sm font-semibold text-primary">
-              {sections.aboutPage.platformsLabel}
-            </p>
+            <p className="text-sm font-semibold text-ink">{sections.aboutPage.platformsLabel}</p>
             <div className="flex items-center gap-2">
               {socialLinks.map(({ label, href, Icon }) => (
                 <a
@@ -144,7 +153,7 @@ export default function AboutPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={`${label} profile`}
-                  className="inline-flex size-10 items-center justify-center rounded-full text-secondary transition-colors duration-200 hover:bg-elevated hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base"
+                  className="inline-flex size-10 items-center justify-center rounded-full text-ink-dim transition-colors duration-200 hover:bg-elevated hover:text-ink"
                 >
                   <Icon className="size-5" />
                 </a>
