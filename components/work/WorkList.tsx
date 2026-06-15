@@ -123,6 +123,7 @@ export function WorkList({ projects, covers, filters }: WorkListProps) {
             <li
               key={project.slug}
               data-flip-id={project.slug}
+              data-cursor="view"
               className={cn("work-row border-b border-line", !shown && "hidden")}
               onMouseEnter={() => setHovered(project)}
               onMouseLeave={() => setHovered((h) => (h === project ? null : h))}

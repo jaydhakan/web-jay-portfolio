@@ -58,6 +58,7 @@ export function FeaturedStack({
         return (
           <article
             key={project.slug}
+            data-cursor="view"
             className="stack-card static will-change-transform md:sticky md:top-28"
           >
             <div className="overflow-hidden rounded-3xl bg-white/[0.02] p-1.5 ring-1 ring-white/[0.06]">

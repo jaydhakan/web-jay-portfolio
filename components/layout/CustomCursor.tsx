@@ -1,93 +1,127 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { gsap, useGSAP } from "@/lib/gsap";
 
 const INTERACTIVE_SELECTOR =
   'a, button, [role="button"], label, input, select, textarea, [data-cursor="hover"]';
 
+type CursorState = "default" | "hover" | "view";
+
+const RING_SCALE: Record<CursorState, number> = { default: 0.5, hover: 0.72, view: 1 };
+
+function subscribe(cb: () => void) {
+  const queries = [
+    window.matchMedia("(pointer: fine)"),
+    window.matchMedia("(hover: hover)"),
+    window.matchMedia("(prefers-reduced-motion: reduce)"),
+  ];
+  for (const q of queries) q.addEventListener("change", cb);
+  return () => {
+    for (const q of queries) q.removeEventListener("change", cb);
+  };
+}
+function getActive() {
+  return (
+    window.matchMedia("(pointer: fine)").matches &&
+    window.matchMedia("(hover: hover)").matches &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
 /**
- * 8px dot that trails the pointer; expands to a 40px mix-blend-difference
- * ring over interactive elements (DESIGN.md signature). Renders nothing for
- * touch pointers and under reduced motion; the native cursor is hidden only
- * while this is active (html.has-custom-cursor).
+ * Custom cursor (catalog #22): an instant dot + a lagging ring (gsap.quickTo),
+ * expanding over interactive elements and growing into a "VIEW" badge over
+ * project rows/cards ([data-cursor="view"]). mix-blend-difference so it inverts
+ * over any layer; z-60 per the scale. Rendered only for fine pointers with
+ * motion allowed (useSyncExternalStore, reactive if a mouse is plugged in); the
+ * native cursor is hidden only while it's mounted (html.has-custom-cursor).
  */
 export function CustomCursor() {
-  const reduceMotion = useReducedMotion();
-  const [enabled, setEnabled] = useState(false);
+  const active = useSyncExternalStore(subscribe, getActive, () => false);
+  const dotRef = useRef<HTMLDivElement>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
+  const labelRef = useRef<HTMLSpanElement>(null);
+  const [state, setState] = useState<CursorState>("default");
   const [visible, setVisible] = useState(false);
-  const [hovering, setHovering] = useState(false);
-  const [pressed, setPressed] = useState(false);
-
-  const x = useMotionValue(-100);
-  const y = useMotionValue(-100);
-  // High stiffness = the "slight lag" from the spec, not a floaty trail.
-  const springX = useSpring(x, { stiffness: 700, damping: 50, mass: 0.5 });
-  const springY = useSpring(y, { stiffness: 700, damping: 50, mass: 0.5 });
 
   useEffect(() => {
-    const finePointer = window.matchMedia("(pointer: fine)");
-    const update = () => setEnabled(finePointer.matches && !reduceMotion);
-    update();
-    finePointer.addEventListener("change", update);
-    return () => finePointer.removeEventListener("change", update);
-  }, [reduceMotion]);
+    if (!active) return;
+    const dot = dotRef.current;
+    const ring = ringRef.current;
+    if (!dot || !ring) return;
 
-  useEffect(() => {
-    if (!enabled) return;
     document.documentElement.classList.add("has-custom-cursor");
+    const dotX = gsap.quickTo(dot, "x", { duration: 0.12, ease: "power3.out" });
+    const dotY = gsap.quickTo(dot, "y", { duration: 0.12, ease: "power3.out" });
+    const ringX = gsap.quickTo(ring, "x", { duration: 0.5, ease: "power3.out" });
+    const ringY = gsap.quickTo(ring, "y", { duration: 0.5, ease: "power3.out" });
 
     const onMove = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") return;
-      x.set(e.clientX);
-      y.set(e.clientY);
+      dotX(e.clientX);
+      dotY(e.clientY);
+      ringX(e.clientX);
+      ringY(e.clientY);
       setVisible(true);
     };
     const onOver = (e: PointerEvent) => {
       const target = e.target as Element | null;
-      setHovering(Boolean(target?.closest(INTERACTIVE_SELECTOR)));
+      if (target?.closest('[data-cursor="view"]')) setState("view");
+      else if (target?.closest(INTERACTIVE_SELECTOR)) setState("hover");
+      else setState("default");
     };
-    const onDown = () => setPressed(true);
-    const onUp = () => setPressed(false);
-    const onLeaveWindow = () => setVisible(false);
+    const onLeave = () => setVisible(false);
 
     window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("pointerover", onOver, { passive: true });
-    window.addEventListener("pointerdown", onDown, { passive: true });
-    window.addEventListener("pointerup", onUp, { passive: true });
-    document.documentElement.addEventListener("pointerleave", onLeaveWindow);
+    document.documentElement.addEventListener("pointerleave", onLeave);
 
     return () => {
       document.documentElement.classList.remove("has-custom-cursor");
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerover", onOver);
-      window.removeEventListener("pointerdown", onDown);
-      window.removeEventListener("pointerup", onUp);
-      document.documentElement.removeEventListener("pointerleave", onLeaveWindow);
+      document.documentElement.removeEventListener("pointerleave", onLeave);
     };
-  }, [enabled, x, y]);
+  }, [active]);
 
-  if (!enabled) return null;
+  // Animate the ring scale / dot + label opacity on state change.
+  useGSAP(
+    () => {
+      if (!active) return;
+      gsap.to(ringRef.current, { scale: RING_SCALE[state], duration: 0.3, ease: "power3.out" });
+      gsap.to(dotRef.current, { opacity: state === "default" ? 1 : 0, duration: 0.2 });
+      gsap.to(labelRef.current, {
+        opacity: state === "view" ? 1 : 0,
+        duration: 0.2,
+      });
+    },
+    { dependencies: [state, active] },
+  );
 
-  // Base box is 40px; the dot state scales it to 8px (0.2).
-  const scale = hovering ? (pressed ? 0.8 : 1) : pressed ? 0.14 : 0.2;
+  if (!active) return null;
 
   return (
-    // Centered on the pointer via negative margins: motion's x/y own the
-    // transform, so translate utilities would be overwritten.
-    <motion.div
+    <div
       aria-hidden
-      className="pointer-events-none fixed left-0 top-0 z-[60] -ml-5 -mt-5 size-10 mix-blend-difference"
-      style={{ x: springX, y: springY, opacity: visible ? 1 : 0 }}
+      className="pointer-events-none fixed inset-0 z-[60] mix-blend-difference transition-opacity duration-300"
+      style={{ opacity: visible ? 1 : 0 }}
     >
-      <motion.div
-        className="size-full rounded-full border-[1.5px] border-white"
-        animate={{
-          scale,
-          backgroundColor: hovering ? "rgba(255,255,255,0)" : "rgba(255,255,255,1)",
-        }}
-        transition={{ type: "spring", stiffness: 300, damping: 22 }}
+      <div
+        ref={dotRef}
+        className="absolute -ml-[3px] -mt-[3px] size-1.5 rounded-full bg-white"
       />
-    </motion.div>
+      <div
+        ref={ringRef}
+        className="absolute -ml-8 -mt-8 flex size-16 items-center justify-center rounded-full border border-white"
+      >
+        <span
+          ref={labelRef}
+          className="text-[11px] font-medium uppercase tracking-wider text-white opacity-0"
+        >
+          View
+        </span>
+      </div>
+    </div>
   );
 }
