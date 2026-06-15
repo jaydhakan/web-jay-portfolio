@@ -739,6 +739,7 @@ export const sections = {
     eyebrow: "SERVICES",
     heading: "What I Build & How I Charge",
     subheading: "Clear scope, clear pricing. No surprises.",
+    coverageHeading: "What Each Service Covers",
   },
   contactPage: {
     eyebrow: "GET IN TOUCH",

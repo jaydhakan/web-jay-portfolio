@@ -8,9 +8,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { services, sections } from "@/data/content";
-import { Card } from "@/components/ui/Card";
-import { SectionLabel } from "@/components/ui/SectionLabel";
-import { Reveal, RevealGroup, RevealItem } from "@/components/ui/Reveal";
+import { RevealText } from "@/components/motion/RevealText";
+import { ClipReveal } from "@/components/motion/ClipReveal";
 
 const iconMap: Record<string, LucideIcon> = {
   Bot,
@@ -21,33 +20,49 @@ const iconMap: Record<string, LucideIcon> = {
   Server,
 };
 
+/**
+ * Services as a hairline-divided grid, not floating cards (avoids the identical
+ * card-grid cliche): one cohesive system of cells separated by 1px rules. The
+ * cells wipe in left-to-right (catalog #15) — the section's one motion moment —
+ * while the heading reveals with the masked-line baseline grammar. No eyebrow:
+ * the heading carries the section, keeping the page's eyebrow budget low.
+ */
 export function Services() {
   return (
-    <section className="py-24">
+    <section className="py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-6">
-        <Reveal>
-          <SectionLabel>{sections.services.eyebrow}</SectionLabel>
-          <h2 className="mt-3 max-w-2xl font-display text-4xl font-bold tracking-tight text-primary md:text-5xl">
-            {sections.services.heading}
-          </h2>
-        </Reveal>
+        <RevealText
+          as="h2"
+          className="max-w-2xl font-display text-4xl font-bold tracking-tight text-ink md:text-5xl"
+        >
+          {sections.services.heading}
+        </RevealText>
 
-        <RevealGroup className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <ClipReveal
+          as="ul"
+          stagger={0.1}
+          className="mt-14 grid gap-px overflow-hidden rounded-3xl bg-line ring-1 ring-line sm:grid-cols-2 lg:grid-cols-3"
+        >
           {services.map((service) => {
             const Icon = iconMap[service.icon];
             return (
-              <RevealItem key={service.title} className="h-full">
-                <Card className="h-full p-6 lg:p-7">
-                  {Icon && <Icon aria-hidden className="size-6 text-accent-primary" />}
-                  <h3 className="mt-5 text-xl font-semibold text-primary">{service.title}</h3>
-                  <p className="mt-2.5 text-sm leading-relaxed text-secondary">
-                    {service.description}
-                  </p>
-                </Card>
-              </RevealItem>
+              <li
+                key={service.title}
+                className="group bg-base p-7 transition-colors duration-300 hover:bg-surface lg:p-8"
+              >
+                {Icon && (
+                  <Icon
+                    aria-hidden
+                    strokeWidth={1.5}
+                    className="size-6 text-accent transition-transform duration-300 ease-out group-hover:-translate-y-0.5"
+                  />
+                )}
+                <h3 className="mt-5 text-lg font-semibold text-ink">{service.title}</h3>
+                <p className="mt-2.5 text-sm leading-relaxed text-ink-dim">{service.description}</p>
+              </li>
             );
           })}
-        </RevealGroup>
+        </ClipReveal>
       </div>
     </section>
   );
