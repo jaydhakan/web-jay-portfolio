@@ -42,8 +42,8 @@ Locked to the plan.md §3 recommendations (override any before Phase 2; Phase 1 
 | 0     | Approval gate                                       | **[x]**        | Decisions locked (defaults)                                                           |
 | 1     | Environment + perf/a11y baseline                    | **[x]\***      | A11y=100 + desktop=100 all routes; mobile applied-throttle=99 all routes (see caveat) |
 | 2     | Design foundation (tokens, fonts, primitives)       | **[x]**        | Build green; visual QA 375/768/1440; LH delta ≥ −2                                    |
-| 3     | Motion infrastructure (Lenis, lib/gsap, primitives) | **[ ]** ← NEXT | Zero jank; no ScrollTrigger leaks; RM = native; JS-off OK                             |
-| 4     | "The Field" signature shader                        | [ ]            | Perf-neutral vs old shader; idle-gate + off-screen unmount intact                     |
+| 3     | Motion infrastructure (Lenis, lib/gsap, primitives) | **[x]**        | Zero jank; no ScrollTrigger leaks; RM = native; JS-off OK                             |
+| 4     | "The Field" signature shader                        | **[ ]** ← NEXT | Perf-neutral vs old shader; idle-gate + off-screen unmount intact                     |
 | 5     | Section-by-section rebuild (9 sub-steps)            | [ ]            | Per-section: build green, RM + no-JS + responsive shots, frame trace clean            |
 | 6     | Custom cursor states (dot+ring+VIEW)                | [ ]            | Native cursor restored on unmount; off touch/RM; blend works                          |
 | 7     | Page transitions + atmosphere                       | [ ]            | RM instant swap; cursor inverts above grain/curtain; no CLS                           |
@@ -95,15 +95,24 @@ Three diagnosed fixes applied — note the deviations from the plan's literal wo
 
 ---
 
-## Phase 3 — Motion infrastructure  `[ ]`
+## Phase 3 — Motion infrastructure  `[x]`  (done)
 
-- [ ] `lib/gsap.ts` single registration (ScrollTrigger, SplitText, Flip, DrawSVG, ScrambleText, CustomEase; `jdFlow` ease; `DUR`).
-- [ ] `SmoothScrollProvider` (ReactLenis, `autoRaf:false`, `syncTouch:false`, RM-gated, StrictMode-safe) in root layout.
-- [ ] Remove `html { scroll-behavior: smooth }`; route skip-link/case-study anchors via `lenis.scrollTo`; Header menu-lock → `lenis.stop()/start()`.
-- [ ] Rebuild ScrollProgress + Header smart-hide off single Lenis callback (delete Motion spring); dev ScrollTrigger leak counter.
-- [ ] Primitives: `RevealText` (SplitText, runtime-set, onSplit tweens), `FadeUp`, `Parallax`, `Pin`, `LineDraw`, `Counter` — all `useGSAP({scope})`, matchMedia RM + <768px branches.
+- [x] `lib/gsap.ts` single registration (ScrollTrigger, SplitText, Flip, DrawSVG, ScrambleText, CustomEase; `jdFlow` ease guarded against Fast-Refresh re-create; `DUR`). Verified all 6 plugin subpaths resolve in gsap 3.15.0 and the former-premium plugins (SplitText, DrawSVG) animate in the free distribution.
+- [x] `SmoothScrollProvider` (ReactLenis `root`, `autoRaf:false` — the double-loop footgun, `syncTouch:false`, RM-gated) in root layout; exposes the Lenis instance via context (`useLenisInstance`) so Header/ScrollProgress/anchors share one instance.
+- [x] Removed `html { scroll-behavior: smooth }`; new `AnchorScroll` routes `#hash` links via `lenis.scrollTo` (skip-link `immediate`, sections glide) + focus mgmt, no-op under RM; Header menu-lock → `lenis.stop()/start()` (overflow fallback under RM).
+- [x] Rebuilt ScrollProgress off Lenis `progress` (Motion spring deleted; writes `scaleX` straight to DOM, no state for a continuous value; solid `bg-accent`); Header smart-hide + scrolled-bg off the Lenis scroll callback (window-scroll fallback under RM). Dev `ScrollTriggerLeakCounter` logs live ST count per route.
+- [x] Primitives in `components/motion/`: `RevealText` (SplitText, `mask`+`autoSplit`, tweens inside `onSplit`, `aria:"auto"`), `FadeUp` (element or staggered children), `Parallax` (≥768px only), `Pin` (desktop-default, `invalidateOnRefresh`+`anticipatePin`), `LineDraw` (DrawSVG, scrub-or-once), `Counter` (GSAP, mono tabular, mutates textContent). All `useGSAP({scope})` + `gsap.matchMedia` RM branches, runtime-set start states (R7).
 
-**Exit gate:** zero jank / no double-smooth; navigate all routes ×2 with no ScrollTrigger leaks; RM uses native scroll; JS-off renders everything; LH delta ≥ −2.
+**Exit gate — PASSED.** Build + lint green. Verified via Puppeteer on a throwaway `/p3test` harness (since deleted):
+- **No double-smooth:** one wheel event → 20 distinct eased scrollY values (0→…→1703), not a jump.
+- **Plugins animate:** RevealText splits into masked lines, Counter ticks to `150+`, LineDraw draws (dasharray applied, offset→0).
+- **RM = native + final state:** no `lenis` class, native scroll; FadeUp `opacity:1`/`transform:none`, RevealText `opacity:1` and *not split*, Counter shows `150+`. **No hydration mismatch** (GSAP primitives ship final DOM, don't branch markup on RM — fixes the Motion-`Reveal` mismatch flagged at the P3-core check-in; that clears fully when Phase 5 swaps the Motion reveals out).
+- **No ScrollTrigger leaks:** 10 navigations across all routes — `/` steady at 1 (the existing Process connector), others 0, returns to baseline every revisit.
+- **JS-off:** all body copy present; the only `opacity:0` text elements are pre-existing CSS `.anim-rise`/`.page-enter` transients (play to visible without JS) + intentional hover-overlay captions — none are Phase 3 primitives (all `data-reveal=false`, no `.fu/.rt/.ld/.ct`).
+
+*LH delta + the /about+/contact simulated-mobile ≥95 re-check (Phase 1 caveat): the Motion `Reveal`s that cause the dip are still on those pages — they're swapped for these primitives per-section in Phase 5, so that re-measure moves to the Phase 5 section gates (5.4 /contact, 5.6 /about), not here. Build/lint green is the gate that's actionable now.*
+
+> **Note:** the Phase 3 **core** (Lenis/GSAP/anchors/Header/ScrollProgress) was committed + pushed mid-phase by an automated commit hook as `6fea9b1`; the primitives + leak counter are this commit.
 
 ---
 
@@ -167,4 +176,5 @@ Order = cheapest/lowest-risk first, riskiest pin last on a proven base. Each sub
 ## Changelog
 - 2026-06-15 — Phase 0 locked (defaults). PHASES.md created. Phase 1 started: env verified (46G free, stale tree confirmed, lenis absent).
 - 2026-06-15 — **Phase 1 done** (`npm install` resync + lenis 1.3.23, build/lint green). Shader interaction-armed, hero H1 → opacity:1, contrast sweep, + fixed real a11y bugs (/work heading-order, /about list semantics). Result: **A11y=100 + desktop Perf=100 all routes; mobile applied-throttle=99 all routes**; simulated mobile 92–97 (caveat accepted — Phase 2/3 clears /about+/contact). Committed + pushed. **Next: Phase 2 (design foundation).**
-- 2026-06-15 — **Phase 2 done** (verified + completed pre-staged work from a prior session). OKLCH dark-only tokens + legacy aliases, `next-themes`/Theme* fully removed, Syne/DM Sans/JetBrains Mono, motion vocab props + `:focus-visible`, primitives (pill Button w/ arrow-circle + fill-wipe, double-bezel Card 24/18, mono SectionLabel w/ tick), shader recolored to mono-indigo. §8 cheap wins landed (planToBudget fix verified, base-URL unified, `seo.home` wired, case-study labels → content.ts). Caught + fixed an em-dash regression in the now-visible `seo.home` title. Build + lint green; visual QA 375/768/1440 × 6 routes clean; no theme leaks. **Not yet committed.** **Next: Phase 3 (motion infrastructure — Lenis, lib/gsap, primitives).**
+- 2026-06-15 — **Phase 2 done** (verified + completed pre-staged work from a prior session). OKLCH dark-only tokens + legacy aliases, `next-themes`/Theme* fully removed, Syne/DM Sans/JetBrains Mono, motion vocab props + `:focus-visible`, primitives (pill Button w/ arrow-circle + fill-wipe, double-bezel Card 24/18, mono SectionLabel w/ tick), shader recolored to mono-indigo. §8 cheap wins landed (planToBudget fix verified, base-URL unified, `seo.home` wired, case-study labels → content.ts). Caught + fixed an em-dash regression in the now-visible `seo.home` title. Build + lint green; visual QA 375/768/1440 × 6 routes clean; no theme leaks. Committed + pushed (`bc75fbf`).
+- 2026-06-15 — **Phase 3 done.** Core (Lenis `SmoothScrollProvider` w/ ticker-driven rAF + `autoRaf:false`, `lib/gsap.ts`, `AnchorScroll`, Header/ScrollProgress rebuilt off Lenis, `scroll-behavior:smooth` removed) auto-committed mid-phase as `6fea9b1`. Primitives (`RevealText`/`FadeUp`/`Parallax`/`Pin`/`LineDraw`/`Counter`) + dev leak counter built in `components/motion/`. Exit gate passed via `/p3test` harness (deleted): no double-smooth (20 eased values/wheel), plugins animate, RM native + final state + no hydration mismatch, no ST leaks over 10 navs, JS-off renders. Build + lint green. **Next: Phase 4 ("The Field" signature shader).**

@@ -8,6 +8,7 @@ import { CustomCursor } from "@/components/layout/CustomCursor";
 import { ScrollProgress } from "@/components/layout/ScrollProgress";
 import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
 import { AnchorScroll } from "@/components/layout/AnchorScroll";
+import { ScrollTriggerLeakCounter } from "@/components/motion/ScrollTriggerLeakCounter";
 
 const syne = Syne({
   subsets: ["latin"],
@@ -93,6 +94,7 @@ export default function RootLayout({
         </a>
         <SmoothScrollProvider>
           <AnchorScroll />
+          <ScrollTriggerLeakCounter />
           <CustomCursor />
           <ScrollProgress />
           <Header />
