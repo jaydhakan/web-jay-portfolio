@@ -80,11 +80,6 @@ export default function RootLayout({
       className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
     >
       <body className="font-body">
-        {/* Below-fold sections may use Motion whileInView reveals (data-reveal).
-            Without JS those stay at opacity:0 — force them visible. */}
-        <noscript>
-          <style>{`[data-reveal]{opacity:1!important;transform:none!important}`}</style>
-        </noscript>
         {/* Skip link: first focusable element on every page (a11y spec) */}
         <a
           href="#main-content"

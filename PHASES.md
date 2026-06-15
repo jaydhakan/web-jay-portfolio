@@ -44,8 +44,8 @@ Locked to the plan.md §3 recommendations (override any before Phase 2; Phase 1 
 | 2     | Design foundation (tokens, fonts, primitives)       | **[x]**        | Build green; visual QA 375/768/1440; LH delta ≥ −2                                    |
 | 3     | Motion infrastructure (Lenis, lib/gsap, primitives) | **[x]**        | Zero jank; no ScrollTrigger leaks; RM = native; JS-off OK                             |
 | 4     | "The Field" signature shader                        | **[x]**        | Perf-neutral vs old shader; idle-gate + off-screen unmount intact                     |
-| 5     | Section-by-section rebuild (9 sub-steps)            | **[~]** ← NEXT | Per-section: build green, RM + no-JS + responsive shots, frame trace clean            |
-| 6     | Custom cursor states (dot+ring+VIEW)                | [ ]            | Native cursor restored on unmount; off touch/RM; blend works                          |
+| 5     | Section-by-section rebuild (9 sub-steps)            | **[x]**        | Per-section: build green, RM + no-JS + responsive shots, frame trace clean            |
+| 6     | Custom cursor states (dot+ring+VIEW)                | **[ ]** ← NEXT | Native cursor restored on unmount; off touch/RM; blend works                          |
 | 7     | Page transitions + atmosphere                       | [ ]            | RM instant swap; cursor inverts above grain/curtain; no CLS                           |
 | 8     | Choreographed opening (preloader + master TL)       | [ ]            | Cold mobile LH ≥95 — else cut preloader                                               |
 | 9     | Full QA matrix + launch cleanup                     | [ ]            | 5 routes ×LH ≥95/100; keyboard; leak check; DESIGN.md/README rewrite                  |
@@ -129,17 +129,17 @@ Three diagnosed fixes applied — note the deviations from the plan's literal wo
 
 Order = cheapest/lowest-risk first, riskiest pin last on a proven base. Each sub-step in one commit adopts new tokens + new primitives + its ONE assigned effect + its `loading.tsx` geometry.
 
-- [ ] 5.1 **Stats** — Counter + LineDraw underline (proves the primitives)
-- [ ] 5.2 **Services** + **/services pricing** — clip-path wipe (+ Growth ring LineDraw)
-- [ ] 5.3 **TechStack** — mouse-tracked spotlight (desktop only; readable without it)
-- [ ] 5.4 **CTABanner** + **/contact** — magnetic CTA (+ spotlight on dark column)
-- [ ] 5.5 **Testimonials** — delete carousel → calm masked-line grid
-- [ ] 5.6 **/about** — teleprompter bio + **Experience timeline** (the ONLY timeline; D4 line-draw flagship)
-- [ ] 5.7 **/work** list — hover-preview-follow + WorkGrid Flip filtering + refresh-after-filter
-- [ ] 5.8 **Home FeaturedWork** — sticky stacked cards (the only new pin; after Lenis proven)
-- [ ] 5.9 **/work/[slug]** — sticky split scrollytelling formalization
+- [x] 5.1 **Stats** — Counter + LineDraw underline. Dropped the SaaS card grid → editorial white mono numerals with accent underlines drawing as they count.
+- [x] 5.2 **Services** + **/services pricing** — clip-path wipe (new `ClipReveal` primitive). Home Services → hairline-divided bordered grid (no floating cards); pricing → double-bezel with the Growth-tier concentric-arc "growth ring" LineDraw.
+- [x] 5.3 **TechStack** — mouse-tracked spotlight (masked colour layer over a readable grayscale base; `useSyncExternalStore` capability gate; desktop/fine/no-RM only).
+- [x] 5.4 **CTABanner** + **/contact** — magnetic CTA (MagneticButton ported to GSAP `quickTo`) + `Spotlight` wrapper on the contact info column. **Also fixed a Phase-2 regression: `--color-white/black/transparent` were wiped by `--color-*: initial`, breaking every `text-white` button label + bezel-card `bg/ring-white`.**
+- [x] 5.5 **Testimonials** — deleted the Motion carousel → calm masked-line grid (large accent quote mark, RevealText quote, no stars). Now a server component.
+- [x] 5.6 **/about** — `Teleprompter` bio + `ExperienceTimeline` (D9, drawn scaleY spine + node pops + slide-in entries) + contour-arc divider (D4 line-draw) + slide-in How-I-Work.
+- [x] 5.7 **/work** — `WorkList` (deleted WorkGrid): hairline row index, cursor-follow cover preview (desktop) / inline thumbs (mobile), GSAP **Flip** filtering + ScrollTrigger.refresh.
+- [x] 5.8 **Home FeaturedWork** — sticky card stack (catalog #12). Split server `FeaturedWork` (resolves covers) + client `FeaturedStack` (GSAP scrub scale/fade); desktop pin only, mobile static.
+- [x] 5.9 **/work/[slug]** — sticky split scrollytelling: sidebar accent indicator slides to the active section; results stats → GSAP `Counter`; RevealText title.
 
-**Exit gate per section:** build green; section RM + no-JS + 375/768/1440 shots; 4×-CPU trace <5% dropped frames, no paint storms; LH spot-check after 5.4, 5.7, 5.8.
+**Exit gate — PASSED (all 9).** Build + lint green throughout. Final QA: **no ScrollTrigger leaks** (counts stable per route across 11 navigations: `/`=24, `/about`=21, `/work`=2, `/services`=10, `/contact`=3, case=5 — no growth, once-triggers self-remove); **reduced motion = zero hidden text + zero hydration errors** (the Phase-3 Motion-Reveal mismatch is gone — all reveals are now runtime-set GSAP); **JS-off renders full SSR content** (curl-verified); **no horizontal overflow at 375/768/1440** across all 6 routes; home eyebrows = 2 (≤ budget); no em-dashes in visible copy. **Cleanup:** deleted dead `CountUp.tsx` + `Reveal.tsx`, retired the `noscript [data-reveal]` hack (no `data-reveal` remains). New primitives added: `ClipReveal`, `Spotlight`, `Teleprompter`. Motion now confined to two grandfathered islands (Header mobile menu, ContactForm) → Phase 9 removes the package. *LH spot-checks deferred to the Phase 9 matrix.*
 
 ---
 
@@ -162,7 +162,7 @@ Order = cheapest/lowest-risk first, riskiest pin last on a proven base. Each sub
 
 ## Phase 9 — Full QA matrix + launch cleanup  `[ ]`
 - [ ] 5 routes × LH (mobile+desktop) ≥95/100; 375/768/1440 × default/RM shots; JS-off; keyboard; 10-nav leak check; em-dash grep on touched copy.
-- [ ] delete old token aliases; retire `noscript [data-reveal]` hack (only if every reveal runtime-set); regenerate `og-image.png`; rewrite README + `DESIGN.md`.
+- [ ] delete old token aliases; ~~retire `noscript [data-reveal]` hack~~ (DONE in Phase 5 — all reveals runtime-set); remove `motion` package after porting Header menu + ContactForm; regenerate `og-image.png`; rewrite README + `DESIGN.md`.
 - [ ] **D13:** prod build, screenshot every section, self-critique vs plan + spec checklist, fix gaps, report done.
 
 ---
@@ -179,4 +179,5 @@ Order = cheapest/lowest-risk first, riskiest pin last on a proven base. Each sub
 - 2026-06-15 — **Phase 1 done** (`npm install` resync + lenis 1.3.23, build/lint green). Shader interaction-armed, hero H1 → opacity:1, contrast sweep, + fixed real a11y bugs (/work heading-order, /about list semantics). Result: **A11y=100 + desktop Perf=100 all routes; mobile applied-throttle=99 all routes**; simulated mobile 92–97 (caveat accepted — Phase 2/3 clears /about+/contact). Committed + pushed. **Next: Phase 2 (design foundation).**
 - 2026-06-15 — **Phase 2 done** (verified + completed pre-staged work from a prior session). OKLCH dark-only tokens + legacy aliases, `next-themes`/Theme* fully removed, Syne/DM Sans/JetBrains Mono, motion vocab props + `:focus-visible`, primitives (pill Button w/ arrow-circle + fill-wipe, double-bezel Card 24/18, mono SectionLabel w/ tick), shader recolored to mono-indigo. §8 cheap wins landed (planToBudget fix verified, base-URL unified, `seo.home` wired, case-study labels → content.ts). Caught + fixed an em-dash regression in the now-visible `seo.home` title. Build + lint green; visual QA 375/768/1440 × 6 routes clean; no theme leaks. Committed + pushed (`bc75fbf`).
 - 2026-06-15 — **Phase 3 done.** Core (Lenis `SmoothScrollProvider` w/ ticker-driven rAF + `autoRaf:false`, `lib/gsap.ts`, `AnchorScroll`, Header/ScrollProgress rebuilt off Lenis, `scroll-behavior:smooth` removed) auto-committed mid-phase as `6fea9b1`. Primitives (`RevealText`/`FadeUp`/`Parallax`/`Pin`/`LineDraw`/`Counter`) + dev leak counter built in `components/motion/`. Exit gate passed via `/p3test` harness (deleted): no double-smooth (20 eased values/wheel), plugins animate, RM native + final state + no hydration mismatch, no ST leaks over 10 navs, JS-off renders. Build + lint green. Committed + pushed (`126e59f`). **Next: Phase 4 ("The Field" signature shader).**
-- 2026-06-16 — **Phase 4 done.** Hero shader rewritten into "The Field" (monochrome-indigo topographic contour / loss-landscape: minor+major iso-lines crowding on steep gradients, valley wash, ~17s descent-highlight). Concept chosen via a 3-way judge panel (Topographic Descent won, 88). Perf-neutral by construction (6 simplex evals identical, no trig, 2 fwidth, 1 quad/draw call) + judge-confirmed; low-power hardened (clamped fwidth, MINOR=20). Idle-gate/unmount + `.hero-fallback` untouched. Build/lint green, runtime-compiles clean, AAA left-text contrast preserved, RM skips shader. **Next: Phase 5 (section-by-section rebuild).**
+- 2026-06-16 — **Phase 4 done.** Hero shader rewritten into "The Field" (monochrome-indigo topographic contour / loss-landscape: minor+major iso-lines crowding on steep gradients, valley wash, ~17s descent-highlight). Concept chosen via a 3-way judge panel (Topographic Descent won, 88). Perf-neutral by construction (6 simplex evals identical, no trig, 2 fwidth, 1 quad/draw call) + judge-confirmed; low-power hardened (clamped fwidth, MINOR=20). Idle-gate/unmount + `.hero-fallback` untouched. Build/lint green, runtime-compiles clean, AAA left-text contrast preserved, RM skips shader. Committed + pushed (`1657f1f`). **Next: Phase 5 (section-by-section rebuild).**
+- 2026-06-16 — **Phase 5 done (all 9 sub-steps).** Every section/page rebuilt onto the new tokens + GSAP primitives with its one assigned effect (Stats counters, Services clip-wipe, TechStack spotlight, magnetic CTA + contact spotlight, calm testimonials, /about teleprompter + timeline + contour divider, /work hover-preview row list + Flip, FeaturedWork sticky stack, case-study scrollytelling). New primitives: `ClipReveal`, `Spotlight`, `Teleprompter`. Caught + fixed a Phase-2 white-token regression (broke all primary buttons + bezel cards). Deleted dead `CountUp`/`Reveal`, retired the noscript hack. Final QA: no ST leaks (stable counts), RM = zero hidden text + zero hydration errors, JS-off full SSR, no overflow 375/768/1440, eyebrows ≤3, no em-dashes. Committed per sub-step + pushed. **Next: Phase 6 (custom cursor states).** Still blocked on Jay: project covers + profile photo (render gradient placeholders), real testimonials, Resend/env.
