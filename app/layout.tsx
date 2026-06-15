@@ -6,6 +6,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CustomCursor } from "@/components/layout/CustomCursor";
 import { ScrollProgress } from "@/components/layout/ScrollProgress";
+import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
+import { AnchorScroll } from "@/components/layout/AnchorScroll";
 
 const syne = Syne({
   subsets: ["latin"],
@@ -89,11 +91,14 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <CustomCursor />
-        <ScrollProgress />
-        <Header />
-        {children}
-        <Footer />
+        <SmoothScrollProvider>
+          <AnchorScroll />
+          <CustomCursor />
+          <ScrollProgress />
+          <Header />
+          {children}
+          <Footer />
+        </SmoothScrollProvider>
       </body>
     </html>
   );

@@ -1,17 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  AnimatePresence,
-  motion,
-  useMotionValueEvent,
-  useReducedMotion,
-  useScroll,
-} from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { useLenisInstance } from "@/components/layout/SmoothScrollProvider";
 import { transition } from "@/lib/animations";
 import { cn } from "@/lib/utils";
 
@@ -25,17 +20,37 @@ const navLinks = [
 export function Header() {
   const pathname = usePathname();
   const reduceMotion = useReducedMotion();
-  const { scrollY } = useScroll();
+  const lenis = useLenisInstance();
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  useMotionValueEvent(scrollY, "change", (y) => {
-    setScrolled(y > 60);
-    const prev = scrollY.getPrevious() ?? 0;
-    // Smart-hide: down past the hero margin hides, any upward scroll shows.
-    setHidden(y > prev && y > 160 && !menuOpen);
-  });
+  // Scroll-driven chrome (scrolled bg + smart-hide), sourced from Lenis when
+  // smooth scroll is active, else native window scroll (reduced motion). Read
+  // menuOpen via ref so the subscription never needs to re-bind.
+  const menuOpenRef = useRef(menuOpen);
+  useEffect(() => {
+    menuOpenRef.current = menuOpen;
+  }, [menuOpen]);
+  useEffect(() => {
+    let prevY = lenis?.scroll ?? window.scrollY;
+    const onScroll = (y: number) => {
+      setScrolled(y > 60);
+      // Smart-hide: scrolling down past the hero margin hides; any upward
+      // scroll shows. Suppressed while the mobile menu is open.
+      setHidden(y > prevY && y > 160 && !menuOpenRef.current);
+      prevY = y;
+    };
+    if (lenis) {
+      const handler = ({ scroll }: { scroll: number }) => onScroll(scroll);
+      lenis.on("scroll", handler);
+      return () => lenis.off("scroll", handler);
+    }
+    const handler = () => onScroll(window.scrollY);
+    window.addEventListener("scroll", handler, { passive: true });
+    handler();
+    return () => window.removeEventListener("scroll", handler);
+  }, [lenis]);
 
   // Close the overlay on navigation (state adjustment during render, per
   // react.dev "adjusting state when props change" — no effect needed).
@@ -45,12 +60,20 @@ export function Header() {
     setMenuOpen(false);
   }
 
+  // Lock scroll behind the mobile overlay. With Lenis active, stop()/start()
+  // is the canonical lock; without it (reduced motion / native), fall back to
+  // an overflow lock on <html>.
   useEffect(() => {
+    if (lenis) {
+      if (menuOpen) lenis.stop();
+      else lenis.start();
+      return () => lenis.start();
+    }
     document.documentElement.style.overflow = menuOpen ? "hidden" : "";
     return () => {
       document.documentElement.style.overflow = "";
     };
-  }, [menuOpen]);
+  }, [menuOpen, lenis]);
   useEffect(() => {
     if (!menuOpen) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenuOpen(false);

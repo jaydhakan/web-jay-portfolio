@@ -129,10 +129,9 @@ html {
 }
 
 @layer base {
-  /* Lenis + ScrollTrigger own smooth scroll; this is removed in Phase 3. */
-  html {
-    scroll-behavior: smooth;
-  }
+  /* Smooth scroll is owned by Lenis (motion-allowed) or native instant
+     (reduced motion). No CSS `scroll-behavior: smooth` — it double-smooths
+     against Lenis and overrides the RM instant path (plan.md §6.2, risk #4). */
 
   body {
     @apply bg-base font-body text-ink antialiased;
