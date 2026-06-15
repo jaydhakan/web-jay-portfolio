@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
-import { projects } from "@/data/content";
+import { projects, sections } from "@/data/content";
 import { publicImageExists } from "@/lib/images";
 import { Tag } from "@/components/ui/Tag";
 import { CountUp } from "@/components/ui/CountUp";
@@ -32,11 +32,12 @@ export default async function CaseStudyPage({ params }: PageProps) {
   const { caseStudy } = project;
   const hasCover = publicImageExists(project.coverImage);
 
+  const labels = sections.caseStudy.sections;
   const sidebarItems = [
-    { id: "problem", label: "The Problem" },
-    { id: "approach", label: "My Approach" },
-    { id: "built", label: "What I Built" },
-    ...(caseStudy.results.length > 0 ? [{ id: "results", label: "The Results" }] : []),
+    { id: "problem", label: labels.problem },
+    { id: "approach", label: labels.approach },
+    { id: "built", label: labels.built },
+    ...(caseStudy.results.length > 0 ? [{ id: "results", label: labels.results }] : []),
   ];
 
   const meta = [
@@ -57,7 +58,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
             aria-hidden
             className="size-4 transition-transform duration-200 ease-out group-hover:-translate-x-0.5"
           />
-          All Work
+          {sections.caseStudy.backLabel}
         </Link>
 
         <div className="mt-10 lg:grid lg:grid-cols-[230px_minmax(0,1fr)] lg:gap-16">
@@ -115,7 +116,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
 
             <section id="problem" className="scroll-mt-28">
               <h2 className="mt-16 font-display text-2xl font-semibold text-primary">
-                The Problem
+                {labels.problem}
               </h2>
               {caseStudy.problem.map((paragraph) => (
                 <p key={paragraph} className="mt-4 leading-relaxed text-secondary">
@@ -126,7 +127,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
 
             <section id="approach" className="scroll-mt-28">
               <h2 className="mt-14 font-display text-2xl font-semibold text-primary">
-                My Approach
+                {labels.approach}
               </h2>
               {caseStudy.approach.map((paragraph) => (
                 <p key={paragraph} className="mt-4 leading-relaxed text-secondary">
@@ -137,7 +138,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
 
             <section id="built" className="scroll-mt-28">
               <h2 className="mt-14 font-display text-2xl font-semibold text-primary">
-                What I Built
+                {labels.built}
               </h2>
               <ul className="mt-6 space-y-4">
                 {caseStudy.built.map((item) => (
@@ -152,7 +153,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
             {caseStudy.results.length > 0 && (
               <section id="results" className="scroll-mt-28">
                 <h2 className="mt-14 font-display text-2xl font-semibold text-primary">
-                  The Results
+                  {labels.results}
                 </h2>
                 <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4">
                   {caseStudy.results.map((stat) => (
@@ -177,7 +178,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
             </p>
 
             <nav aria-label="Next project" className="mt-16 border-t border-token pt-8">
-              <p className="text-xs font-medium text-secondary">Next project</p>
+              <p className="text-xs font-medium text-secondary">{sections.caseStudy.nextProject}</p>
               <Link
                 href={`/work/${next.slug}`}
                 className="group mt-2 inline-flex items-center gap-2 rounded font-display text-xl font-semibold text-primary transition-colors duration-200 hover:text-accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base"

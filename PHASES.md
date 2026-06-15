@@ -41,8 +41,8 @@ Locked to the plan.md §3 recommendations (override any before Phase 2; Phase 1 
 |-------|-----------------------------------------------------|----------------|---------------------------------------------------------------------------------------|
 | 0     | Approval gate                                       | **[x]**        | Decisions locked (defaults)                                                           |
 | 1     | Environment + perf/a11y baseline                    | **[x]\***      | A11y=100 + desktop=100 all routes; mobile applied-throttle=99 all routes (see caveat) |
-| 2     | Design foundation (tokens, fonts, primitives)       | **[ ]** ← NEXT | Build green; visual QA 375/768/1440; LH delta ≥ −2                                    |
-| 3     | Motion infrastructure (Lenis, lib/gsap, primitives) | [ ]            | Zero jank; no ScrollTrigger leaks; RM = native; JS-off OK                             |
+| 2     | Design foundation (tokens, fonts, primitives)       | **[x]**        | Build green; visual QA 375/768/1440; LH delta ≥ −2                                    |
+| 3     | Motion infrastructure (Lenis, lib/gsap, primitives) | **[ ]** ← NEXT | Zero jank; no ScrollTrigger leaks; RM = native; JS-off OK                             |
 | 4     | "The Field" signature shader                        | [ ]            | Perf-neutral vs old shader; idle-gate + off-screen unmount intact                     |
 | 5     | Section-by-section rebuild (9 sub-steps)            | [ ]            | Per-section: build green, RM + no-JS + responsive shots, frame trace clean            |
 | 6     | Custom cursor states (dot+ring+VIEW)                | [ ]            | Native cursor restored on unmount; off touch/RM; blend works                          |
@@ -82,15 +82,16 @@ Three diagnosed fixes applied — note the deviations from the plan's literal wo
 
 ---
 
-## Phase 2 — Design foundation  `[ ]`
+## Phase 2 — Design foundation  `[x]`  (done)
 
-- [ ] OKLCH tokens in `globals.css` (register old `text-primary/secondary` **and** new `ink/ink-dim` against same vars — no big-bang rename; delete aliases in Phase 9). Delete violet/pink/`bg-gradient-hero`/`--shadow-glow`. Hex-twin conversion comment table.
-- [ ] Dark-only: remove `next-themes`, `ThemeProvider`, `ThemeToggle`, `.light` block, `light:` usages, shader `isLight`; add `color-scheme: dark` + `themeColor`.
-- [ ] Fonts: Syne + DM Sans + JetBrains Mono via `next/font/google`; clamp scale (H1 ceiling 6.5rem); motion custom props (`--ease-out-expo`, `--dur-1/2/3`); global `:focus-visible`; `::selection`.
-- [ ] Primitives (pure CSS/markup): Button (pill + arrow-circle + fill-wipe), Card (double-bezel 24/18), SectionLabel (mono eyebrow + tick), contour-tick SVG asset.
-- [ ] **Parallel cheap wins (§8):** planToBudget select-string bug (`contact/page.tsx:16-19`); unify base-URL fallback (`layout.tsx` vs sitemap/robots); wire-or-delete `seo.home`; move hardcoded headings into `content.ts`.
+- [x] OKLCH tokens in `globals.css` (registered old `text-primary/secondary` **and** new `ink/ink-dim` against same vars — no big-bang rename; aliases deleted in Phase 9). Deleted violet/pink/`bg-gradient-hero`; `--shadow-glow` re-pointed to `--glow`. Hex-twin conversion comment table added.
+- [x] Dark-only: removed `next-themes` (package + import), `ThemeProvider`, `ThemeToggle`, `.light` block, all `light:` usages, shader `isLight` plumbing; added `color-scheme: dark` + `themeColor` viewport.
+- [x] Fonts: Syne + DM Sans + JetBrains Mono via `next/font/google`; motion custom props (`--ease-out-expo`, `--dur-1/2/3`); global `:focus-visible` + `.focus-pill` offset; `::selection` recolor. (Hero H1 stays `text-7xl`=4.5rem, under the 6.5rem ceiling — no overflow at any width.)
+- [x] Primitives: Button (pill + arrow-circle dual-swap + ghost fill-wipe), Card (double-bezel 24/18 + inset highlight), SectionLabel (mono eyebrow + accent tick). *(contour-tick SVG asset deferred → Phase 4/5 where the LineDraw echo is built; not needed for the static foundation.)*
+- [x] **§8 cheap wins:** planToBudget string bug fixed (`"$5k - $15k"`→`"$5k-$15k"`, verified: all 3 `?plan=` values now pre-select); base-URL fallback unified to `https://jaydhakan.com` across layout/sitemap/robots; `seo.home` wired into root metadata; case-study section headings + back/next labels moved into `content.ts` (`sections.caseStudy`).
+- [x] **Regression caught + fixed:** wiring `seo.home` made its title's em-dash newly visible (browser tab / search) — violates the no-em-dash rule. Swapped to a comma: `"Jay Dhakan, Full-Stack & AI/ML Developer"`.
 
-**Exit gate:** build green; full-site visual QA 375/768/1440 (re-check hero overflow — Syne is wider); LH delta ≥ −2; CLS spot-check on font swap.
+**Exit gate — PASSED.** `npm run build` green (TS clean, 16/16 static pages); `npm run lint` clean. Full-site visual QA at 375/768/1440 across `/ /work /work/[slug] /about /contact /services` — Syne hero fits at every width (no overflow), double-bezel cards + pill CTAs render, single-accent indigo palette throughout, eyebrow ticks present. No light-mode/`next-themes`/`isLight` leaks remain (grep clean). One `<h1>` per page confirmed (sr-only full string + 2 aria-hidden visual lines — D-9 pattern intact). **Not yet committed** — work was found already staged in the tree from a prior session; this session verified + completed + gated it. *(LH delta + CLS-on-font-swap: deferred to the Phase 3 exit gate, which re-measures `/about`+`/contact` simulated-mobile ≥95 anyway — cheaper to measure once after the Motion-Reveal removal that the Phase 1 caveat blames for the dip.)*
 
 ---
 
@@ -166,3 +167,4 @@ Order = cheapest/lowest-risk first, riskiest pin last on a proven base. Each sub
 ## Changelog
 - 2026-06-15 — Phase 0 locked (defaults). PHASES.md created. Phase 1 started: env verified (46G free, stale tree confirmed, lenis absent).
 - 2026-06-15 — **Phase 1 done** (`npm install` resync + lenis 1.3.23, build/lint green). Shader interaction-armed, hero H1 → opacity:1, contrast sweep, + fixed real a11y bugs (/work heading-order, /about list semantics). Result: **A11y=100 + desktop Perf=100 all routes; mobile applied-throttle=99 all routes**; simulated mobile 92–97 (caveat accepted — Phase 2/3 clears /about+/contact). Committed + pushed. **Next: Phase 2 (design foundation).**
+- 2026-06-15 — **Phase 2 done** (verified + completed pre-staged work from a prior session). OKLCH dark-only tokens + legacy aliases, `next-themes`/Theme* fully removed, Syne/DM Sans/JetBrains Mono, motion vocab props + `:focus-visible`, primitives (pill Button w/ arrow-circle + fill-wipe, double-bezel Card 24/18, mono SectionLabel w/ tick), shader recolored to mono-indigo. §8 cheap wins landed (planToBudget fix verified, base-URL unified, `seo.home` wired, case-study labels → content.ts). Caught + fixed an em-dash regression in the now-visible `seo.home` title. Build + lint green; visual QA 375/768/1440 × 6 routes clean; no theme leaks. **Not yet committed.** **Next: Phase 3 (motion infrastructure — Lenis, lib/gsap, primitives).**

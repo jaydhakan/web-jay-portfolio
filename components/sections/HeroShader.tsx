@@ -5,10 +5,10 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 /**
- * Liquid indigo/violet hero background. One full-screen quad, one draw call,
- * no postprocessing: a domain-warped fbm field blends base -> indigo ->
- * violet with subtle pointer parallax. Color energy lives top-right so the
- * left text column keeps AAA contrast.
+ * Liquid monochrome-indigo hero background. One full-screen quad, one draw
+ * call, no postprocessing: a domain-warped fbm field blends base -> accent ->
+ * accent-solid with subtle pointer parallax. Color energy lives top-right so
+ * the left text column keeps AAA contrast.
  */
 
 const vertexShader = /* glsl */ `
@@ -107,12 +107,11 @@ const fragmentShader = /* glsl */ `
   }
 `;
 
-type ShaderPlaneProps = { isLight: boolean };
+/* Hex twins of --base / --accent / --accent-solid (globals.css table) —
+   THREE.Color can't parse oklch(). Keep in sync manually. */
+const BASE = new THREE.Color("#0b0b11");
 
-const DARK_BASE = new THREE.Color("#0a0a0f");
-const LIGHT_BASE = new THREE.Color("#f8f8ff");
-
-function ShaderPlane({ isLight }: ShaderPlaneProps) {
+function ShaderPlane() {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   const pointerTarget = useRef({ x: 0, y: 0 });
 
@@ -121,10 +120,10 @@ function ShaderPlane({ isLight }: ShaderPlaneProps) {
       uTime: { value: 0 },
       uResolution: { value: new THREE.Vector2(1, 1) },
       uMouse: { value: new THREE.Vector2(0, 0) },
-      uBase: { value: new THREE.Color("#0a0a0f") },
-      uColorA: { value: new THREE.Color("#5b6ef5") },
-      uColorB: { value: new THREE.Color("#8b5cf6") },
-      uIntensity: { value: 0.55 },
+      uBase: { value: new THREE.Color("#0b0b11") },
+      uColorA: { value: new THREE.Color("#6b7cff") },
+      uColorB: { value: new THREE.Color("#4356ee") },
+      uIntensity: { value: 0.45 },
     }),
     [],
   );
@@ -150,9 +149,7 @@ function ShaderPlane({ isLight }: ShaderPlaneProps) {
       size.width * viewport.dpr,
       size.height * viewport.dpr,
     );
-    // Theme applied per frame (R3F mutates in the loop, not in effects).
-    (material.uniforms.uBase.value as THREE.Color).copy(isLight ? LIGHT_BASE : DARK_BASE);
-    material.uniforms.uIntensity.value = isLight ? 0.24 : 0.45;
+    (material.uniforms.uBase.value as THREE.Color).copy(BASE);
     // Exponential damping toward the pointer: parallax with momentum.
     const mouse = material.uniforms.uMouse.value as THREE.Vector2;
     const ease = 1 - Math.exp(-2.5 * delta);
@@ -175,7 +172,7 @@ function ShaderPlane({ isLight }: ShaderPlaneProps) {
   );
 }
 
-export default function HeroShader({ isLight }: ShaderPlaneProps) {
+export default function HeroShader() {
   return (
     <Canvas
       className="size-full"
@@ -184,7 +181,7 @@ export default function HeroShader({ isLight }: ShaderPlaneProps) {
       frameloop="always"
       aria-hidden
     >
-      <ShaderPlane isLight={isLight} />
+      <ShaderPlane />
     </Canvas>
   );
 }

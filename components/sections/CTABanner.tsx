@@ -8,13 +8,12 @@ export function CTABanner() {
 
   return (
     <section className="relative isolate overflow-hidden border-y border-token py-28">
-      <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-hero opacity-[0.12]" />
       <div
         aria-hidden
         className="absolute inset-0 -z-10"
         style={{
           background:
-            "radial-gradient(ellipse 60% 80% at 50% 50%, transparent, var(--bg-base) 90%)",
+            "radial-gradient(ellipse 60% 80% at 50% 50%, oklch(63% 0.21 272 / 14%), transparent 70%), var(--base)",
         }}
       />
       <Reveal className="mx-auto max-w-3xl px-6 text-center">

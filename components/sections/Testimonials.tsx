@@ -15,23 +15,25 @@ function wrapValue(min: number, max: number, value: number) {
 
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   return (
-    <Card interactive={false} className="flex h-full w-[min(85vw,380px)] shrink-0 flex-col p-8">
-      <div className="flex gap-1" aria-hidden>
-        {Array.from({ length: testimonial.rating }, (_, i) => (
-          <Star key={i} className="size-4 fill-accent-primary text-accent-primary" />
-        ))}
-      </div>
-      <span className="sr-only">Rated {testimonial.rating} out of 5</span>
-      <blockquote className="mt-5 flex-1 text-base leading-relaxed text-primary">
-        &ldquo;{testimonial.quote}&rdquo;
-      </blockquote>
-      <footer className="mt-6">
-        <p className="text-sm font-semibold text-primary">{testimonial.name}</p>
-        <p className="mt-0.5 text-xs text-secondary">
-          {testimonial.company}, {testimonial.platform}
-        </p>
-      </footer>
-    </Card>
+    <div className="h-full w-[min(85vw,380px)] shrink-0">
+      <Card interactive={false} className="flex h-full flex-col p-8">
+        <div className="flex gap-1" aria-hidden>
+          {Array.from({ length: testimonial.rating }, (_, i) => (
+            <Star key={i} className="size-4 fill-accent-primary text-accent-primary" />
+          ))}
+        </div>
+        <span className="sr-only">Rated {testimonial.rating} out of 5</span>
+        <blockquote className="mt-5 flex-1 text-base leading-relaxed text-primary">
+          &ldquo;{testimonial.quote}&rdquo;
+        </blockquote>
+        <footer className="mt-6">
+          <p className="text-sm font-semibold text-primary">{testimonial.name}</p>
+          <p className="mt-0.5 text-xs text-secondary">
+            {testimonial.company}, {testimonial.platform}
+          </p>
+        </footer>
+      </Card>
+    </div>
   );
 }
 

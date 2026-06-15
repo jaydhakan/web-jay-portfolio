@@ -14,8 +14,8 @@ type PageProps = { searchParams: Promise<{ plan?: string }> };
 
 /** /contact?plan=growth pre-selects the matching budget range. */
 const planToBudget: Record<string, string> = {
-  starter: "$1k - $5k",
-  growth: "$5k - $15k",
+  starter: "$1k-$5k",
+  growth: "$5k-$15k",
   custom: "Let's discuss",
 };
 

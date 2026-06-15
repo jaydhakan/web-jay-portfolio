@@ -14,10 +14,11 @@ export function SectionLabel({ className, children }: SectionLabelProps) {
   return (
     <p
       className={cn(
-        "text-sm font-semibold uppercase tracking-widest text-accent-primary",
+        "flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-ink-dim",
         className,
       )}
     >
+      <span aria-hidden className="block h-px w-6 bg-accent" />
       {children}
     </p>
   );

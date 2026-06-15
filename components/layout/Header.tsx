@@ -12,7 +12,6 @@ import {
 } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { transition } from "@/lib/animations";
 import { cn } from "@/lib/utils";
 
@@ -103,7 +102,6 @@ export function Header() {
               </Link>
             ))}
             <div className="ml-2 flex items-center gap-2">
-              <ThemeToggle />
               <Button href="/contact" size="md">
                 Let&apos;s Talk
               </Button>
@@ -111,7 +109,6 @@ export function Header() {
           </nav>
 
           <div className="flex items-center gap-2 md:hidden">
-            <ThemeToggle />
             <button
               type="button"
               aria-label={menuOpen ? "Close menu" : "Open menu"}

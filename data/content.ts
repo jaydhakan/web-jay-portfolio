@@ -717,6 +717,16 @@ export const sections = {
       "Production systems shipped across AI agents, data pipelines, and high-performance APIs.",
     filters: ["All", "AI & Agents", "Data Pipelines", "APIs"] as const,
   },
+  caseStudy: {
+    backLabel: "All Work",
+    nextProject: "Next project",
+    sections: {
+      problem: "The Problem",
+      approach: "My Approach",
+      built: "What I Built",
+      results: "The Results",
+    },
+  },
   aboutPage: {
     eyebrow: "ABOUT ME",
     heading: "Builder. Problem Solver. Shipping Machine.",
@@ -741,7 +751,7 @@ export const sections = {
 
 export const seo = {
   home: {
-    title: "Jay Dhakan — Full-Stack & AI/ML Developer",
+    title: "Jay Dhakan, Full-Stack & AI/ML Developer",
     description:
       "Python & AI/ML engineer building LLM chatbots, multi-agent automation, data pipelines, and web apps. Based in India, working worldwide.",
   },

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
-import { useTheme } from "next-themes";
 import { useInView, useReducedMotion } from "motion/react";
 
 const HeroShader = dynamic(() => import("./HeroShader"), { ssr: false });
@@ -26,7 +25,6 @@ function probeWebgl() {
  */
 export function HeroBackground() {
   const reduceMotion = useReducedMotion();
-  const { resolvedTheme } = useTheme();
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { margin: "200px 0px" });
   // false during SSR/hydration, cached WebGL probe on the client.
@@ -60,7 +58,7 @@ export function HeroBackground() {
     <div ref={ref} aria-hidden className="absolute inset-0 -z-10">
       {showShader && (
         <div className="size-full animate-[rise-in_1.2s_ease-out_both]">
-          <HeroShader isLight={resolvedTheme === "light"} />
+          <HeroShader />
         </div>
       )}
     </div>

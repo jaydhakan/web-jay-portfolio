@@ -1,125 +1,127 @@
 @import "tailwindcss";
 
-/* Dark is the default theme (:root); next-themes adds .light. This variant
-   lets utilities target light mode: e.g. `invert light:invert-0`. */
-@custom-variant light (&:where(.light, .light *));
-
 /* ---------------------------------------------------------------------------
-   Design tokens (see DESIGN.md). Raw vars switch at runtime via next-themes:
-   dark is the default (:root), .light overrides on <html>.
+   Design tokens — OKLCH, dark-only (D-3, D-4).
+   Hex twins are kept as comments for THREE.Color / email templates that can't
+   parse oklch(). Keep in sync manually when accent is updated.
+
+   Hex-twin table:
+     --base           #0b0b11
+     --surface        #14141c
+     --elevated       #1a1a26
+     --ink            #ebecfa
+     --ink-dim        #a3a4c4
+     --accent         #6b7cff
+     --accent-solid   #4356ee
+     --ok             #72c98a  (approx)
+     --err            #e07a6a  (approx)
+     --line           rgba(235,236,250,0.08)
 --------------------------------------------------------------------------- */
 :root {
-  --bg-base: #0a0a0f;
-  --bg-surface: #111118;
-  --bg-elevated: #1a1a26;
-  --accent-primary: #5b6ef5;
-  --accent-violet: #8b5cf6;
-  --accent-warm: #ec4899;
-  --text-primary: #f0f0ff;
-  --text-secondary: #8a8aa8;
-  --text-muted: #4a4a6a;
-  --success: #22c55e;
-  --error: #f87171;
-  --border-token: rgba(255, 255, 255, 0.07);
+  --base:         oklch(14.5% 0.012 278);  /* #0b0b11 */
+  --surface:      oklch(18.5% 0.014 278);  /* #14141c */
+  --elevated:     oklch(22.5% 0.016 278);  /* #1a1a26 */
+  --ink:          oklch(94.5% 0.012 280);  /* #ebecfa */
+  --ink-dim:      oklch(72%   0.028 278);  /* #a3a4c4 */
+  --accent:       oklch(63%   0.21  272);  /* #6b7cff */
+  --accent-solid: oklch(54%   0.215 272);  /* #4356ee  — CTA fills (white-on-solid ≥5:1 AA) */
+  --ok:           oklch(72%   0.17  152);  /* availability dot / result metrics */
+  --err:          oklch(68%   0.18   25);  /* form errors */
+  --line:         oklch(94.5% 0.012 280 / 8%);  /* hairline rings / rules */
+  --glow:         0 0 40px -12px oklch(63% 0.21 272 / 35%);
+
+  /* Legacy aliases — same vars, different names. Phase 9 deletes these. */
+  --bg-base:      var(--base);
+  --bg-surface:   var(--surface);
+  --bg-elevated:  var(--elevated);
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink-dim);
+  --accent-primary: var(--accent);
+  --border-token: var(--line);
+  --success: var(--ok);
+  --error:   var(--err);
+
+  /* Motion vocabulary (spec §4.3) */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-1: 0.4s;   /* micro */
+  --dur-2: 0.8s;   /* standard */
+  --dur-3: 1.2s;   /* hero */
 }
 
-.light {
-  --bg-base: #f8f8ff;
-  --bg-surface: #ffffff;
-  --bg-elevated: #efeff8;
-  --accent-primary: #4a5cf4; /* adjusted for light contrast */
-  --accent-violet: #7c4def;
-  --accent-warm: #db2777;
-  --text-primary: #0a0a1a;
-  --text-secondary: #5a5a78;
-  --text-muted: #9898b0;
-  --success: #16a34a;
-  --error: #dc2626;
-  --border-token: rgba(10, 10, 26, 0.08);
+/* dark-only: no .light block, no color-scheme toggle */
+html {
+  color-scheme: dark;
 }
 
-/* Theme-switching tokens reference the raw vars directly (inline). Utility
-   class names match the old v3 config: bg-base, text-secondary, border-token… */
+/* Tailwind 4 theme registration — utilities read these token names */
 @theme inline {
   --color-*: initial;
-  --color-base: var(--bg-base);
-  --color-surface: var(--bg-surface);
-  --color-elevated: var(--bg-elevated);
-  --color-primary: var(--text-primary);
-  --color-secondary: var(--text-secondary);
-  --color-muted: var(--text-muted);
-  --color-accent-primary: var(--accent-primary);
-  --color-accent-violet: var(--accent-violet);
-  --color-accent-warm: var(--accent-warm);
-  --color-success: var(--success);
-  --color-error: var(--error);
-  --color-token: var(--border-token);
-  --color-white: #ffffff;
-  --color-black: #000000;
-  --color-transparent: transparent;
-  --font-display: var(--font-jakarta), system-ui, sans-serif;
-  --font-body: var(--font-jakarta), system-ui, sans-serif;
+  --color-base:          var(--base);
+  --color-surface:       var(--surface);
+  --color-elevated:      var(--elevated);
+  --color-ink:           var(--ink);
+  --color-ink-dim:       var(--ink-dim);
+  --color-accent:        var(--accent);
+  --color-accent-solid:  var(--accent-solid);
+  --color-ok:            var(--ok);
+  --color-err:           var(--err);
+  --color-line:          var(--line);
+  /* Legacy aliases for components not yet renamed (removed in Phase 9) */
+  --color-primary:        var(--ink);
+  --color-secondary:      var(--ink-dim);
+  --color-muted:          oklch(40% 0.018 278);  /* kept for aria-hidden process ghost number */
+  --color-accent-primary: var(--accent);
+  --color-accent-solid:   var(--accent-solid);
+  --color-success:        var(--ok);
+  --color-error:          var(--err);
+  --color-token:          var(--line);
+
+  /* Font stacks — CSS vars set by next/font in layout.tsx */
+  --font-display: var(--font-syne), system-ui, sans-serif;
+  --font-body:    var(--font-dm-sans), system-ui, sans-serif;
+  --font-mono:    var(--font-jetbrains), ui-monospace, monospace;
 }
 
 @theme {
-  /* Solid CTA fill: one step deeper than accent-primary so white labels pass
-     WCAG AA (5.08:1 vs 4.2:1). Same value in both themes by design. */
-  --color-accent-solid: #4a5cf4;
+  --shadow-glow: var(--glow);
 
-  --shadow-glow: 0 0 20px rgba(91, 110, 245, 0.2);
-
-  --animate-marquee: marquee 30s linear infinite;
+  --animate-marquee:   marquee 30s linear infinite;
   --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
 
   @keyframes marquee {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(-50%);
-    }
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
   }
 
   @keyframes pulse-dot {
-    0%,
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 0.4;
-      transform: scale(0.85);
-    }
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(0.85); }
   }
 }
 
-/* CTA banner tint + OG image only (no v4 namespace for background-image). */
-@utility bg-gradient-hero {
-  background-image: linear-gradient(135deg, #5b6ef5 0%, #8b5cf6 50%, #ec4899 100%);
-}
-
-/* Static hero backdrop: the always-painted layer under the shader canvas.
-   Serves as loading state, reduced-motion state, and no-WebGL fallback.
-   color-mix + raw vars keep it correct in both themes. */
+/* Static hero backdrop: always-painted layer under the shader canvas.
+   Single-accent indigo radials replace the old tri-color gradient (D-3).
+   Serves as loading state, reduced-motion state, and no-WebGL fallback. */
 .hero-fallback {
   background:
     radial-gradient(
       ellipse 75% 65% at 74% 36%,
-      color-mix(in oklab, var(--accent-primary) 20%, transparent),
+      oklch(63% 0.21 272 / 22%),
       transparent 70%
     ),
     radial-gradient(
-      ellipse 55% 50% at 88% 70%,
-      color-mix(in oklab, var(--accent-violet) 13%, transparent),
+      ellipse 45% 45% at 88% 72%,
+      oklch(54% 0.215 272 / 14%),
       transparent 65%
     ),
-    var(--bg-base);
+    var(--base);
 }
 
-/* Semantic z-scale (DESIGN.md): header 40 < scroll-progress 45 <
-   mobile-nav overlay 50 < custom cursor 60. No other z values. */
+/* Semantic z-scale (plan.md §4.6 — closed, no new values):
+   grain 30 < header 40 < scroll-progress 45 < mobile-overlay/skip-link 50
+   < transition-curtain/preloader 55 < cursor 60 */
 
-/* Native cursor hidden only while CustomCursor is mounted (fine pointer,
+/* Custom cursor: hidden only while CustomCursor is mounted (fine pointer,
    motion allowed). Touch + reduced-motion users keep the real cursor. */
 .has-custom-cursor,
 .has-custom-cursor * {
@@ -127,69 +129,72 @@
 }
 
 @layer base {
+  /* Lenis + ScrollTrigger own smooth scroll; this is removed in Phase 3. */
   html {
     scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-base font-body text-primary antialiased;
+    @apply bg-base font-body text-ink antialiased;
+    background-color: var(--base);
   }
 
-  h1,
-  h2,
-  h3 {
+  h1, h2, h3 {
     text-wrap: balance;
+    font-family: var(--font-display);
   }
 
   p {
     text-wrap: pretty;
   }
 
+  /* Global focus style — loads above any animation component (spec §4.4).
+     Custom cursor hides the pointer; keyboard focus must remain prominent. */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Pill buttons get wider offset so the outline clears the full-radius edge */
+  .focus-pill:focus-visible {
+    outline-offset: 4px;
+  }
+
   ::selection {
-    @apply bg-accent-primary/30 text-primary;
+    background-color: oklch(63% 0.21 272 / 28%);
+    color: var(--ink);
   }
 }
 
 /* ---------------------------------------------------------------------------
-   Entrance choreography (hero, page template): pure CSS so the first paint
-   needs no hydration (LCP) and still works with JS disabled. `both` fill
-   keeps elements hidden through their delay; reduced-motion removes the
-   animation entirely, leaving content visible and static.
+   Entrance choreography — pure CSS so the first paint needs no hydration
+   (protects LCP) and still works with JS disabled. Reduced-motion collapses
+   everything to instant / static.
 --------------------------------------------------------------------------- */
 @keyframes char-rise {
-  from {
-    opacity: 0;
-    transform: translateY(0.5em);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(0.5em); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .anim-char {
   display: inline-block;
   will-change: transform;
-  animation: char-rise 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation: char-rise 0.5s var(--ease-out-expo) both;
 }
 
 .anim-rise {
-  animation: rise-in 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation: rise-in var(--dur-2) var(--ease-out-expo) both;
 }
 
+/* Page enter — kept until Phase 7 (template.tsx wipe replaces it) */
 .page-enter {
-  animation: rise-in 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation: rise-in 0.35s var(--ease-out-expo) both;
 }
 
 @media (prefers-reduced-motion: reduce) {

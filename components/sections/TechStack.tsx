@@ -1,5 +1,4 @@
-import { techStack } from "@/data/content";
-import { sections } from "@/data/content";
+import { techStack, sections } from "@/data/content";
 import { Reveal, RevealGroup, RevealItem } from "@/components/ui/Reveal";
 import { cn } from "@/lib/utils";
 
@@ -36,7 +35,7 @@ export function TechStack() {
                         loading="lazy"
                         className={cn(
                           "size-6 grayscale transition duration-200 group-hover:grayscale-0",
-                          item.iconInvertDark && "invert light:invert-0",
+                          item.iconInvertDark && "invert",
                         )}
                       />
                     )}
