@@ -6,7 +6,8 @@ import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { projects, sections } from "@/data/content";
 import { publicImageExists } from "@/lib/images";
 import { Tag } from "@/components/ui/Tag";
-import { CountUp } from "@/components/ui/CountUp";
+import { Counter } from "@/components/motion/Counter";
+import { RevealText } from "@/components/motion/RevealText";
 import { CaseStudySidebar } from "@/components/work/CaseStudySidebar";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -52,7 +53,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
       <div className="mx-auto max-w-7xl px-6">
         <Link
           href="/work"
-          className="group inline-flex items-center gap-1.5 rounded-full text-sm font-medium text-secondary transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base"
+          className="group inline-flex items-center gap-1.5 rounded-full text-sm font-medium text-ink-dim transition-colors duration-200 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
         >
           <ArrowLeft
             aria-hidden
@@ -72,25 +73,28 @@ export default async function CaseStudyPage({ params }: PageProps) {
             <header>
               <div className="flex items-center gap-3">
                 <Tag>{project.industry}</Tag>
-                <span className="text-xs text-secondary">{project.year}</span>
+                <span className="text-xs text-ink-dim">{project.year}</span>
               </div>
-              <h1 className="mt-5 font-display text-4xl font-bold tracking-tight text-primary md:text-5xl">
+              <RevealText
+                as="h1"
+                className="mt-5 font-display text-4xl font-bold tracking-tight text-ink md:text-5xl"
+              >
                 {project.title}
-              </h1>
-              <p className="mt-5 text-lg leading-relaxed text-secondary sm:text-xl">
+              </RevealText>
+              <p className="mt-5 text-lg leading-relaxed text-ink-dim sm:text-xl">
                 {project.description}
               </p>
 
-              <dl className="mt-9 grid grid-cols-2 gap-x-6 gap-y-5 border-y border-token py-6 sm:grid-cols-4">
+              <dl className="mt-9 grid grid-cols-2 gap-x-6 gap-y-5 border-y border-line py-6 sm:grid-cols-4">
                 {meta.map((item) => (
                   <div key={item.label}>
-                    <dt className="text-xs font-medium text-secondary">{item.label}</dt>
-                    <dd className="mt-1.5 text-sm font-medium text-primary">{item.value}</dd>
+                    <dt className="text-xs font-medium text-ink-dim">{item.label}</dt>
+                    <dd className="mt-1.5 text-sm font-medium text-ink">{item.value}</dd>
                   </div>
                 ))}
               </dl>
 
-              <div className="relative mt-10 aspect-video w-full overflow-hidden rounded-2xl border border-token">
+              <div className="relative mt-10 aspect-video w-full overflow-hidden rounded-2xl border border-line">
                 {hasCover ? (
                   <Image
                     src={project.coverImage}
@@ -107,7 +111,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
                     className="size-full bg-elevated"
                     style={{
                       backgroundImage:
-                        "radial-gradient(ellipse 80% 90% at 70% 20%, color-mix(in oklab, var(--accent-primary) 14%, transparent), transparent 65%)",
+                        "radial-gradient(ellipse 80% 90% at 70% 20%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 65%)",
                     }}
                   />
                 )}
@@ -115,36 +119,36 @@ export default async function CaseStudyPage({ params }: PageProps) {
             </header>
 
             <section id="problem" className="scroll-mt-28">
-              <h2 className="mt-16 font-display text-2xl font-semibold text-primary">
+              <h2 className="mt-16 font-display text-2xl font-semibold text-ink">
                 {labels.problem}
               </h2>
               {caseStudy.problem.map((paragraph) => (
-                <p key={paragraph} className="mt-4 leading-relaxed text-secondary">
+                <p key={paragraph} className="mt-4 leading-relaxed text-ink-dim">
                   {paragraph}
                 </p>
               ))}
             </section>
 
             <section id="approach" className="scroll-mt-28">
-              <h2 className="mt-14 font-display text-2xl font-semibold text-primary">
+              <h2 className="mt-14 font-display text-2xl font-semibold text-ink">
                 {labels.approach}
               </h2>
               {caseStudy.approach.map((paragraph) => (
-                <p key={paragraph} className="mt-4 leading-relaxed text-secondary">
+                <p key={paragraph} className="mt-4 leading-relaxed text-ink-dim">
                   {paragraph}
                 </p>
               ))}
             </section>
 
             <section id="built" className="scroll-mt-28">
-              <h2 className="mt-14 font-display text-2xl font-semibold text-primary">
+              <h2 className="mt-14 font-display text-2xl font-semibold text-ink">
                 {labels.built}
               </h2>
               <ul className="mt-6 space-y-4">
                 {caseStudy.built.map((item) => (
                   <li key={item} className="flex items-start gap-3">
-                    <Check aria-hidden className="mt-1 size-4 shrink-0 text-accent-primary" />
-                    <span className="leading-relaxed text-secondary">{item}</span>
+                    <Check aria-hidden className="mt-1 size-4 shrink-0 text-accent" />
+                    <span className="leading-relaxed text-ink-dim">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -152,36 +156,36 @@ export default async function CaseStudyPage({ params }: PageProps) {
 
             {caseStudy.results.length > 0 && (
               <section id="results" className="scroll-mt-28">
-                <h2 className="mt-14 font-display text-2xl font-semibold text-primary">
+                <h2 className="mt-14 font-display text-2xl font-semibold text-ink">
                   {labels.results}
                 </h2>
                 <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4">
                   {caseStudy.results.map((stat) => (
                     <div key={stat.label}>
-                      <dd className="font-display text-3xl font-bold text-accent-primary sm:text-4xl">
-                        <CountUp
+                      <dd className="font-display text-3xl font-bold text-accent sm:text-4xl">
+                        <Counter
                           value={stat.value}
                           prefix={stat.prefix}
                           suffix={stat.suffix}
                           decimals={stat.decimals}
                         />
                       </dd>
-                      <dt className="mt-2 text-xs leading-snug text-secondary">{stat.label}</dt>
+                      <dt className="mt-2 text-xs leading-snug text-ink-dim">{stat.label}</dt>
                     </div>
                   ))}
                 </dl>
               </section>
             )}
 
-            <p className="mt-12 text-lg font-medium leading-relaxed text-primary">
+            <p className="mt-12 text-lg font-medium leading-relaxed text-ink">
               {caseStudy.narrative}
             </p>
 
-            <nav aria-label="Next project" className="mt-16 border-t border-token pt-8">
-              <p className="text-xs font-medium text-secondary">{sections.caseStudy.nextProject}</p>
+            <nav aria-label="Next project" className="mt-16 border-t border-line pt-8">
+              <p className="text-xs font-medium text-ink-dim">{sections.caseStudy.nextProject}</p>
               <Link
                 href={`/work/${next.slug}`}
-                className="group mt-2 inline-flex items-center gap-2 rounded font-display text-xl font-semibold text-primary transition-colors duration-200 hover:text-accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base"
+                className="group mt-2 inline-flex items-center gap-2 rounded font-display text-xl font-semibold text-ink transition-colors duration-200 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
               >
                 {next.title}
                 <ArrowRight
