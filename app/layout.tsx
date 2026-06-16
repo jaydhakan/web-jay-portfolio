@@ -79,6 +79,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      // The pre-paint opening-gate script sets html[data-preloader] before React
+      // hydrates; suppress the (expected, one-level) attribute mismatch warning —
+      // the canonical pattern for pre-hydration <html> mutations (cf. next-themes).
+      suppressHydrationWarning
       className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
     >
       <body className="font-body">
