@@ -6,6 +6,7 @@ import Image from "next/image";
 import { ArrowUpRight, TrendingUp } from "lucide-react";
 import type { Project } from "@/data/content";
 import { gsap, useGSAP } from "@/lib/gsap";
+import { blurProps } from "@/lib/blur";
 import { Tag } from "@/components/ui/Tag";
 
 const PLACEHOLDER_BG =
@@ -70,7 +71,8 @@ export function FeaturedStack({
                       alt=""
                       fill
                       sizes="(min-width: 1024px) 40vw, 100vw"
-                      className="object-cover"
+                      className="ken-burns object-cover"
+                      {...blurProps(project.coverImage)}
                     />
                   ) : (
                     <div aria-hidden className="size-full" style={{ backgroundImage: PLACEHOLDER_BG }} />

@@ -293,6 +293,26 @@ html {
   animation: fade-in 0.25s var(--ease-out-expo) both;
 }
 
+/* Ken-burns (P11): a slow scroll-driven zoom on covers, native CSS scroll-driven
+   animation (compositor-only, zero main-thread JS). Progressive enhancement +
+   motion-safe; unsupported / reduced-motion leave the cover static. The cover
+   sits in an overflow-hidden frame so the scale never spills. */
+@keyframes ken-burns {
+  from { transform: scale(1.001); }
+  to   { transform: scale(1.08); }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .ken-burns {
+      animation: ken-burns linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+      transform-origin: center;
+      will-change: transform;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

@@ -7,6 +7,7 @@ import { ArrowUpRight } from "lucide-react";
 import { gsap, useGSAP, ScrollTrigger, useExtraPlugins, getFlip, DUR } from "@/lib/gsap";
 import type { Flip } from "gsap/Flip";
 import type { Project, ProjectCategory } from "@/data/content";
+import { blurProps } from "@/lib/blur";
 import { Tag } from "@/components/ui/Tag";
 import { cn } from "@/lib/utils";
 
@@ -177,7 +178,7 @@ export function WorkList({ projects, covers, filters }: WorkListProps) {
                 {/* Mobile inline thumb (desktop uses the cursor-follow preview). */}
                 <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-elevated ring-1 ring-line sm:hidden">
                   {hasCover ? (
-                    <Image src={project.coverImage} alt="" fill sizes="100vw" className="object-cover" />
+                    <Image src={project.coverImage} alt="" fill sizes="100vw" className="object-cover" {...blurProps(project.coverImage)} />
                   ) : (
                     <div aria-hidden className="size-full" style={{ backgroundImage: PLACEHOLDER_BG }} />
                   )}
@@ -219,7 +220,7 @@ export function WorkList({ projects, covers, filters }: WorkListProps) {
           <div className="relative aspect-video w-[min(26vw,340px)] overflow-hidden rounded-xl bg-elevated shadow-glow ring-1 ring-line">
             {hovered &&
               (hoveredHasCover ? (
-                <Image src={hovered.coverImage} alt="" fill sizes="340px" className="object-cover" />
+                <Image src={hovered.coverImage} alt="" fill sizes="340px" className="object-cover" {...blurProps(hovered.coverImage)} />
               ) : (
                 <div className="flex size-full items-end p-4" style={{ backgroundImage: PLACEHOLDER_BG }}>
                   <span className="font-display text-sm font-semibold text-ink">{hovered.title}</span>

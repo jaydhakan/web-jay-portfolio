@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { howIWork, profile, sections, seo, siteConfig, timeline } from "@/data/content";
 import { publicImageExists } from "@/lib/images";
+import { blurProps } from "@/lib/blur";
 import { GitHubIcon, LinkedInIcon, UpworkIcon } from "@/components/ui/BrandIcon";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Tag } from "@/components/ui/Tag";
@@ -67,6 +68,7 @@ export default function AboutPage() {
                 fill
                 sizes="112px"
                 className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                {...blurProps(profile.photo)}
               />
             ) : (
               // TODO(JAY): drop a 400x400+ photo at public/images/profile/jay.jpg

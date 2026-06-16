@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { projects, sections } from "@/data/content";
 import { publicImageExists } from "@/lib/images";
+import { blurProps } from "@/lib/blur";
 import { Tag } from "@/components/ui/Tag";
 import { Counter } from "@/components/motion/Counter";
 import { RevealText } from "@/components/motion/RevealText";
@@ -113,7 +114,8 @@ export default async function CaseStudyPage({ params }: PageProps) {
                     fill
                     priority
                     sizes="(min-width: 1024px) 768px, 100vw"
-                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                    className="ken-burns object-cover"
+                    {...blurProps(project.coverImage)}
                   />
                 ) : (
                   // TODO(JAY): drop the real screenshot at public{project.coverImage}
@@ -210,6 +212,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
                       fill
                       sizes="176px"
                       className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                      {...blurProps(next.coverImage)}
                     />
                   ) : (
                     <div
