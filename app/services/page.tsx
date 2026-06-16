@@ -37,15 +37,15 @@ export default function ServicesPage() {
   return (
     <main id="main-content" tabIndex={-1} className="pt-32">
       <div className="mx-auto max-w-7xl px-6">
-        <header className="max-w-2xl">
+        <header className="max-w-3xl">
           <SectionLabel>{sections.servicesPage.eyebrow}</SectionLabel>
           <RevealText
             as="h1"
-            className="mt-4 font-display text-4xl font-bold tracking-tight text-ink md:text-6xl"
+            className="mt-4 font-display text-5xl font-bold tracking-[-0.03em] text-ink sm:text-6xl lg:text-7xl"
           >
             {sections.servicesPage.heading}
           </RevealText>
-          <FadeUp delay={0.1} className="mt-5 text-base leading-relaxed text-ink-dim sm:text-lg">
+          <FadeUp delay={0.1} className="mt-5 max-w-xl text-base leading-relaxed text-ink-dim sm:text-lg">
             {sections.servicesPage.subheading}
           </FadeUp>
         </header>
@@ -119,29 +119,51 @@ export default function ServicesPage() {
         <section className="py-24">
           <RevealText
             as="h2"
-            className="font-display text-4xl font-bold tracking-tight text-ink"
+            className="font-display text-4xl font-bold tracking-tight text-ink md:text-5xl"
           >
             {sections.servicesPage.coverageHeading}
           </RevealText>
-          <FadeUp as="ul" stagger={0.08} className="mt-10">
-            {services.map((service) => {
+
+          {/* Bento 2.0 (P7): a deliberately varied tile grid — a wide feature
+              tile + a wide footer tile + standard tiles — with neon-accent
+              tactile hover (lift + accent ring + glowing icon chip). */}
+          <ClipReveal
+            as="ul"
+            stagger={0.09}
+            className="mt-12 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {services.map((service, i) => {
               const Icon = iconMap[service.icon];
+              // First tile spans two columns (feature); last spans the full row.
+              const span = i === 0 ? "sm:col-span-2" : i === services.length - 1 ? "sm:col-span-2 lg:col-span-3" : "";
               return (
                 <li
                   key={service.title}
-                  className="grid gap-4 border-t border-line py-8 md:grid-cols-[300px_1fr] md:gap-10"
+                  className={cn(
+                    "group relative flex flex-col overflow-hidden rounded-[1.25rem] bg-surface p-7 ring-1 ring-white/[0.06] transition duration-300 ease-out",
+                    "hover:-translate-y-1 hover:bg-elevated hover:ring-accent/30 active:scale-[0.99]",
+                    span,
+                  )}
                 >
-                  <div className="flex items-center gap-3.5">
-                    {Icon && (
-                      <Icon aria-hidden strokeWidth={1.5} className="size-5 shrink-0 text-accent" />
-                    )}
-                    <h3 className="text-lg font-semibold text-ink">{service.title}</h3>
-                  </div>
-                  <p className="max-w-2xl leading-relaxed text-ink-dim">{service.description}</p>
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.1] to-transparent"
+                  />
+                  {Icon && (
+                    <span className="relative grid size-11 place-items-center rounded-xl bg-accent/10 ring-1 ring-accent/15 transition-colors duration-300 group-hover:bg-accent/20 group-hover:ring-accent/30">
+                      <span
+                        aria-hidden
+                        className="absolute inset-0 rounded-xl bg-accent opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-30"
+                      />
+                      <Icon aria-hidden strokeWidth={1.5} className="relative size-5 text-accent" />
+                    </span>
+                  )}
+                  <h3 className="mt-5 font-display text-lg font-semibold text-ink">{service.title}</h3>
+                  <p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-ink-dim">{service.description}</p>
                 </li>
               );
             })}
-          </FadeUp>
+          </ClipReveal>
         </section>
       </div>
 
