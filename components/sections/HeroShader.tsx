@@ -3,6 +3,10 @@
 import { useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { silenceThreeClockDeprecation } from "@/lib/three-console";
+
+// Install before the Canvas (and thus R3F's internal THREE.Clock) mounts.
+silenceThreeClockDeprecation();
 
 /**
  * "The Field" — the signature hero shader (D-6). An iridescent indigo -> violet
