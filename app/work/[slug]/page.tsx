@@ -32,6 +32,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
   const next = projects[(index + 1) % projects.length];
   const { caseStudy } = project;
   const hasCover = publicImageExists(project.coverImage);
+  const nextHasCover = publicImageExists(next.coverImage);
 
   const labels = sections.caseStudy.sections;
   const sidebarItems = [
@@ -77,11 +78,11 @@ export default async function CaseStudyPage({ params }: PageProps) {
               </div>
               <RevealText
                 as="h1"
-                className="mt-5 font-display text-4xl font-bold tracking-tight text-ink md:text-5xl"
+                className="mt-5 font-display text-4xl font-bold tracking-[-0.03em] text-ink sm:text-5xl lg:text-6xl"
               >
                 {project.title}
               </RevealText>
-              <p className="mt-5 text-lg leading-relaxed text-ink-dim sm:text-xl">
+              <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-dim sm:text-xl">
                 {project.description}
               </p>
 
@@ -94,7 +95,17 @@ export default async function CaseStudyPage({ params }: PageProps) {
                 ))}
               </dl>
 
-              <div className="relative mt-10 aspect-video w-full overflow-hidden rounded-2xl border border-line">
+              {/* Cinematic cover hero — duotone overlay + subtle scale on hover
+                  (ken-burns proper lands in P11); grain is global. */}
+              <div className="group relative mt-10 aspect-video w-full overflow-hidden rounded-2xl border border-line">
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-tr from-base/50 via-transparent to-accent/10"
+                />
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 z-10 opacity-60 [box-shadow:inset_0_0_80px_-20px_var(--color-base)]"
+                />
                 {hasCover ? (
                   <Image
                     src={project.coverImage}
@@ -102,7 +113,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
                     fill
                     priority
                     sizes="(min-width: 1024px) 768px, 100vw"
-                    className="object-cover"
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                   />
                 ) : (
                   // TODO(JAY): drop the real screenshot at public{project.coverImage}
@@ -159,10 +170,10 @@ export default async function CaseStudyPage({ params }: PageProps) {
                 <h2 className="mt-14 font-display text-2xl font-semibold text-ink">
                   {labels.results}
                 </h2>
-                <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4">
+                <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4">
                   {caseStudy.results.map((stat) => (
                     <div key={stat.label}>
-                      <dd className="font-display text-3xl font-bold text-accent sm:text-4xl">
+                      <dd className="font-mono text-[clamp(2.5rem,6vw,3.75rem)] font-semibold leading-none tracking-tight text-accent">
                         <Counter
                           value={stat.value}
                           prefix={stat.prefix}
@@ -170,7 +181,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
                           decimals={stat.decimals}
                         />
                       </dd>
-                      <dt className="mt-2 text-xs leading-snug text-ink-dim">{stat.label}</dt>
+                      <dt className="mt-3 text-sm leading-snug text-ink-dim">{stat.label}</dt>
                     </div>
                   ))}
                 </dl>
@@ -181,17 +192,51 @@ export default async function CaseStudyPage({ params }: PageProps) {
               {caseStudy.narrative}
             </p>
 
-            <nav aria-label="Next project" className="mt-16 border-t border-line pt-8">
-              <p className="text-xs font-medium text-ink-dim">{sections.caseStudy.nextProject}</p>
+            {/* Bold next-project card — chains case studies cinematically. */}
+            <nav aria-label="Next project" className="mt-20 border-t border-line pt-10">
               <Link
                 href={`/work/${next.slug}`}
-                className="group mt-2 inline-flex items-center gap-2 rounded font-display text-xl font-semibold text-ink transition-colors duration-200 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
+                className="group flex items-center gap-6 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-4 focus-visible:ring-offset-base"
               >
-                {next.title}
-                <ArrowRight
-                  aria-hidden
-                  className="size-5 transition-transform duration-200 ease-out group-hover:translate-x-0.5"
-                />
+                <div className="relative aspect-[16/10] w-32 shrink-0 overflow-hidden rounded-xl ring-1 ring-line sm:w-44">
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-tr from-base/40 to-transparent"
+                  />
+                  {nextHasCover ? (
+                    <Image
+                      src={next.coverImage}
+                      alt=""
+                      fill
+                      sizes="176px"
+                      className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    />
+                  ) : (
+                    <div
+                      aria-hidden
+                      className="size-full bg-elevated"
+                      style={{
+                        backgroundImage:
+                          "radial-gradient(ellipse 80% 90% at 70% 20%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 65%)",
+                      }}
+                    />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink-dim">
+                    {sections.caseStudy.nextProject}
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl font-bold tracking-tight text-ink transition-colors duration-200 group-hover:text-accent sm:text-3xl">
+                    {next.title}
+                  </h2>
+                  <span className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-ink-dim">
+                    View case study
+                    <ArrowRight
+                      aria-hidden
+                      className="size-4 transition-transform duration-200 ease-out group-hover:translate-x-1"
+                    />
+                  </span>
+                </div>
               </Link>
             </nav>
           </article>
