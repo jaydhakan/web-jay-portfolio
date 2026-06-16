@@ -36,7 +36,15 @@ const baseClasses =
   "active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50";
 
 const variantClasses = {
-  primary: "bg-accent-solid text-white hover:shadow-glow hover:brightness-110",
+  /* Controlled-neon glow: a pre-rendered blurred accent layer behind the pill,
+     animated by opacity + scale only (compositor-friendly, never a box-shadow
+     tween). isolate keeps the -z-10 layer contained to the button. */
+  primary:
+    "bg-accent-solid text-white isolate hover:brightness-110 " +
+    "before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-full " +
+    "before:bg-accent before:opacity-40 before:blur-lg before:transition before:duration-300 before:ease-out " +
+    "hover:before:opacity-90 hover:before:scale-110 " +
+    "focus-visible:before:opacity-90 focus-visible:before:scale-110 motion-reduce:before:transition-none",
   /* Fill-wipe: scaleX from origin-left, transform-only (never a color fade). */
   ghost:
     "border border-line text-ink overflow-hidden isolate " +

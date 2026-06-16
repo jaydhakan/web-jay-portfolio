@@ -2,6 +2,7 @@ import { hero, siteConfig } from "@/data/content";
 import { Button } from "@/components/ui/Button";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { HeroBackground } from "@/components/sections/HeroBackground";
+import { HeroHeadlineKinetic } from "@/components/sections/HeroHeadlineKinetic";
 
 /**
  * Left-aligned full-viewport hero (DESIGN.md: never centered). Exactly four
@@ -33,7 +34,7 @@ export function Hero() {
               preloader, so the H1's opacity:1 paint still registers first. No-JS /
               reduced-motion / mobile / repeat visit leave the lines at rest =
               fully visible. */}
-          <h1 className="mt-6 font-display text-5xl font-bold leading-[1.08] tracking-tight text-ink sm:text-6xl lg:text-7xl">
+          <h1 className="mt-6 font-display text-[clamp(2.75rem,8vw,4.9rem)] font-bold leading-[1.04] tracking-[-0.03em] text-ink">
             <span className="sr-only">
               {hero.h1Line1} {hero.h1Line2}
             </span>
@@ -44,6 +45,7 @@ export function Hero() {
               <span data-hero-line className="block">{hero.h1Line2}</span>
             </span>
           </h1>
+          <HeroHeadlineKinetic />
 
           <p
             data-hero-rise

@@ -48,9 +48,14 @@ never alternating section backgrounds. (`text-muted` is retired as a readable to
 - **Syne** display (variable 400–800), **DM Sans** body, **JetBrains Mono**
   eyebrows/meta/numerals — all `next/font/google`, `display: "swap"`, mapped to
   `--font-display` / `--font-body` / `--font-mono`.
-- Hero H1 `clamp` ceiling `text-7xl` (4.5rem); tracking floor ≥ −0.04em;
-  `text-wrap: balance` on h1–h3; body ≤ 65ch. Syne never below ~24px and never
-  for numerals (counters use JetBrains Mono `tabular-nums`).
+- Hero H1 `clamp(2.75rem, 8vw, 4.9rem)`, tracking −0.03em (≥ −0.04em floor). Desktop
+  fine-pointer + motion-safe adds a **kinetic Syne `wght` wave** (`HeroHeadlineKinetic`):
+  a one-shot load weight-settle + a cursor-reactive per-letter weight, with each letter
+  pinned to its rest width so the wave thickens glyphs in place and never reflows the
+  masked line. Enhancement-only — the H1 ships server-rendered at rest weight (the LCP
+  element); no-JS / reduced motion / mobile keep the static headline. `text-wrap: balance`
+  on h1–h3; body ≤ 65ch. Syne never below ~24px and never for numerals (JetBrains Mono
+  `tabular-nums`).
 
 ## Motion
 
@@ -78,8 +83,11 @@ never alternating section backgrounds. (`text-muted` is retired as a readable to
 
 - **Pill button** (`Button`): `rounded-full`, label + 36px arrow circle flush
   right (button-in-button) with a diagonal dual-swap on hover; ghost variant adds
-  a transform-only fill-wipe; `active:scale-[0.98]`. Renders `<button>` when no
-  `href`. `MagneticButton` (GSAP `quickTo`) composes around it (desktop only).
+  a transform-only fill-wipe; `active:scale-[0.98]`. **Primary** carries a controlled-neon
+  glow — a pre-rendered blurred accent layer behind the pill, animated by opacity + scale
+  only (never a box-shadow tween), faint at rest and blooming on hover / `:focus-visible`
+  (the crisp accent outline stays the a11y indicator). Renders `<button>` when no `href`.
+  `MagneticButton` (GSAP `quickTo`) composes around it (desktop only).
 - **Double-bezel card** (`Card`): 24px outer shell (`bg-white/[0.02]`, `p-1.5`,
   hairline ring) → 18px inner core + inset top highlight. Glow is a pre-rendered
   opacity layer, never a `box-shadow` tween. No backdrop-blur on scrolling content.
