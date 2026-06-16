@@ -165,6 +165,46 @@ export const stats: Stat[] = [
   { value: 50, suffix: "%", label: "Cut from third-party SaaS costs" },
 ];
 
+// ─────────────────────────────────────────────────────── Impact set-piece ──
+// Oversized home impact moment (P5). Real numbers, each bound to the system it
+// came from (resume / case studies); the featured transformation leads. Kept
+// distinct from the bento's live 15M+/99.9% tile so the home never triple-counts.
+
+export const impact = {
+  heading: "Numbers That Held Up in Production",
+  intro:
+    "Not vanity metrics. Each one came out of a real system I designed, shipped, and kept alive under load.",
+  transform: {
+    from: "18h",
+    to: 1.2,
+    suffix: "h",
+    decimals: 1,
+    label: "Nightly ETL pipeline, rebuilt",
+    context:
+      "Re-architected end to end, so the job that ate the whole night now finishes before the team's first coffee.",
+  },
+  stats: [
+    {
+      value: 70,
+      suffix: "M+",
+      label: "records harvested",
+      context: "by a single Scrapy pipeline, at under $3 per million rows",
+    },
+    {
+      value: 175,
+      suffix: "+",
+      label: "QPS benchmarked",
+      context: "on one async FastAPI node, under fault injection",
+    },
+    {
+      value: 50,
+      suffix: "%",
+      label: "SaaS costs cut",
+      context: "by replacing third-party APIs with services I built",
+    },
+  ],
+};
+
 // ──────────────────────────────────────────────────────────────── Services ──
 
 export const services: Service[] = [
