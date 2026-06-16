@@ -70,6 +70,32 @@ hover-preview row list + Flip filtering + staggered row reveal. /work/[slug]: st
 
 ---
 
+  ## 🗺️ Execution — strictly phase by phase
+
+**One phase at a time. Never everything at once.** Each phase = one focused, shippable move; I build it,
+verify the gate (desktop 100 · mobile Perf ≥ 95 · A11y 100 · CLS 0), commit it, **you review**, *then* the
+next phase starts. (Same cadence as the V2 build + the repo's "one whole section per move" rule.) Any phase
+can be reordered, paused, or cut — the goal leads, not the list.
+
+| # | Phase | Scope | Gated on |
+|---|---|---|---|
+| **P1** | Palette v2 foundation | tokens (violet/cyan/mint) + status-green→mint + shader hex twins + contrast re-pass | — |
+| **P2** | Field-as-star (home) | iridescent duotone + fuller bleed + stronger cursor displacement | P1 |
+| **P3** | Hero type + neon | oversized kinetic H1 (load settle) + controlled-neon CTA glow + charged focus states | P1 |
+| **P4** | Home: Bento capabilities | Bento 2.0 grid (agents · pipelines · APIs · live metric tile) | P1 |
+| **P5** | Home: impact set-piece | oversized scroll-counted numbers (15M+/day · 99.9% · 18h→1.2h) | P1 |
+| **P6** | /work elevation | ambient index numbers · kinetic header · logo scramble | P1 |
+| **P7** | /services | rebuild as Bento 2.0 tiles + neon-accent micro-interactions | P1 |
+| **P8** | /contact | statement page (`KineticHeadline`) + charged form + submit animation | P1 |
+| **P9** | /about | kinetic intro · skills bento · richer timeline | P1 |
+| **P10** | /work/[slug] | case-study cover hero · impact set-piece · scroll-to-next-project morph | P1 |
+| **P11** 🔒 | Real-imagery cinematic | cover ken-burns · LQIP blur-up · galleries · photo treatment | real covers/photo |
+| **P12** | Polish pass | page-transition timing · orb/grain balance · micro-language consistency | P2–P10 |
+
+> Recommended start: **P1 → P2** (palette is the foundation; Field-as-star is the highest-impact single move).
+
+---
+
 ## 🔥 BIG SWINGS — the moves that make it unmistakably "wow"
 
 > These are the priority for the goal. Each is grounded in 2026 award-direction research (dark-first +
