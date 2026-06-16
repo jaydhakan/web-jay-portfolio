@@ -11,9 +11,9 @@ import { cn } from "@/lib/utils";
 
 const fieldClasses =
   "w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink " +
-  "placeholder:text-ink-dim transition-colors duration-200 " +
+  "placeholder:text-ink-dim transition-[color,border-color,box-shadow] duration-200 " +
   "hover:border-accent/30 focus:border-accent focus:outline-none " +
-  "focus:ring-2 focus:ring-accent/40";
+  "focus:ring-2 focus:ring-accent/50 focus:shadow-glow";
 
 const labelClasses = "block text-sm font-medium text-ink";
 const errorClasses = "mt-2 text-sm text-err";
@@ -64,14 +64,21 @@ export function ContactForm() {
     <div className="relative">
       {sent ? (
           <div
-            className="anim-rise flex min-h-96 flex-col items-center justify-center rounded-2xl border border-line bg-surface p-10 text-center"
+            className="anim-rise relative flex min-h-96 flex-col items-center justify-center overflow-hidden rounded-2xl border border-ok/25 bg-surface p-10 text-center"
             role="status"
           >
-            <CircleCheck aria-hidden className="size-12 text-ok" />
-            <h2 className="mt-5 font-display text-2xl font-semibold text-ink">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,oklch(72%_0.17_152/0.12),transparent_70%)]"
+            />
+            <CircleCheck
+              aria-hidden
+              className="relative size-14 text-ok motion-safe:animate-[success-pop_0.5s_var(--ease-out-expo)_both]"
+            />
+            <h2 className="relative mt-5 font-display text-2xl font-semibold text-ink">
               Message sent!
             </h2>
-            <p className="mt-2 max-w-sm text-sm leading-relaxed text-ink-dim">
+            <p className="relative mt-2 max-w-sm text-sm leading-relaxed text-ink-dim">
               {contact.responseTime}. If it&apos;s urgent, reach me at{" "}
               <a
                 href={`mailto:${siteConfig.email}`}

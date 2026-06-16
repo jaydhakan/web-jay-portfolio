@@ -3,9 +3,9 @@ import { Clock, Mail, MapPin } from "lucide-react";
 import { contact, sections, seo, siteConfig } from "@/data/content";
 import { GitHubIcon, LinkedInIcon, UpworkIcon } from "@/components/ui/BrandIcon";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { RevealText } from "@/components/motion/RevealText";
 import { FadeUp } from "@/components/motion/FadeUp";
 import { Spotlight } from "@/components/motion/Spotlight";
+import { KineticHeadline } from "@/components/ui/KineticHeadline";
 import { ContactForm } from "@/components/contact/ContactForm";
 
 export const metadata: Metadata = {
@@ -32,13 +32,16 @@ export default function ContactPage() {
               section's one motion moment). */}
           <Spotlight className="-m-6 rounded-3xl p-6">
             <SectionLabel>{sections.contactPage.eyebrow}</SectionLabel>
-            <RevealText
-              as="h1"
-              className="mt-4 font-display text-4xl font-bold tracking-tight text-ink md:text-5xl"
-            >
-              {sections.contactPage.heading}
-            </RevealText>
-            <FadeUp delay={0.1} className="mt-5 max-w-lg text-base leading-relaxed text-ink-dim sm:text-lg">
+            {/* Statement headline — kinetic Syne weight follows the cursor (desktop);
+                sr-only text carries the accessible name since the visual is aria-hidden. */}
+            <h1 className="mt-4">
+              <span className="sr-only">{sections.contactPage.heading}</span>
+              <KineticHeadline
+                text={sections.contactPage.heading}
+                className="block font-display text-5xl font-bold leading-[1.02] tracking-[-0.03em] text-ink sm:text-6xl lg:text-7xl"
+              />
+            </h1>
+            <FadeUp delay={0.1} className="mt-6 max-w-lg text-base leading-relaxed text-ink-dim sm:text-lg">
               {sections.contactPage.subheading}
             </FadeUp>
 
@@ -89,6 +92,24 @@ export default function ContactPage() {
 
           <ContactForm />
         </div>
+
+        {/* "What happens next" — a genuine ordered flow, so the numbers are earned. */}
+        <section className="mt-24 border-t border-line pt-14">
+          <FadeUp as="h2" className="font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+            What happens next
+          </FadeUp>
+          <FadeUp as="ol" stagger={0.1} className="mt-10 grid gap-8 sm:grid-cols-3">
+            {contact.whatNext.map((step, i) => (
+              <li key={step.title}>
+                <span aria-hidden className="font-mono text-sm tabular-nums text-accent">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h3 className="mt-3 font-display text-lg font-semibold text-ink">{step.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-dim">{step.desc}</p>
+              </li>
+            ))}
+          </FadeUp>
+        </section>
       </div>
     </main>
   );

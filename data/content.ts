@@ -846,6 +846,12 @@ export const contact = {
   location: "Based in India · Available worldwide",
   upworkBadge: "Top Rated on Upwork", // TODO(JAY): not in resume — confirm before showing
   availability: "Currently accepting new projects", // shown with pulsing dot
+  // Genuine ordered flow (numbers are earned here, not scaffolding).
+  whatNext: [
+    { title: "You send the brief", desc: "What you're building, the problem it solves, and any timeline." },
+    { title: "I reply within 24 hours", desc: "Usually same day, with first questions or a quick call to align." },
+    { title: "We scope it and I ship", desc: "Clear plan, clear price, then I start building, not a month of meetings." },
+  ],
   budgetOptions: [
     "Under $1k",
     "$1k-$5k",
