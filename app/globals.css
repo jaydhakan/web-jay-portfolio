@@ -237,6 +237,16 @@ html {
   animation: rise-in var(--dur-2) var(--ease-out-expo) both;
 }
 
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Mobile-menu overlay fade (Header) — replaces the old Motion AnimatePresence. */
+.anim-fade {
+  animation: fade-in 0.25s var(--ease-out-expo) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -248,7 +258,8 @@ html {
   .animate-orb-a,
   .animate-orb-b,
   .anim-char,
-  .anim-rise {
+  .anim-rise,
+  .anim-fade {
     animation: none;
   }
 }

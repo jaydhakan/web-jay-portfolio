@@ -13,15 +13,6 @@ export const metadata: Metadata = {
   description: seo.contact.description,
 };
 
-type PageProps = { searchParams: Promise<{ plan?: string }> };
-
-/** /contact?plan=growth pre-selects the matching budget range. */
-const planToBudget: Record<string, string> = {
-  starter: "$1k-$5k",
-  growth: "$5k-$15k",
-  custom: "Let's discuss",
-};
-
 const socialLinks = [
   { label: "GitHub", href: siteConfig.githubUrl, Icon: GitHubIcon },
   { label: "LinkedIn", href: siteConfig.linkedinUrl, Icon: LinkedInIcon },
@@ -30,10 +21,9 @@ const socialLinks = [
     : []),
 ];
 
-export default async function ContactPage({ searchParams }: PageProps) {
-  const { plan } = await searchParams;
-  const defaultBudget = plan ? planToBudget[plan] : undefined;
-
+/* Static page — the ?plan= pre-select is read client-side in ContactForm so this
+   route prerenders (no per-request searchParams dynamic render). */
+export default function ContactPage() {
   return (
     <main id="main-content" tabIndex={-1} className="pb-24 pt-32">
       <div className="mx-auto max-w-7xl px-6">
@@ -97,7 +87,7 @@ export default async function ContactPage({ searchParams }: PageProps) {
             </FadeUp>
           </Spotlight>
 
-          <ContactForm defaultBudget={defaultBudget} />
+          <ContactForm />
         </div>
       </div>
     </main>

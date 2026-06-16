@@ -3,11 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useLenisInstance } from "@/components/layout/SmoothScrollProvider";
-import { transition } from "@/lib/animations";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -19,7 +17,6 @@ const navLinks = [
 
 export function Header() {
   const pathname = usePathname();
-  const reduceMotion = useReducedMotion();
   const lenis = useLenisInstance();
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -145,17 +142,12 @@ export function Header() {
         </div>
       </header>
 
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
+      {menuOpen && (
+          <div
             role="dialog"
             aria-modal="true"
             aria-label="Navigation"
-            initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="fixed inset-0 z-50 flex flex-col bg-base/95 backdrop-blur-xl md:hidden"
+            className="anim-fade fixed inset-0 z-50 flex flex-col bg-base/95 backdrop-blur-xl md:hidden"
           >
             <div className="flex h-16 items-center justify-end px-6">
               <button
@@ -169,11 +161,10 @@ export function Header() {
             </div>
             <nav aria-label="Mobile" className="flex flex-1 flex-col justify-center gap-2 px-8 pb-24">
               {navLinks.map((link, i) => (
-                <motion.div
+                <div
                   key={link.href}
-                  initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ ...transition, delay: 0.05 + i * 0.06 }}
+                  className="anim-rise"
+                  style={{ animationDelay: `${0.05 + i * 0.06}s` }}
                 >
                   <Link
                     href={link.href}
@@ -187,22 +178,19 @@ export function Header() {
                   >
                     {link.label}
                   </Link>
-                </motion.div>
+                </div>
               ))}
-              <motion.div
-                initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ ...transition, delay: 0.05 + navLinks.length * 0.06 }}
-                className="mt-6"
+              <div
+                className="anim-rise mt-6"
+                style={{ animationDelay: `${0.05 + navLinks.length * 0.06}s` }}
               >
                 <Button href="/contact" size="lg" withArrow>
                   Let&apos;s Talk
                 </Button>
-              </motion.div>
+              </div>
             </nav>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
     </>
   );
 }

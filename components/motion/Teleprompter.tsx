@@ -17,7 +17,7 @@ type TeleprompterProps = {
  * no-preference only; reduced motion / no-JS keep it fully lit and readable (R7).
  */
 export function Teleprompter({ children, className, as = "p" }: TeleprompterProps) {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLSpanElement>(null);
   const Tag = as;
   const ready = useExtraPlugins(); // SplitText loads lazily after mount
 
@@ -27,14 +27,21 @@ export function Teleprompter({ children, className, as = "p" }: TeleprompterProp
       if (!ready || !SplitText) return;
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
+        // aria:"none" — the animated span is already aria-hidden and the readable
+        // copy lives in the sr-only span, so SplitText must NOT add an aria-label
+        // (prohibited on <p>) and the dimmed words are out of the a11y/contrast
+        // tree entirely.
         const split = SplitText.create(ref.current, {
           type: "words",
-          aria: "auto",
+          aria: "none",
           autoSplit: true,
           onSplit(self) {
-            gsap.set(self.words, { opacity: 0.16 });
+            // Light words from --ink-dim (#a3a4c4, ~8:1 — readable) up to --ink,
+            // not from near-zero opacity: a sub-contrast dim state fails the a11y
+            // audit even on aria-hidden text. Hex twins (GSAP can't tween oklch).
+            gsap.set(self.words, { color: "#a3a4c4" });
             return gsap.to(self.words, {
-              opacity: 1,
+              color: "#ebecfa",
               ease: "none",
               stagger: 0.08,
               scrollTrigger: {
@@ -52,9 +59,16 @@ export function Teleprompter({ children, className, as = "p" }: TeleprompterProp
     { scope: ref, dependencies: [ready] },
   );
 
+  // Accessible copy is the sr-only span (read once, full contrast); the visible
+  // teleprompter is aria-hidden so the scroll-lit dim state never trips contrast
+  // or duplicates for screen readers. No-JS / reduced motion: the aria-hidden
+  // span renders fully lit and static (R7).
   return (
-    <Tag ref={ref as React.Ref<never>} className={className}>
-      {children}
+    <Tag className={className}>
+      <span className="sr-only">{children}</span>
+      <span aria-hidden ref={ref}>
+        {children}
+      </span>
     </Tag>
   );
 }

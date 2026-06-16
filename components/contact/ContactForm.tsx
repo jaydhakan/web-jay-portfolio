@@ -1,18 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { CircleCheck, LoaderCircle } from "lucide-react";
 import { contact, siteConfig } from "@/data/content";
 import { contactSchema, type ContactInput } from "@/lib/contact-schema";
 import { sendContactMessage } from "@/app/actions/contact";
 import { cn } from "@/lib/utils";
-
-type ContactFormProps = {
-  defaultBudget?: string;
-};
 
 const fieldClasses =
   "w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink " +
@@ -23,8 +18,15 @@ const fieldClasses =
 const labelClasses = "block text-sm font-medium text-ink";
 const errorClasses = "mt-2 text-sm text-err";
 
-export function ContactForm({ defaultBudget }: ContactFormProps) {
-  const reduceMotion = useReducedMotion();
+/** /contact?plan=growth pre-selects the matching budget (read client-side so the
+    page stays static). */
+const planToBudget: Record<string, string> = {
+  starter: "$1k-$5k",
+  growth: "$5k-$15k",
+  custom: "Let's discuss",
+};
+
+export function ContactForm() {
   const [isPending, startTransition] = useTransition();
   const [sent, setSent] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -32,11 +34,19 @@ export function ContactForm({ defaultBudget }: ContactFormProps) {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<ContactInput>({
     resolver: zodResolver(contactSchema),
-    defaultValues: { budget: defaultBudget ?? "", projectType: "", website: "" },
+    defaultValues: { budget: "", projectType: "", website: "" },
   });
+
+  // Pre-select the budget from ?plan= (client-side; keeps the page static).
+  useEffect(() => {
+    const plan = new URLSearchParams(window.location.search).get("plan");
+    const budget = plan ? planToBudget[plan] : undefined;
+    if (budget) setValue("budget", budget);
+  }, [setValue]);
 
   const onSubmit = (data: ContactInput) => {
     setServerError(null);
@@ -52,14 +62,9 @@ export function ContactForm({ defaultBudget }: ContactFormProps) {
 
   return (
     <div className="relative">
-      <AnimatePresence mode="wait" initial={false}>
-        {sent ? (
-          <motion.div
-            key="success"
-            initial={reduceMotion ? false : { opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: "spring", duration: 0.5, bounce: 0.2 }}
-            className="flex min-h-96 flex-col items-center justify-center rounded-2xl border border-line bg-surface p-10 text-center"
+      {sent ? (
+          <div
+            className="anim-rise flex min-h-96 flex-col items-center justify-center rounded-2xl border border-line bg-surface p-10 text-center"
             role="status"
           >
             <CircleCheck aria-hidden className="size-12 text-ok" />
@@ -76,13 +81,9 @@ export function ContactForm({ defaultBudget }: ContactFormProps) {
               </a>
               .
             </p>
-          </motion.div>
+          </div>
         ) : (
-          <motion.form
-            key="form"
-            initial={false}
-            exit={reduceMotion ? undefined : { opacity: 0, y: -12 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+          <form
             onSubmit={handleSubmit(onSubmit)}
             noValidate
             className="flex flex-col gap-6"
@@ -241,9 +242,8 @@ export function ContactForm({ defaultBudget }: ContactFormProps) {
                 "Send Message"
               )}
             </button>
-          </motion.form>
+          </form>
         )}
-      </AnimatePresence>
     </div>
   );
 }

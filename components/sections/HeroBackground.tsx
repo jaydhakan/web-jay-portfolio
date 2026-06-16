@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
-import { useInView, useReducedMotion } from "motion/react";
 
 const HeroShader = dynamic(() => import("./HeroShader"), { ssr: false });
 
@@ -24,9 +23,25 @@ function probeWebgl() {
  * hero so the GPU goes idle on the rest of the page.
  */
 export function HeroBackground() {
-  const reduceMotion = useReducedMotion();
+  // Resolve reduced motion once before first paint (stable for the mount).
+  const [reduceMotion] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { margin: "200px 0px" });
+  // Mount/unmount the shader as the hero enters/leaves view (so the GPU idles on
+  // the rest of the page). IntersectionObserver replaces Motion's useInView.
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
+      rootMargin: "200px 0px",
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   // false during SSR/hydration, cached WebGL probe on the client.
   const webglOk = useSyncExternalStore(noopSubscribe, probeWebgl, () => false);
 
