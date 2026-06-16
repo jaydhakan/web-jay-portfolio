@@ -30,17 +30,6 @@
   --line:         oklch(94.5% 0.012 280 / 8%);  /* hairline rings / rules */
   --glow:         0 0 40px -12px oklch(63% 0.21 272 / 35%);
 
-  /* Legacy aliases — same vars, different names. Phase 9 deletes these. */
-  --bg-base:      var(--base);
-  --bg-surface:   var(--surface);
-  --bg-elevated:  var(--elevated);
-  --text-primary: var(--ink);
-  --text-secondary: var(--ink-dim);
-  --accent-primary: var(--accent);
-  --border-token: var(--line);
-  --success: var(--ok);
-  --error:   var(--err);
-
   /* Motion vocabulary (spec §4.3) */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --dur-1: 0.4s;   /* micro */
@@ -72,15 +61,9 @@ html {
   --color-white:         #ffffff;
   --color-black:         #000000;
   --color-transparent:   transparent;
-  /* Legacy aliases for components not yet renamed (removed in Phase 9) */
-  --color-primary:        var(--ink);
-  --color-secondary:      var(--ink-dim);
-  --color-muted:          oklch(40% 0.018 278);  /* kept for aria-hidden process ghost number */
-  --color-accent-primary: var(--accent);
-  --color-accent-solid:   var(--accent-solid);
-  --color-success:        var(--ok);
-  --color-error:          var(--err);
-  --color-token:          var(--line);
+  /* text-muted: kept solely for the aria-hidden Process ghost number (decorative,
+     not a readable token). Every other legacy alias was deleted in Phase 9. */
+  --color-muted:          oklch(40% 0.018 278);
 
   /* Font stacks — CSS vars set by next/font in layout.tsx */
   --font-display: var(--font-syne), system-ui, sans-serif;

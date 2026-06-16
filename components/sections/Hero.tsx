@@ -19,10 +19,10 @@ export function Hero() {
         <div className="max-w-3xl">
           <p
             data-hero-rise
-            className="anim-rise flex items-center gap-2.5 text-sm font-medium text-success"
+            className="anim-rise flex items-center gap-2.5 text-sm font-medium text-ok"
             style={{ animationDelay: "0.05s" }}
           >
-            <span aria-hidden className="size-2 animate-pulse-dot rounded-full bg-success" />
+            <span aria-hidden className="size-2 animate-pulse-dot rounded-full bg-ok" />
             {siteConfig.availabilityNote}
           </p>
 
@@ -33,7 +33,7 @@ export function Hero() {
               preloader, so the H1's opacity:1 paint still registers first. No-JS /
               reduced-motion / mobile / repeat visit leave the lines at rest =
               fully visible. */}
-          <h1 className="mt-6 font-display text-5xl font-bold leading-[1.08] tracking-tight text-primary sm:text-6xl lg:text-7xl">
+          <h1 className="mt-6 font-display text-5xl font-bold leading-[1.08] tracking-tight text-ink sm:text-6xl lg:text-7xl">
             <span className="sr-only">
               {hero.h1Line1} {hero.h1Line2}
             </span>
@@ -47,7 +47,7 @@ export function Hero() {
 
           <p
             data-hero-rise
-            className="anim-rise mt-6 max-w-lg text-base leading-relaxed text-secondary sm:text-lg"
+            className="anim-rise mt-6 max-w-lg text-base leading-relaxed text-ink-dim sm:text-lg"
             style={{ animationDelay: "0.4s" }}
           >
             {hero.subheading}

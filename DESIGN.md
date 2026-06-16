@@ -1,47 +1,117 @@
-# Design
+# Design — V2 motion rebuild
 
-Dark-first, indigo-accented, editorial-premium. SaaS-product feel (Linear/Vercel lineage), Brittany Chiang v4 and rauno.me as interaction-craft references. Per the master prompt: do not deviate from these tokens.
+Dark-only, indigo-accented, editorial-premium. Linear/Vercel lineage. The site
+*is* the engineering proof: **Lighthouse Performance ≥ 95 / Accessibility = 100**
+is a hard gate. **Premium = restraint** — exactly one intentional motion moment
+per section; the boldness budget is spent on one signature ("The Field").
 
-## Color (dark = default theme)
+> Source of truth for *intent* is `plan.md`; live status is `PHASES.md`. This file
+> documents the shipped system.
 
-| Token | Dark | Light (next-themes toggle) | Role |
+## Color — OKLCH, dark-only
+
+Defined as CSS vars in `app/globals.css`. Hex twins are kept for `THREE.Color`
+(shader) and email templates only.
+
+| Token | OKLCH | Hex twin | Role |
 |---|---|---|---|
-| `base` | `#0A0A0F` | `#F8F8FF` | page canvas |
-| `surface` | `#111118` | `#FFFFFF` | cards / panels |
-| `elevated` | `#1A1A26` | `#EFEFF8` | hover states, active panels |
-| `accent-primary` | `#5B6EF5` | `#4A5CF4` | electric indigo, signature color |
-| `accent-violet` | `#8B5CF6` | `#7C4DEF` | gradient complement, sparing |
-| `accent-warm` | `#EC4899` | `#DB2777` | hot pink, very sparing third accent |
-| `primary` (text) | `#F0F0FF` | `#0A0A1A` | headings, body |
-| `secondary` (text) | `#8A8AA8` | `#5A5A78` | labels, meta |
-| `muted` (text) | `#4A4A6A` | `#9898B0` | placeholders, dividers |
-| `token` (border) | `rgba(255,255,255,0.07)` | `rgba(10,10,26,0.08)` | hairline borders |
-| `success` | `#22C55E` | `#16A34A` | availability dot, result metrics |
-| `gradient-hero` | `linear-gradient(135deg, #5B6EF5 0%, #8B5CF6 50%, #EC4899 100%)` | same | CTA banner tint (10-15% opacity), OG image |
+| `--base` | `oklch(14.5% 0.012 278)` | `#0b0b11` | page canvas (one color site-wide) |
+| `--surface` | `oklch(18.5% 0.014 278)` | `#14141c` | cards / panels |
+| `--elevated` | `oklch(22.5% 0.016 278)` | `#1a1a26` | hover / inner-card |
+| `--ink` | `oklch(94.5% 0.012 280)` | `#ebecfa` | headings + body (~17:1) |
+| `--ink-dim` | `oklch(72% 0.028 278)` | `#a3a4c4` | secondary / meta (~8:1) |
+| `--accent` | `oklch(63% 0.21 272)` | `#6b7cff` | the electric indigo |
+| `--accent-solid` | `oklch(54% 0.215 272)` | `#4356ee` | CTA fills (white-on-solid AA) |
+| `--ok` | `oklch(72% 0.17 152)` | — | availability dot / result metrics |
+| `--err` | `oklch(68% 0.18 25)` | — | form errors |
+| `--line` | `oklch(94.5% 0.012 280 / 8%)` | — | hairline rings / rules |
+| `--glow` | `0 0 40px -12px oklch(63% 0.21 272 / 35%)` | — | pre-rendered hover glow |
 
-Implemented as CSS variables in `globals.css` (RGB triplets for alpha support), referenced from `tailwind.config.ts`, switched by `next-themes` class.
+Tailwind 4 `@theme inline` maps these to `bg-base`, `text-ink`, `text-ink-dim`,
+`text-accent`, `border-line`, `bg-accent-solid`, `text-ok`, `text-err`, etc.
+Rules: no cream/beige; **no two-hue gradient** (single-hue → transparent radials
+only); accent ≤ ~5% of any viewport; depth comes from cards + hairlines, never
+alternating section backgrounds. (`text-muted` is retired as a readable token —
+the lone `--color-muted` survivor is only the aria-hidden Process ghost number.)
 
 ## Typography
 
-- Single family: **Plus Jakarta Sans** via `next/font/google` (`--font-jakarta`). Semibold/bold for headings, regular for body.
-- Scale: `text-7xl` hero H1 · `text-5xl` section headings · `text-3xl` card headings · `text-xl` sub-headings · `text-base leading-relaxed` body · `text-sm tracking-widest uppercase` eyebrow labels (SectionLabel).
-- Body copy max-width ~65ch (`max-w-lg`/`max-w-2xl` per spec). `text-wrap: balance` on h1-h3.
-
-## Spacing & Layout
-
-- Strict 8px grid (`p-2`=8 … `p-24`=96). Sections breathe: `py-24` typical.
-- Page container `max-w-7xl mx-auto px-6`.
-- Left-aligned hero (never centered). Asymmetric bento for featured work (60/40).
-- Radius: `rounded-2xl` cards (per master prompt), `rounded-full` pills/tags/buttons.
-- Z-scale (semantic): content < sticky header < mobile-nav overlay < modal < toast < cursor.
+- **Syne** display (variable 400–800), **DM Sans** body, **JetBrains Mono**
+  eyebrows/meta/numerals — all `next/font/google`, `display: "swap"`, mapped to
+  `--font-display` / `--font-body` / `--font-mono`.
+- Hero H1 `clamp` ceiling `text-7xl` (4.5rem); tracking floor ≥ −0.04em;
+  `text-wrap: balance` on h1–h3; body ≤ 65ch. Syne never below ~24px and never
+  for numerals (counters use JetBrains Mono `tabular-nums`).
 
 ## Motion
 
-- Framer Motion variants in `/lib/animations.ts`; shared transition `{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }`.
-- GSAP ScrollTrigger only for scroll storytelling (Process connector line). Never mixed with Motion in the same component tree.
-- Signature moves: character-stagger hero reveal (AnimatedText), CountUp stats on viewport entry, magnetic CTAs (40px radius), custom cursor (8px dot → 40px difference ring), glass header after 60px scroll, R3F indigo/violet liquid shader hero background with subtle mouse parallax.
-- Everything gated by `useReducedMotion()`; cursor also disabled on `pointer: coarse`.
+- **Two easings:** `--ease-out-expo` `cubic-bezier(0.16,1,0.3,1)` for all
+  reveals/fades/micro; `jdFlow` (`CustomEase "M0,0 C0.7,0 0.18,1 1,1"`) reserved
+  for the signature family only (page wipe, preloader wipe, line draws). Scrubbed
+  tweens use `ease:"none"`.
+- **Three durations:** `--dur-1` 0.4s / `--dur-2` 0.8s / `--dur-3` 1.2s. Ambient
+  loops (marquee, orb drift, shader time) are documented exemptions.
+- **One reveal grammar:** "content emerges from behind an edge" — masked line
+  rises (SplitText) + clip-path inset wipes, everywhere. Reveals always *enhance*
+  already-visible content; start states are set at runtime via GSAP, never
+  CSS-hidden (no blank-section bug; no-JS / reduced-motion render the final state).
+- **Stack:** GSAP (+ ScrollTrigger, SplitText, Flip, DrawSVG, ScrambleText,
+  CustomEase) via `lib/gsap.ts`, and Lenis smooth scroll driven off the GSAP
+  ticker (`autoRaf:false`). **Perf:** only gsap core + ScrollTrigger + CustomEase
+  are registered eagerly; the heavy plugins lazy-load after mount behind a
+  `useExtraPlugins()` readiness gate (keeps the initial JS small). No `motion`
+  (framer-motion) dependency — all motion is GSAP or CSS.
+- **Reduced motion** is mandatory and decided up front (matchMedia / `gsap.matchMedia`),
+  never post-hoc disabled. Mobile is a deliberately simplified experience, not a
+  broken desktop one (no custom cursor, no preloader, no parallax/tilt).
 
 ## Components
 
-`Button` (primary/ghost), `Card` (hover glow: border → accent + `0 0 20px rgba(91,110,245,0.2)`), `Tag` pill, `SectionLabel` eyebrow, `AnimatedText`, `MagneticButton`, `CustomCursor`, `ScrollProgress`, `CountUp`. Header: transparent → glass (`backdrop-blur-xl bg-base/80 border-b border-token`). Focus rings: `ring-2 ring-accent-primary ring-offset-2 ring-offset-base`.
+- **Pill button** (`Button`): `rounded-full`, label + 36px arrow circle flush
+  right (button-in-button) with a diagonal dual-swap on hover; ghost variant adds
+  a transform-only fill-wipe; `active:scale-[0.98]`. Renders `<button>` when no
+  `href`. `MagneticButton` (GSAP `quickTo`) composes around it (desktop only).
+- **Double-bezel card** (`Card`): 24px outer shell (`bg-white/[0.02]`, `p-1.5`,
+  hairline ring) → 18px inner core + inset top highlight. Glow is a pre-rendered
+  opacity layer, never a `box-shadow` tween. No backdrop-blur on scrolling content.
+- **Eyebrow** (`SectionLabel`): JetBrains Mono `text-xs uppercase tracking-[0.2em]
+  text-ink-dim` + a 24px accent tick.
+- **Focus** (load-bearing — the custom cursor hides the pointer): global
+  `:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px }`;
+  pills get `.focus-pill` offset 4px.
+
+## z-index scale (closed)
+
+`grain 30 < header 40 < scroll-progress 45 < mobile-overlay/skip-link 50 <
+transition-curtain/preloader 55 < cursor 60`. Nothing between `<body>` and the
+cursor may create a stacking/blend-isolating context (transform/filter/opacity<1/
+isolation/mix-blend on a full-screen wrapper) — it would kill the
+`mix-blend-difference` cursor.
+
+## Signature & atmosphere
+
+- **"The Field"** — the hero WebGL shader: a monochrome-indigo topographic
+  contour field (gradient-descent / loss-landscape). Interaction-armed + offscreen-
+  unmounted (the `.hero-fallback` single-accent radials carry it until then and on
+  mobile/no-WebGL). The **drawn line** (DrawSVG contour ticks) is its sitewide echo.
+- **Choreographed opening** (desktop only — `pointer:fine`, first visit): a
+  session-once preloader scramble-decodes "JAY DHAKAN" from binary, then a `jdFlow`
+  clip wipe reveals an orchestrated hero (nav slide → masked H1 line-rise → copy
+  stagger). Mobile keeps the LCP-safe CSS entrance (a full-screen overlay would
+  delay the hero LCP past the gate).
+- **Page transitions:** enter-only clip wipe via `template.tsx` remount (z-55),
+  accent leading edge, first-load suppressed to protect LCP.
+- **Film grain** (static feTurbulence, z-30, 3.2%, no blend mode) + **ambient
+  orbs** (CTABanner, pre-baked single-hue radials, transform-drift, ≤1 on mobile).
+- **Custom cursor:** dot + lagging ring + VIEW state, `mix-blend-difference`,
+  off on touch / reduced motion.
+
+## Per-section motion (one moment each)
+
+Home: orchestrated opening + The Field (hero), velocity-skew marquee, kinetic
+counters + LineDraw (stats), sticky stacked cards (featured work), clip-wipe
+(services), connector line-draw (process), masked-line quotes (testimonials),
+mouse-tracked spotlight (tech stack), magnetic CTA + orbs (CTA banner). /about:
+teleprompter bio (lights words from `--ink-dim` → `--ink`, contrast-safe) +
+the only timeline (experience) + contour line-draw divider. /work: hover-preview
+row list + Flip filtering. /work/[slug]: sticky split scrollytelling.

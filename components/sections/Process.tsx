@@ -59,18 +59,18 @@ export function Process() {
     <section ref={sectionRef} className="py-24">
       <div className="mx-auto max-w-7xl px-6">
         <SectionLabel>{sections.process.eyebrow}</SectionLabel>
-        <h2 className="mt-3 font-display text-4xl font-bold tracking-tight text-primary md:text-5xl">
+        <h2 className="mt-3 font-display text-4xl font-bold tracking-tight text-ink md:text-5xl">
           {sections.process.heading}
         </h2>
 
         <div className="relative mt-16">
           {/* Desktop connector: horizontal track + accent fill. */}
-          <div aria-hidden className="absolute inset-x-0 top-0 hidden h-px bg-token lg:block">
-            <div className="process-fill-h size-full origin-left bg-accent-primary" />
+          <div aria-hidden className="absolute inset-x-0 top-0 hidden h-px bg-line lg:block">
+            <div className="process-fill-h size-full origin-left bg-accent" />
           </div>
           {/* Mobile connector: vertical, aligned with the dots. */}
-          <div aria-hidden className="absolute bottom-2 left-[5px] top-0 block w-px bg-token lg:hidden">
-            <div className="process-fill-v size-full origin-top bg-accent-primary" />
+          <div aria-hidden className="absolute bottom-2 left-[5px] top-0 block w-px bg-line lg:hidden">
+            <div className="process-fill-v size-full origin-top bg-accent" />
           </div>
 
           <ol className="grid gap-12 lg:grid-cols-4 lg:gap-8">
@@ -81,7 +81,7 @@ export function Process() {
               >
                 <span
                   aria-hidden
-                  className="absolute left-0 top-1.5 block size-[11px] rounded-full border-2 border-accent-primary bg-base lg:-top-[5px]"
+                  className="absolute left-0 top-1.5 block size-[11px] rounded-full border-2 border-accent bg-base lg:-top-[5px]"
                 />
                 <span
                   aria-hidden
@@ -89,8 +89,8 @@ export function Process() {
                 >
                   {step.step}
                 </span>
-                <h3 className="text-xl font-semibold text-primary">{step.title}</h3>
-                <p className="mt-3 max-w-xs text-sm leading-relaxed text-secondary">
+                <h3 className="text-xl font-semibold text-ink">{step.title}</h3>
+                <p className="mt-3 max-w-xs text-sm leading-relaxed text-ink-dim">
                   {step.description}
                 </p>
               </li>

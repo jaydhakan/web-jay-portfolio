@@ -86,7 +86,7 @@ export function Header() {
         className={cn(
           "fixed inset-x-0 top-0 z-40 transition-[transform,background-color,border-color] duration-300 ease-out",
           scrolled || menuOpen
-            ? "border-b border-token bg-base/80 backdrop-blur-xl"
+            ? "border-b border-line bg-base/80 backdrop-blur-xl"
             : "border-b border-transparent bg-transparent",
           hidden && "-translate-y-full",
         )}
@@ -94,12 +94,12 @@ export function Header() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Link
             href="/"
-            className="group flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base rounded-full"
+            className="group flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base rounded-full"
           >
             <span className="flex size-8 items-center justify-center rounded-full bg-accent-solid text-xs font-bold text-white">
               JD
             </span>
-            <span className="text-sm font-semibold text-secondary transition-colors duration-200 group-hover:text-primary">
+            <span className="text-sm font-semibold text-ink-dim transition-colors duration-200 group-hover:text-ink">
               Jay Dhakan
             </span>
           </Link>
@@ -112,10 +112,10 @@ export function Header() {
                 aria-current={isActive(link.href) ? "page" : undefined}
                 className={cn(
                   "rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base",
                   isActive(link.href)
-                    ? "text-accent-primary"
-                    : "text-secondary hover:text-primary",
+                    ? "text-accent"
+                    : "text-ink-dim hover:text-ink",
                 )}
               >
                 {link.label}
@@ -134,7 +134,7 @@ export function Header() {
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((v) => !v)}
-              className="inline-flex size-9 items-center justify-center rounded-full text-primary transition-colors duration-200 hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base"
+              className="inline-flex size-9 items-center justify-center rounded-full text-ink transition-colors duration-200 hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
             >
               {menuOpen ? <X aria-hidden className="size-5" /> : <Menu aria-hidden className="size-5" />}
             </button>
@@ -154,7 +154,7 @@ export function Header() {
                 type="button"
                 aria-label="Close menu"
                 onClick={() => setMenuOpen(false)}
-                className="inline-flex size-9 items-center justify-center rounded-full text-primary transition-colors duration-200 hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base"
+                className="inline-flex size-9 items-center justify-center rounded-full text-ink transition-colors duration-200 hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
               >
                 <X aria-hidden className="size-5" />
               </button>
@@ -172,8 +172,8 @@ export function Header() {
                     aria-current={isActive(link.href) ? "page" : undefined}
                     className={cn(
                       "block py-3 font-display text-4xl font-semibold transition-colors duration-200",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base rounded-lg",
-                      isActive(link.href) ? "text-accent-primary" : "text-primary hover:text-accent-primary",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base rounded-lg",
+                      isActive(link.href) ? "text-accent" : "text-ink hover:text-accent",
                     )}
                   >
                     {link.label}

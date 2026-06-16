@@ -12,14 +12,14 @@ const COPIES = 4;
  */
 export function Marquee({ items }: MarqueeProps) {
   return (
-    <div aria-hidden className="overflow-hidden border-y border-token">
+    <div aria-hidden className="overflow-hidden border-y border-line">
       <div className="flex w-max animate-marquee">
         {Array.from({ length: COPIES }, (_, copy) => (
           <ul key={copy} className="flex shrink-0 items-center">
             {items.map((item) => (
               <li
                 key={item}
-                className="whitespace-nowrap px-8 py-4 text-sm font-medium uppercase tracking-widest text-secondary"
+                className="whitespace-nowrap px-8 py-4 text-sm font-medium uppercase tracking-widest text-ink-dim"
               >
                 {item}
               </li>

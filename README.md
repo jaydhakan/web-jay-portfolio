@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Jay Dhakan — Portfolio
 
-## Getting Started
+A premium, motion-led portfolio for Jay Dhakan (Python & AI/ML engineer). Dark,
+indigo-accented, editorial; the site is itself the engineering proof — Lighthouse
+**Performance ≥ 95 / Accessibility = 100** is a hard gate, not a nice-to-have.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router) · **React 19** · **TypeScript** · **Tailwind CSS 4**
+- **GSAP** (ScrollTrigger, SplitText, Flip, DrawSVG, ScrambleText, CustomEase) for all motion
+- **Lenis** smooth scroll, driven off the GSAP ticker
+- **three / @react-three/fiber** for one hero shader ("The Field"), lazy + interaction-armed
+- `react-hook-form` + `zod` (contact form) · `resend` (email) · `lucide-react` (icons)
+
+No `motion`/framer-motion — every animation is GSAP or CSS.
+
+## Scripts
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev     # dev server (http://localhost:3000)
+npm run build   # production build
+npm run start   # serve the production build
+npm run lint    # eslint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+app/                 routes (App Router) + globals.css + opengraph-image + error/not-found
+components/
+  layout/            Header, Footer, SmoothScrollProvider, CustomCursor, FilmGrain,
+                     OpeningChoreo, PageTransition, ScrollProgress, AnchorScroll
+  motion/            reveal primitives: RevealText, FadeUp, Parallax, Pin, LineDraw,
+                     Counter, ClipReveal, Spotlight, Teleprompter
+  sections/ ui/ work/ contact/   page sections + UI atoms
+data/content.ts      ALL copy (single source — no hardcoded strings in components)
+lib/gsap.ts          single GSAP registration point (core eager, heavy plugins lazy)
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Docs
 
-## Learn More
+- **`DESIGN.md`** — the shipped design system (tokens, type, motion, components, z-scale, signature).
+- **`plan.md`** — the design bible (rationale, technical patterns, risk register).
+- **`PHASES.md`** — live build tracker (phase status, exit gates, changelog).
+- **`docs/final_prompt.md`** — the master spec (effects catalog, hard rules, banned list, DoD).
 
-To learn more about Next.js, take a look at the following resources:
+## Conventions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- All visible copy lives in `data/content.ts`; no em/en dashes in copy.
+- Animate only `transform` / `opacity` / `clip-path` / `filter`; `prefers-reduced-motion`
+  fully handled; mobile is a deliberately simplified experience.
+- Closed z-index scale (see DESIGN.md); nothing may create a blend-isolating context
+  beneath the `mix-blend-difference` cursor.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Before launch (content / env — owner: Jay)
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Real project covers → `public/images/projects/<slug>.jpg`, profile photo →
+  `public/images/profile/jay.jpg` (currently honest gradient placeholders).
+- Replace the 3 placeholder testimonials in `data/content.ts`.
+- Confirm email / LinkedIn / Upwork URLs and resume timeline dates.
+- Set `RESEND_API_KEY` + a verified `from:` domain, and `NEXT_PUBLIC_SITE_URL`.

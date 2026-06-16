@@ -11,28 +11,28 @@ const footerNav = [
 ] as const;
 
 const iconLinkClasses =
-  "inline-flex size-9 items-center justify-center rounded-full text-secondary transition-colors duration-200 " +
-  "hover:bg-elevated hover:text-primary focus-visible:outline-none focus-visible:ring-2 " +
-  "focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base";
+  "inline-flex size-9 items-center justify-center rounded-full text-ink-dim transition-colors duration-200 " +
+  "hover:bg-elevated hover:text-ink focus-visible:outline-none focus-visible:ring-2 " +
+  "focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base";
 
 export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-token">
+    <footer className="border-t border-line">
       <div className="mx-auto max-w-7xl px-6 py-16">
         <div className="flex flex-col justify-between gap-10 md:flex-row">
           <div className="max-w-sm">
             <Link
               href="/"
-              className="inline-flex items-center gap-3 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base"
+              className="inline-flex items-center gap-3 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
             >
               <span className="flex size-8 items-center justify-center rounded-full bg-accent-solid text-xs font-bold text-white">
                 JD
               </span>
-              <span className="text-sm font-semibold text-primary">Jay Dhakan</span>
+              <span className="text-sm font-semibold text-ink">Jay Dhakan</span>
             </Link>
-            <p className="mt-4 text-sm leading-relaxed text-secondary">
+            <p className="mt-4 text-sm leading-relaxed text-ink-dim">
               {siteConfig.role}. {profile.location}.
             </p>
             <div className="mt-6 flex items-center gap-1">
@@ -69,7 +69,7 @@ export function Footer() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="w-fit rounded-full text-sm text-secondary transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base"
+                className="w-fit rounded-full text-sm text-ink-dim transition-colors duration-200 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
               >
                 {link.label}
               </Link>
@@ -77,8 +77,8 @@ export function Footer() {
           </nav>
         </div>
 
-        <div className="mt-14 border-t border-token pt-6">
-          <p className="text-xs text-secondary">
+        <div className="mt-14 border-t border-line pt-6">
+          <p className="text-xs text-ink-dim">
             &copy; {year} Jay Dhakan. Built with Next.js, deployed on Vercel.
           </p>
         </div>
