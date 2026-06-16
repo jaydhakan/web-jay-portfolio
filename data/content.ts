@@ -107,6 +107,7 @@ export const siteConfig = {
   githubUrl: "https://github.com/jaydhakan",
   isAvailable: true,
   availabilityNote: "Available for new projects",
+  footerCta: "Let's build something that ships.",
 };
 
 export const profile = {

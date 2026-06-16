@@ -20,11 +20,13 @@ import { ScrollTriggerLeakCounter } from "@/components/motion/ScrollTriggerLeakC
    never set it (LCP fires on the painted H1). */
 const openingGate = `(function(){try{var m=window.matchMedia;if(m("(min-width:768px)").matches&&m("(pointer:fine)").matches&&!m("(prefers-reduced-motion: reduce)").matches&&!sessionStorage.getItem("jd-seen")){document.documentElement.dataset.preloader="pending"}}catch(e){}})();`;
 
+// Loaded as the VARIABLE font (no static `weight` array) so the wght axis is
+// continuous — required for the footer kinetic-weight statement
+// (font-variation-settings). One variable file also replaces five static cuts.
 const syne = Syne({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-syne",
-  weight: ["400", "500", "600", "700", "800"],
 });
 
 const dmSans = DM_Sans({

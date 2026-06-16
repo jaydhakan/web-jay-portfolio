@@ -225,6 +225,28 @@ html {
   to   { opacity: 1; }
 }
 
+/* Cinematic hero scroll-out — native CSS scroll-driven animation (runs on the
+   compositor, zero main-thread JS). At scroll 0 the content rests in its final
+   position, so the LCP H1 is untouched; it drifts up and dims only as the first
+   viewport scrolls away. Progressive enhancement (@supports) + motion-safe; the
+   reduced-motion / unsupported path leaves the hero static. */
+@keyframes hero-drift {
+  to {
+    opacity: 0.12;
+    transform: translateY(-9%);
+  }
+}
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-parallax {
+      animation: hero-drift linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 92vh;
+      will-change: transform, opacity;
+    }
+  }
+}
+
 /* Mobile-menu overlay fade (Header) — replaces the old Motion AnimatePresence. */
 .anim-fade {
   animation: fade-in 0.25s var(--ease-out-expo) both;

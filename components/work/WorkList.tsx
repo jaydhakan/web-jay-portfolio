@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
-import { gsap, useGSAP, ScrollTrigger, useExtraPlugins, getFlip } from "@/lib/gsap";
+import { gsap, useGSAP, ScrollTrigger, useExtraPlugins, getFlip, DUR } from "@/lib/gsap";
 import type { Flip } from "gsap/Flip";
 import type { Project, ProjectCategory } from "@/data/content";
 import { Tag } from "@/components/ui/Tag";
@@ -93,6 +93,30 @@ export function WorkList({ projects, covers, filters }: WorkListProps) {
           return () => root.removeEventListener("pointermove", onMove);
         },
       );
+    },
+    { scope: rootRef },
+  );
+
+  // Staggered entrance for the rows — the site's reveal grammar applied to the
+  // list (which previously had none). One-shot per row, motion-safe; the start
+  // state is set at runtime (never CSS-hidden), so no-JS / reduced-motion render
+  // the rows at rest, and it stays clear of the Flip filtering (which owns its
+  // own enter/leave tweens).
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const rows = gsap.utils.toArray<HTMLElement>(".work-row");
+        rows.forEach((row) => {
+          gsap.from(row, {
+            opacity: 0,
+            y: 30,
+            duration: DUR.std,
+            ease: "expo.out",
+            scrollTrigger: { trigger: row, start: "top 90%", once: true },
+          });
+        });
+      });
     },
     { scope: rootRef },
   );

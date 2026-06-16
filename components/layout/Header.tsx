@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { SlideText } from "@/components/ui/SlideText";
 import { useLenisInstance } from "@/components/layout/SmoothScrollProvider";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +22,38 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Sliding active-link indicator (new_plan 5.1): a small accent dot that
+  // glides under the active desktop nav link. Measure the active link's box
+  // (relative to the positioned <nav>) on route change / resize / font-load,
+  // then drive a transform-only CSS transition.
+  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const [indicator, setIndicator] = useState({ x: 0, top: 0, show: false });
+  useEffect(() => {
+    const measure = () => {
+      const idx = navLinks.findIndex(
+        (l) => pathname === l.href || pathname.startsWith(`${l.href}/`),
+      );
+      const el = idx >= 0 ? linkRefs.current[idx] : null;
+      if (!el || el.offsetParent === null) {
+        setIndicator((p) => (p.show ? { ...p, show: false } : p));
+        return;
+      }
+      setIndicator({
+        x: el.offsetLeft + el.offsetWidth / 2 - 2,
+        top: el.offsetTop + el.offsetHeight - 6,
+        show: true,
+      });
+    };
+    const raf = requestAnimationFrame(measure);
+    window.addEventListener("resize", measure);
+    // Re-measure once Syne settles (display:swap shifts label widths).
+    document.fonts?.ready.then(measure).catch(() => {});
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", measure);
+    };
+  }, [pathname]);
 
   // Scroll-driven chrome (scrolled bg + smart-hide), sourced from Lenis when
   // smooth scroll is active, else native window scroll (reduced motion). Read
@@ -104,21 +137,24 @@ export function Header() {
             </span>
           </Link>
 
-          <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
-            {navLinks.map((link) => (
+          <nav aria-label="Primary" className="relative hidden items-center gap-1 md:flex">
+            {navLinks.map((link, i) => (
               <Link
                 key={link.href}
+                ref={(el) => {
+                  linkRefs.current[i] = el;
+                }}
                 href={link.href}
                 aria-current={isActive(link.href) ? "page" : undefined}
                 className={cn(
-                  "rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200",
+                  "group inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base",
                   isActive(link.href)
                     ? "text-accent"
                     : "text-ink-dim hover:text-ink",
                 )}
               >
-                {link.label}
+                <SlideText>{link.label}</SlideText>
               </Link>
             ))}
             <div className="ml-2 flex items-center gap-2">
@@ -126,6 +162,15 @@ export function Header() {
                 Let&apos;s Talk
               </Button>
             </div>
+            <span
+              aria-hidden
+              className="pointer-events-none absolute left-0 size-1 rounded-full bg-accent shadow-[0_0_8px_var(--color-accent)] transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
+              style={{
+                top: indicator.top,
+                transform: `translateX(${indicator.x}px)`,
+                opacity: indicator.show ? 1 : 0,
+              }}
+            />
           </nav>
 
           <div className="flex items-center gap-2 md:hidden">

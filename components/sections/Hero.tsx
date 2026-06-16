@@ -16,7 +16,7 @@ export function Hero() {
       <HeroBackground />
 
       <div className="mx-auto w-full max-w-7xl px-6 pt-16">
-        <div className="max-w-3xl">
+        <div className="hero-parallax max-w-3xl">
           <p
             data-hero-rise
             className="anim-rise flex items-center gap-2.5 text-sm font-medium text-ok"

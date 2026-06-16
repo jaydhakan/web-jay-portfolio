@@ -35,6 +35,7 @@ const fragmentShader = /* glsl */ `
   uniform vec3 uColorA;
   uniform vec3 uColorB;
   uniform float uIntensity;
+  uniform float uScroll;
 
   // Simplex 2D noise (Ashima / Ian McEwan, public domain).
   vec3 permute(vec3 x) { return mod(((x * 34.0) + 1.0) * x, 289.0); }
@@ -94,7 +95,9 @@ const fragmentShader = /* glsl */ `
     // Energy: one soft gaussian basin upper-right; portrait pushes it higher
     // and dims it so mobile copy never sits on color.
     float portrait = step(aspectX, 0.85);
-    vec2 focus = vec2(0.76 + uMouse.x * 0.04, 0.7 + portrait * 0.2 + uMouse.y * 0.04);
+    // Scrolling the hero nudges the basin downhill (the descent picture).
+    vec2 focus = vec2(0.76 + uMouse.x * 0.04,
+                      0.7 + portrait * 0.2 + uMouse.y * 0.04 - uScroll * 0.12);
     vec2 d = (uv - focus) * vec2(max(aspectX, 1.0), 1.35);
     float blob = exp(-dot(d, d) * (3.6 + portrait * 2.4));
     // Hard protection for the left text column and the header band. Thresholds
@@ -124,14 +127,18 @@ const fragmentShader = /* glsl */ `
     // Descent cue: a slow band of light travels through the level sets toward
     // the basin (period ~17s), brightening lines that are already drawn -> an
     // optimizer stepping downhill. Gated by energy so it stays upper-right.
-    float descend = 1.0 - smoothstep(0.0, 0.15, abs(h - fract(uTime * 0.06)));
+    // Scroll advances the descent band further downhill through the level sets
+    // (uScroll 0->1 across the first viewport) and lifts contour energy, so
+    // scrolling the hero reads as stepping into the loss landscape.
+    float descend = 1.0 - smoothstep(0.0, 0.15, abs(h - fract(uTime * 0.06 + uScroll * 0.6)));
+    float scrollGain = 1.0 + uScroll * 0.35;
 
     // Compose, monochrome indigo only.
     vec3 col = uBase;
     col = mix(col, uColorB, basin * 0.18 * uIntensity);
-    float minorE = minorLine * energy * (0.55 + 0.3 * steep) * (1.0 + 0.25 * descend);
+    float minorE = minorLine * energy * (0.55 + 0.3 * steep) * (1.0 + 0.25 * descend) * scrollGain;
     col = mix(col, uColorA, minorE * uIntensity);
-    float majorE = majorLine * energy * (0.7 + 0.3 * steep);
+    float majorE = majorLine * energy * (0.7 + 0.3 * steep) * scrollGain;
     col = mix(col, uColorB, majorE * uIntensity * 0.9);
 
     // Dither to stop gradient banding on the dark base.
@@ -158,6 +165,7 @@ function ShaderPlane() {
       uColorA: { value: new THREE.Color("#6b7cff") },
       uColorB: { value: new THREE.Color("#4356ee") },
       uIntensity: { value: 0.45 },
+      uScroll: { value: 0 },
     }),
     [],
   );
@@ -189,6 +197,13 @@ function ShaderPlane() {
     const ease = 1 - Math.exp(-2.5 * delta);
     mouse.x += (pointerTarget.current.x - mouse.x) * ease;
     mouse.y += (pointerTarget.current.y - mouse.y) * ease;
+
+    // Scroll progress through the first viewport (0->1), eased with the same
+    // momentum. Read directly per-frame (cheap, frame-synced, no extra listener);
+    // the shader only renders while the hero is in view, so this stays bounded.
+    const scrollUniform = material.uniforms.uScroll as { value: number };
+    const target = Math.min(window.scrollY / Math.max(window.innerHeight, 1), 1);
+    scrollUniform.value += (target - scrollUniform.value) * ease;
   });
 
   return (
