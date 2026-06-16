@@ -652,6 +652,33 @@ export const testimonials: Testimonial[] = [
     rating: 5,
     isPlaceholder: true,
   },
+  {
+    name: "Client D (placeholder)",
+    company: "AI product team",
+    platform: "via Upwork",
+    quote:
+      "Our multi-agent workflow went from a fragile prototype to something we actually trust in production. Jay thinks in systems, not scripts.",
+    rating: 5,
+    isPlaceholder: true,
+  },
+  {
+    name: "Client E (placeholder)",
+    company: "Data analytics firm",
+    platform: "via LinkedIn",
+    quote:
+      "He scraped millions of records reliably where two other contractors had failed, and documented the whole pipeline so my team could own it.",
+    rating: 5,
+    isPlaceholder: true,
+  },
+  {
+    name: "Client F (placeholder)",
+    company: "Early-stage founder",
+    platform: "Direct referral",
+    quote:
+      "From idea to a deployed full-stack app in a couple of weeks, with none of the agency overhead. I talked to the person actually building it.",
+    rating: 5,
+    isPlaceholder: true,
+  },
 ];
 
 // ───────────────────────────────────────────────────────────────── Process ──
