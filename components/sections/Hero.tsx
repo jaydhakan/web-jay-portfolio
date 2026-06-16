@@ -18,6 +18,7 @@ export function Hero() {
       <div className="mx-auto w-full max-w-7xl px-6 pt-16">
         <div className="max-w-3xl">
           <p
+            data-hero-rise
             className="anim-rise flex items-center gap-2.5 text-sm font-medium text-success"
             style={{ animationDelay: "0.05s" }}
           >
@@ -25,18 +26,27 @@ export function Hero() {
             {siteConfig.availabilityNote}
           </p>
 
-          {/* H1 ships server-rendered at opacity:1 and is never hidden -- this
-              is the LCP element (non-negotiable / D-9). Its runtime motion is the
-              GSAP masked-line reveal added in Phase 8, behind the preloader. */}
+          {/* H1 ships server-rendered at opacity:1 in final position -- it is the
+              LCP element (non-negotiable / D-9). The desktop opening only animates
+              the inner [data-hero-line] spans (a masked-line rise inside
+              overflow-hidden), and only AFTER first paint while covered by the
+              preloader, so the H1's opacity:1 paint still registers first. No-JS /
+              reduced-motion / mobile / repeat visit leave the lines at rest =
+              fully visible. */}
           <h1 className="mt-6 font-display text-5xl font-bold leading-[1.08] tracking-tight text-primary sm:text-6xl lg:text-7xl">
             <span className="sr-only">
               {hero.h1Line1} {hero.h1Line2}
             </span>
-            <span aria-hidden className="block">{hero.h1Line1}</span>
-            <span aria-hidden className="block">{hero.h1Line2}</span>
+            <span aria-hidden className="block overflow-hidden pb-[0.12em]">
+              <span data-hero-line className="block">{hero.h1Line1}</span>
+            </span>
+            <span aria-hidden className="block overflow-hidden pb-[0.12em]">
+              <span data-hero-line className="block">{hero.h1Line2}</span>
+            </span>
           </h1>
 
           <p
+            data-hero-rise
             className="anim-rise mt-6 max-w-lg text-base leading-relaxed text-secondary sm:text-lg"
             style={{ animationDelay: "0.4s" }}
           >
@@ -44,6 +54,7 @@ export function Hero() {
           </p>
 
           <div
+            data-hero-rise
             className="anim-rise mt-10 flex flex-wrap items-center gap-4"
             style={{ animationDelay: "0.55s" }}
           >

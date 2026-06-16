@@ -9,7 +9,16 @@ import { ScrollProgress } from "@/components/layout/ScrollProgress";
 import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
 import { AnchorScroll } from "@/components/layout/AnchorScroll";
 import { FilmGrain } from "@/components/layout/FilmGrain";
+import { OpeningChoreo } from "@/components/layout/OpeningChoreo";
 import { ScrollTriggerLeakCounter } from "@/components/motion/ScrollTriggerLeakCounter";
+
+/* Pre-paint gate for the choreographed opening (Phase 8). Runs before first paint
+   and sets html[data-preloader="pending"] only on a first visit on a >=768px
+   fine-pointer viewport with motion allowed — DESKTOP-ONLY, because any full-
+   screen first-load overlay covers the LCP hero text and sinks mobile Perf below
+   the 95 gate (R4/R9). Touch / mobile / reduced motion / repeat visit / no-JS
+   never set it (LCP fires on the painted H1). */
+const openingGate = `(function(){try{var m=window.matchMedia;if(m("(min-width:768px)").matches&&m("(pointer:fine)").matches&&!m("(prefers-reduced-motion: reduce)").matches&&!sessionStorage.getItem("jd-seen")){document.documentElement.dataset.preloader="pending"}}catch(e){}})();`;
 
 const syne = Syne({
   subsets: ["latin"],
@@ -81,6 +90,11 @@ export default function RootLayout({
       className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
     >
       <body className="font-body">
+        {/* Pre-paint: flip the desktop opening gate before anything paints. */}
+        <script
+          id="jd-opening-init"
+          dangerouslySetInnerHTML={{ __html: openingGate }}
+        />
         {/* Skip link: first focusable element on every page (a11y spec) */}
         <a
           href="#main-content"
@@ -92,6 +106,8 @@ export default function RootLayout({
           {/* Static film grain at z-30 — sibling of the cursor, painted below it
               (no blend mode, so it never fights the z-60 difference cursor). */}
           <FilmGrain />
+          {/* Session-once choreographed opening (z-55 overlay, desktop-gated). */}
+          <OpeningChoreo />
           <AnchorScroll />
           <ScrollTriggerLeakCounter />
           <CustomCursor />

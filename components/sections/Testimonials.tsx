@@ -1,5 +1,6 @@
 import { testimonials, sections } from "@/data/content";
 import { RevealText } from "@/components/motion/RevealText";
+import { FadeUp } from "@/components/motion/FadeUp";
 
 /**
  * Calm testimonial grid (catalog #1). The Motion auto-scroll carousel is gone
@@ -29,9 +30,12 @@ export function Testimonials() {
                 &ldquo;
               </span>
               <blockquote className="mt-5 flex-1">
-                <RevealText as="p" className="text-base leading-relaxed text-ink">
+                {/* FadeUp (block reveal) rather than RevealText here: SplitText's
+                    aria:"auto" puts aria-label on the element, which is prohibited
+                    on a <p> (paragraph role) and fails the a11y audit. */}
+                <FadeUp as="p" className="text-base leading-relaxed text-ink">
                   {t.quote}
-                </RevealText>
+                </FadeUp>
               </blockquote>
               <footer className="mt-6 border-t border-line pt-5">
                 <p className="text-sm font-semibold text-ink">{t.name}</p>

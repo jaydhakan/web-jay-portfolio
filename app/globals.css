@@ -148,6 +148,32 @@ html {
   cursor: none !important;
 }
 
+/* Choreographed opening (Phase 8, D-7). The preloader overlay is display:none by
+   default, so no-JS / crawlers / repeat visits / reduced motion / mobile never
+   see it and the hero H1 underneath stays the LCP element. The pre-paint inline
+   script in layout.tsx flips html[data-preloader="pending"] BEFORE first paint,
+   only on a first visit on a >=768px fine-pointer viewport with motion allowed
+   (DESKTOP-ONLY — mobile keeps the LCP-safe CSS entrance, R4/R9). */
+#jd-preloader {
+  display: none;
+}
+[data-preloader="pending"] #jd-preloader {
+  display: flex;
+  /* Failsafe: if the opening JS throws, the overlay can never strand a user. */
+  animation: jd-preloader-failsafe 0s linear 3.2s forwards;
+}
+@keyframes jd-preloader-failsafe {
+  to {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+/* Under the gate the GSAP opening owns the hero entrance — silence the CSS
+   .anim-rise so the two never double up (the elements stay visible if JS dies). */
+[data-preloader="pending"] .anim-rise {
+  animation: none !important;
+}
+
 @layer base {
   /* Smooth scroll is owned by Lenis (motion-allowed) or native instant
      (reduced motion). No CSS `scroll-behavior: smooth` — it double-smooths
