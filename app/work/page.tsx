@@ -17,7 +17,7 @@ export default function WorkPage() {
   );
 
   return (
-    <main id="main-content" className="pb-24 pt-32">
+    <main id="main-content" tabIndex={-1} className="pb-24 pt-32">
       <div className="mx-auto max-w-7xl px-6">
         <header className="max-w-2xl">
           <SectionLabel>{sections.workPage.eyebrow}</SectionLabel>

@@ -11,7 +11,7 @@ import { CTABanner } from "@/components/sections/CTABanner";
 
 export default function Home() {
   return (
-    <main id="main-content">
+    <main id="main-content" tabIndex={-1}>
       <Hero />
       <Marquee items={hero.marquee} />
       <Stats />

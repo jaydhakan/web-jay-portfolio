@@ -41,7 +41,7 @@ export default function AboutPage() {
   const hasPhoto = publicImageExists(profile.photo);
 
   return (
-    <main id="main-content" className="pt-32">
+    <main id="main-content" tabIndex={-1} className="pt-32">
       <div className="mx-auto max-w-7xl px-6">
         <header className="max-w-3xl">
           <SectionLabel>{sections.aboutPage.eyebrow}</SectionLabel>

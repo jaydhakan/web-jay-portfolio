@@ -35,7 +35,7 @@ const iconMap: Record<string, LucideIcon> = {
 
 export default function ServicesPage() {
   return (
-    <main id="main-content" className="pt-32">
+    <main id="main-content" tabIndex={-1} className="pt-32">
       <div className="mx-auto max-w-7xl px-6">
         <header className="max-w-2xl">
           <SectionLabel>{sections.servicesPage.eyebrow}</SectionLabel>

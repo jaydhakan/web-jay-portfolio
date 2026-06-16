@@ -35,7 +35,7 @@ export default async function ContactPage({ searchParams }: PageProps) {
   const defaultBudget = plan ? planToBudget[plan] : undefined;
 
   return (
-    <main id="main-content" className="pb-24 pt-32">
+    <main id="main-content" tabIndex={-1} className="pb-24 pt-32">
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid gap-16 lg:grid-cols-2">
           {/* Left "dark column": ambient spotlight follows the cursor (the

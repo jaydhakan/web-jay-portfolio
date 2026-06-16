@@ -1,8 +1,17 @@
+import { PageTransition } from "@/components/layout/PageTransition";
+
 /**
- * Page-enter transition: a short CSS fade-rise on every route change.
- * App Router re-mounts templates per navigation, so the animation re-runs;
- * being CSS it needs no hydration and never hides content from no-JS UAs.
+ * Per-navigation remount point: the App Router remounts template.tsx on every
+ * route change, which is what drives the enter wipe. PageTransition is rendered
+ * as a SIBLING of {children} — never a wrapper around it — so the z-55 curtain
+ * stays a bare leaf sibling of the z-60 mix-blend-difference cursor and can
+ * never create a blend-isolating context (plan §4.6).
  */
 export default function Template({ children }: { children: React.ReactNode }) {
-  return <div className="page-enter">{children}</div>;
+  return (
+    <>
+      <PageTransition />
+      {children}
+    </>
+  );
 }

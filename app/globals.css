@@ -93,6 +93,10 @@ html {
 
   --animate-marquee:   marquee 30s linear infinite;
   --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+  /* Ambient orb drift (CTABanner, plan §4.5). Long periods are the documented
+     ambient-loop exemption from the --dur ladder; transform-only, GPU-composited. */
+  --animate-orb-a:     orb-drift-a 26s ease-in-out infinite;
+  --animate-orb-b:     orb-drift-b 32s ease-in-out infinite;
 
   @keyframes marquee {
     from { transform: translateX(0); }
@@ -102,6 +106,16 @@ html {
   @keyframes pulse-dot {
     0%, 100% { opacity: 1; transform: scale(1); }
     50%       { opacity: 0.4; transform: scale(0.85); }
+  }
+
+  @keyframes orb-drift-a {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50%      { transform: translate3d(22px, -18px, 0); }
+  }
+
+  @keyframes orb-drift-b {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50%      { transform: translate3d(-20px, 16px, 0); }
   }
 }
 
@@ -197,11 +211,6 @@ html {
   animation: rise-in var(--dur-2) var(--ease-out-expo) both;
 }
 
-/* Page enter — kept until Phase 7 (template.tsx wipe replaces it) */
-.page-enter {
-  animation: rise-in 0.35s var(--ease-out-expo) both;
-}
-
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -210,9 +219,10 @@ html {
   /* Safety net: JS hooks handle Motion/GSAP; this kills CSS-driven motion. */
   .animate-marquee,
   .animate-pulse-dot,
+  .animate-orb-a,
+  .animate-orb-b,
   .anim-char,
-  .anim-rise,
-  .page-enter {
+  .anim-rise {
     animation: none;
   }
 }

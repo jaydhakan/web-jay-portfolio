@@ -8,6 +8,7 @@ import { CustomCursor } from "@/components/layout/CustomCursor";
 import { ScrollProgress } from "@/components/layout/ScrollProgress";
 import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
 import { AnchorScroll } from "@/components/layout/AnchorScroll";
+import { FilmGrain } from "@/components/layout/FilmGrain";
 import { ScrollTriggerLeakCounter } from "@/components/motion/ScrollTriggerLeakCounter";
 
 const syne = Syne({
@@ -88,6 +89,9 @@ export default function RootLayout({
           Skip to content
         </a>
         <SmoothScrollProvider>
+          {/* Static film grain at z-30 — sibling of the cursor, painted below it
+              (no blend mode, so it never fights the z-60 difference cursor). */}
+          <FilmGrain />
           <AnchorScroll />
           <ScrollTriggerLeakCounter />
           <CustomCursor />
