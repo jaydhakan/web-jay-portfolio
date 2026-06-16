@@ -13,26 +13,35 @@ per section; the boldness budget is spent on one signature ("The Field").
 Defined as CSS vars in `app/globals.css`. Hex twins are kept for `THREE.Color`
 (shader) and email templates only.
 
-| Token | OKLCH | Hex twin | Role |
-|---|---|---|---|
-| `--base` | `oklch(14.5% 0.012 278)` | `#0b0b11` | page canvas (one color site-wide) |
-| `--surface` | `oklch(18.5% 0.014 278)` | `#14141c` | cards / panels |
-| `--elevated` | `oklch(22.5% 0.016 278)` | `#1a1a26` | hover / inner-card |
-| `--ink` | `oklch(94.5% 0.012 280)` | `#ebecfa` | headings + body (~17:1) |
-| `--ink-dim` | `oklch(72% 0.028 278)` | `#a3a4c4` | secondary / meta (~8:1) |
-| `--accent` | `oklch(63% 0.21 272)` | `#6b7cff` | the electric indigo |
-| `--accent-solid` | `oklch(54% 0.215 272)` | `#4356ee` | CTA fills (white-on-solid AA) |
-| `--ok` | `oklch(72% 0.17 152)` | — | availability dot / result metrics |
-| `--err` | `oklch(68% 0.18 25)` | — | form errors |
-| `--line` | `oklch(94.5% 0.012 280 / 8%)` | — | hairline rings / rules |
-| `--glow` | `0 0 40px -12px oklch(63% 0.21 272 / 35%)` | — | pre-rendered hover glow |
+| Token             | OKLCH                                      | Hex twin  | Role                                                         |
+|-------------------|--------------------------------------------|-----------|--------------------------------------------------------------|
+| `--base`          | `oklch(14.5% 0.012 278)`                   | `#0b0b11` | page canvas (one color site-wide)                            |
+| `--surface`       | `oklch(18.5% 0.014 278)`                   | `#14141c` | cards / panels                                               |
+| `--elevated`      | `oklch(22.5% 0.016 278)`                   | `#1a1a26` | hover / inner-card                                           |
+| `--ink`           | `oklch(94.5% 0.012 280)`                   | `#ebecfa` | headings + body (~17:1)                                      |
+| `--ink-dim`       | `oklch(72% 0.028 278)`                     | `#a3a4c4` | secondary / meta (~8:1)                                      |
+| `--accent`        | `oklch(63% 0.21 272)`                      | `#6b7cff` | the electric indigo (primary)                                |
+| `--accent-solid`  | `oklch(54% 0.215 272)`                     | `#4356ee` | CTA fills (white-on-solid AA)                                |
+| `--accent-violet` | `oklch(66% 0.19 285)`                      | `#8b7cff` | iridescent duotone — The Field + hero glow (P2/P3)           |
+| `--accent-cyan`   | `oklch(86% 0.115 207)`                     | `#67e8f9` | iridescent duotone — faint far stop                          |
+| `--ok`            | `oklch(85.5% 0.125 181)`                   | `#5eead4` | mint/teal: availability dot / result metrics (~13:1 on base) |
+| `--err`           | `oklch(68% 0.18 25)`                       | —         | form errors                                                  |
+| `--line`          | `oklch(94.5% 0.012 280 / 8%)`              | —         | hairline rings / rules                                       |
+| `--glow`          | `0 0 40px -12px oklch(63% 0.21 272 / 35%)` | —         | pre-rendered hover glow                                      |
 
 Tailwind 4 `@theme inline` maps these to `bg-base`, `text-ink`, `text-ink-dim`,
-`text-accent`, `border-line`, `bg-accent-solid`, `text-ok`, `text-err`, etc.
-Rules: no cream/beige; **no two-hue gradient** (single-hue → transparent radials
-only); accent ≤ ~5% of any viewport; depth comes from cards + hairlines, never
-alternating section backgrounds. (`text-muted` is retired as a readable token —
-the lone `--color-muted` survivor is only the aria-hidden Process ghost number.)
+`text-accent`, `text-accent-violet`, `text-accent-cyan`, `border-line`,
+`bg-accent-solid`, `text-ok`, `text-err`, etc.
+Rules: no cream/beige; **no rainbow two-hue gradient** — the only gradient is the
+iridescent duotone (`--accent` → `--accent-violet` → `--accent-cyan`), kept to
+**adjacent cool hues so it reads as one shifting light**, scoped to The Field +
+hero glow, and still ≤ ~5% of any viewport; depth comes from cards + hairlines,
+never alternating section backgrounds. (`text-muted` is retired as a readable token
+— the lone `--color-muted` survivor is only the aria-hidden Process ghost number.)
+
+> **Palette v2 (Direction A, "Electric Indigo+")** supersedes the original mono-indigo
+> D-3/D-6: indigo stays primary, the iridescent violet→cyan duotone is added for the
+> signature, and the off-key status green became mint. See `new_plan.md` P1.
 
 ## Typography
 
@@ -90,8 +99,8 @@ isolation/mix-blend on a full-screen wrapper) — it would kill the
 
 ## Signature & atmosphere
 
-- **"The Field"** — the hero WebGL shader: a monochrome-indigo topographic
-  contour field (gradient-descent / loss-landscape). Interaction-armed + offscreen-
+- **"The Field"** — the hero WebGL shader: an iridescent indigo → violet → faint-cyan
+  topographic contour field (gradient-descent / loss-landscape). Interaction-armed + offscreen-
   unmounted (the `.hero-fallback` single-accent radials carry it until then and on
   mobile/no-WebGL). The **drawn line** (DrawSVG contour ticks) is its sitewide echo.
 - **Choreographed opening** (desktop only — `pointer:fine`, first visit): a

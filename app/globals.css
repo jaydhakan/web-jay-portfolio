@@ -11,9 +11,11 @@
      --elevated       #1a1a26
      --ink            #ebecfa
      --ink-dim        #a3a4c4
-     --accent         #6b7cff
-     --accent-solid   #4356ee
-     --ok             #72c98a  (approx)
+     --accent         #6b7cff   electric indigo (primary, unchanged)
+     --accent-solid   #4356ee   CTA fills
+     --accent-violet  #8b7cff   iridescent duotone — The Field + hero glow (P2/P3)
+     --accent-cyan    #67e8f9   iridescent duotone — faint far stop
+     --ok             #5eead4   mint/teal (was green #72c98a — palette v2)
      --err            #e07a6a  (approx)
      --line           rgba(235,236,250,0.08)
 --------------------------------------------------------------------------- */
@@ -23,9 +25,14 @@
   --elevated:     oklch(22.5% 0.016 278);  /* #1a1a26 */
   --ink:          oklch(94.5% 0.012 280);  /* #ebecfa */
   --ink-dim:      oklch(72%   0.028 278);  /* #a3a4c4 */
-  --accent:       oklch(63%   0.21  272);  /* #6b7cff */
-  --accent-solid: oklch(54%   0.215 272);  /* #4356ee  — CTA fills (white-on-solid ≥5:1 AA) */
-  --ok:           oklch(72%   0.17  152);  /* availability dot / result metrics */
+  --accent:        oklch(63%   0.21  272);  /* #6b7cff  — electric indigo, primary */
+  --accent-solid:  oklch(54%   0.215 272);  /* #4356ee  — CTA fills (white-on-solid ≥5:1 AA) */
+  /* Iridescent duotone (palette v2, Direction A). The Field + hero glow read as
+     one cool light shifting indigo -> violet -> faint cyan (adjacent hues, not a
+     rainbow). Consumed by the shader / glow in P2-P3; ≤5% of any viewport. */
+  --accent-violet: oklch(66%   0.19  285);  /* #8b7cff  — duotone middle stop */
+  --accent-cyan:   oklch(86%   0.115 207);  /* #67e8f9  — duotone far stop (faint) */
+  --ok:            oklch(85.5% 0.125 181);  /* #5eead4  — mint/teal: availability + result metrics (~13:1 on base) */
   --err:          oklch(68%   0.18   25);  /* form errors */
   --line:         oklch(94.5% 0.012 280 / 8%);  /* hairline rings / rules */
   --glow:         0 0 40px -12px oklch(63% 0.21 272 / 35%);
@@ -52,6 +59,8 @@ html {
   --color-ink-dim:       var(--ink-dim);
   --color-accent:        var(--accent);
   --color-accent-solid:  var(--accent-solid);
+  --color-accent-violet: var(--accent-violet);
+  --color-accent-cyan:   var(--accent-cyan);
   --color-ok:            var(--ok);
   --color-err:           var(--err);
   --color-line:          var(--line);

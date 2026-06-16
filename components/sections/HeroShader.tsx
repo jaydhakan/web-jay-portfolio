@@ -5,8 +5,9 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 /**
- * "The Field" — the signature hero shader (D-6). A monochrome-indigo flowing
- * contour field read as a gradient-descent / loss-landscape: nested iso-lines
+ * "The Field" — the signature hero shader (D-6). An iridescent indigo -> violet
+ * -> faint-cyan flowing contour field (palette v2) read as a gradient-descent /
+ * loss-landscape: nested iso-lines
  * are the level sets of an objective surface, crowding on steep gradients
  * (the descent picture) and easing apart on the flats. A slow band of light
  * travels through the level sets toward the basin, like an optimizer stepping
@@ -34,6 +35,7 @@ const fragmentShader = /* glsl */ `
   uniform vec3 uBase;
   uniform vec3 uColorA;
   uniform vec3 uColorB;
+  uniform vec3 uColorC;
   uniform float uIntensity;
   uniform float uScroll;
 
@@ -133,13 +135,19 @@ const fragmentShader = /* glsl */ `
     float descend = 1.0 - smoothstep(0.0, 0.15, abs(h - fract(uTime * 0.06 + uScroll * 0.6)));
     float scrollGain = 1.0 + uScroll * 0.35;
 
-    // Compose, monochrome indigo only.
+    // Compose: iridescent indigo -> violet -> faint cyan (palette v2). One cool
+    // light shifting with depth, not a rainbow. Bleed + intensity stay restrained
+    // here; P2 amplifies them to make the Field command the screen.
     vec3 col = uBase;
     col = mix(col, uColorB, basin * 0.18 * uIntensity);
     float minorE = minorLine * energy * (0.55 + 0.3 * steep) * (1.0 + 0.25 * descend) * scrollGain;
     col = mix(col, uColorA, minorE * uIntensity);
     float majorE = majorLine * energy * (0.7 + 0.3 * steep) * scrollGain;
     col = mix(col, uColorB, majorE * uIntensity * 0.9);
+    // The duotone's far stop: a faint cyan shimmer rides only the travelling
+    // descent crest, so it reads as iridescence on the moving light, not a 2nd hue.
+    float crest = majorLine * descend * energy * scrollGain;
+    col = mix(col, uColorC, crest * uIntensity * 0.35);
 
     // Dither to stop gradient banding on the dark base.
     col += (hash(gl_FragCoord.xy) - 0.5) / 255.0 * 3.0;
@@ -148,8 +156,9 @@ const fragmentShader = /* glsl */ `
   }
 `;
 
-/* Hex twins of --base / --accent / --accent-solid (globals.css table) —
-   THREE.Color can't parse oklch(). Keep in sync manually. */
+/* Hex twins of the palette v2 tokens (globals.css table) — THREE.Color can't
+   parse oklch(), so these mirror --base / --accent / --accent-violet / --accent-cyan.
+   Keep in sync manually. */
 const BASE = new THREE.Color("#0b0b11");
 
 function ShaderPlane() {
@@ -162,8 +171,9 @@ function ShaderPlane() {
       uResolution: { value: new THREE.Vector2(1, 1) },
       uMouse: { value: new THREE.Vector2(0, 0) },
       uBase: { value: new THREE.Color("#0b0b11") },
-      uColorA: { value: new THREE.Color("#6b7cff") },
-      uColorB: { value: new THREE.Color("#4356ee") },
+      uColorA: { value: new THREE.Color("#6b7cff") }, // indigo — field body / minor lines
+      uColorB: { value: new THREE.Color("#8b7cff") }, // violet — major lines + valley wash
+      uColorC: { value: new THREE.Color("#67e8f9") }, // cyan   — faint descent-crest shimmer
       uIntensity: { value: 0.45 },
       uScroll: { value: 0 },
     }),
