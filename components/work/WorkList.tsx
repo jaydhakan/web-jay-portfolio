@@ -122,6 +122,8 @@ export function WorkList({ projects, covers, filters }: WorkListProps) {
   );
 
   const hoveredHasCover = hovered ? (covers[hovered.slug] ?? false) : false;
+  // Ambient, sequential index per VISIBLE row (renumbers on filter). Decorative.
+  const visibleIndex = new Map(projects.filter(isVisible).map((p, i) => [p.slug, i + 1]));
 
   return (
     <div ref={rootRef} className="relative">
@@ -164,6 +166,14 @@ export function WorkList({ projects, covers, filters }: WorkListProps) {
                 href={`/work/${project.slug}`}
                 className="group flex flex-col gap-4 py-7 sm:flex-row sm:items-center sm:gap-6"
               >
+                {/* Ambient index — editorial depth, decorative. */}
+                <span
+                  aria-hidden
+                  className="hidden shrink-0 font-mono text-sm tabular-nums text-ink-dim/50 transition-colors duration-300 group-hover:text-accent sm:block"
+                >
+                  {String(visibleIndex.get(project.slug) ?? 0).padStart(2, "0")}
+                </span>
+
                 {/* Mobile inline thumb (desktop uses the cursor-follow preview). */}
                 <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-elevated ring-1 ring-line sm:hidden">
                   {hasCover ? (

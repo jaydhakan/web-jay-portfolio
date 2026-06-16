@@ -19,15 +19,20 @@ export default function WorkPage() {
   return (
     <main id="main-content" tabIndex={-1} className="pb-24 pt-32">
       <div className="mx-auto max-w-7xl px-6">
-        <header className="max-w-2xl">
-          <SectionLabel>{sections.workPage.eyebrow}</SectionLabel>
+        <header className="max-w-3xl">
+          <div className="flex items-center gap-4">
+            <SectionLabel>{sections.workPage.eyebrow}</SectionLabel>
+            <span className="font-mono text-xs tabular-nums text-ink-dim">
+              {String(projects.length).padStart(2, "0")} shipped
+            </span>
+          </div>
           <RevealText
             as="h1"
-            className="mt-4 font-display text-4xl font-bold tracking-tight text-ink md:text-6xl"
+            className="mt-5 font-display text-5xl font-bold tracking-[-0.03em] text-ink sm:text-6xl lg:text-7xl"
           >
             {sections.workPage.heading}
           </RevealText>
-          <FadeUp delay={0.1} className="mt-5 text-base leading-relaxed text-ink-dim sm:text-lg">
+          <FadeUp delay={0.1} className="mt-5 max-w-xl text-base leading-relaxed text-ink-dim sm:text-lg">
             {sections.workPage.subheading}
           </FadeUp>
         </header>

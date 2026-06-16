@@ -508,6 +508,109 @@ export const projects: Project[] = [
       // NOTE: no quantified metrics in resume for this project — section renders narrative only.
     },
   },
+
+  // ─────────────── PLACEHOLDER PROJECTS (TODO(JAY): replace with real work) ──
+  // Added so /work reads full. Plausible and on-domain, but NOT real engagements;
+  // numbers are illustrative. Swap or delete before launch.
+  {
+    slug: "realtime-trading-signals-api",
+    title: "Realtime Trading Signals API",
+    client: "Confidential", // PLACEHOLDER
+    industry: "Fintech Infrastructure",
+    year: "2025",
+    category: "APIs",
+    description:
+      "A low-latency signals API streaming indicators to trading clients over websockets.",
+    tech: ["FastAPI", "WebSockets", "Redis", "TimescaleDB"],
+    result: "sub-50ms fan-out to 2K+ clients", // PLACEHOLDER metric
+    coverImage: "/images/projects/realtime-signals.png",
+    caseStudy: {
+      role: "API architect & engineer",
+      timeline: "2025",
+      problem: [
+        "Trading clients needed market indicators pushed in near-real time, with predictable latency under bursty load, without hammering upstream data providers.",
+      ],
+      approach: [
+        "Built an async FastAPI gateway with a Redis pub/sub fan-out layer and a TimescaleDB hot store, decoupling ingestion from delivery so spikes never stall consumers.",
+      ],
+      built: [
+        "WebSocket fan-out delivering indicator updates to thousands of concurrent clients.",
+        "A backpressure-aware ingestion worker with replay from the hot store on reconnect.",
+      ],
+      results: [
+        { value: 50, prefix: "<", suffix: "ms", label: "Fan-out latency at peak" }, // PLACEHOLDER
+        { value: 2, suffix: "K+", label: "Concurrent clients" }, // PLACEHOLDER
+      ],
+      narrative:
+        "Indicators reach every connected client in well under 50ms, even during market-open bursts, on a stack that scales horizontally.",
+    },
+  },
+  {
+    slug: "autonomous-research-agent",
+    title: "Autonomous Research Agent",
+    client: "Confidential", // PLACEHOLDER
+    industry: "AI / Knowledge Work",
+    year: "2025",
+    category: "AI & Agents",
+    description:
+      "A planner-executor agent that researches a topic and returns a sourced, structured brief.",
+    tech: ["LangGraph", "OpenAI APIs", "Playwright", "pgvector"],
+    result: "hours of desk research in minutes", // PLACEHOLDER
+    coverImage: "/images/projects/research-agent.png",
+    caseStudy: {
+      role: "Architect & sole engineer",
+      timeline: "2025",
+      problem: [
+        "Analysts spent hours gathering, reading, and synthesizing sources into a brief, repeating the same search-read-summarize loop by hand.",
+      ],
+      approach: [
+        "Designed a LangGraph planner-executor loop: a planner decomposes the question, executor agents browse and extract with Playwright, and a synthesizer grounds the answer in retrieved sources via pgvector.",
+      ],
+      built: [
+        "A tool-using agent graph with retries, source de-duplication, and citation tracking.",
+        "Structured-output briefs with inline citations and a confidence pass.",
+      ],
+      results: [
+        { value: 12, suffix: "x", label: "Faster than manual research" }, // PLACEHOLDER
+        { value: 95, suffix: "%", label: "Claims traced to a source" }, // PLACEHOLDER
+      ],
+      narrative:
+        "What was an afternoon of tab-juggling is now a few-minute run that returns a structured, fully-sourced brief.",
+    },
+  },
+  {
+    slug: "product-catalog-etl",
+    title: "Product Catalog ETL & Sync",
+    client: "Confidential", // PLACEHOLDER
+    industry: "E-Commerce Data",
+    year: "2023",
+    category: "Data Pipelines",
+    description:
+      "A nightly pipeline normalizing and syncing millions of SKUs across multiple storefronts.",
+    tech: ["Python", "Airflow", "PostgreSQL", "dbt"],
+    result: "5M+ SKUs synced nightly", // PLACEHOLDER
+    coverImage: "/images/projects/catalog-etl.png",
+    caseStudy: {
+      role: "Pipeline engineer",
+      timeline: "2023",
+      problem: [
+        "Product data arrived in mismatched schemas from several suppliers, and stale or duplicate SKUs were leaking into the storefronts.",
+      ],
+      approach: [
+        "Built an Airflow-orchestrated ETL with dbt models for normalization and deduplication, plus idempotent upserts so a re-run never double-writes.",
+      ],
+      built: [
+        "Schema-mapping adapters per supplier feed, with validation gates that quarantine bad rows.",
+        "Incremental dbt models and a freshness dashboard flagging stale feeds.",
+      ],
+      results: [
+        { value: 5, suffix: "M+", label: "SKUs synced nightly" }, // PLACEHOLDER
+        { value: 99, suffix: "%", label: "Feed freshness SLA met" }, // PLACEHOLDER
+      ],
+      narrative:
+        "Storefronts now wake up to clean, deduplicated, current catalog data, with bad feeds quarantined before they ever ship.",
+    },
+  },
 ];
 
 // ──────────────────────────────────────────────────────────── Testimonials ──

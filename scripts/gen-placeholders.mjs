@@ -19,6 +19,9 @@ const projects = [
   { file: "zillow-harvester.png", title: "Zillow Data Harvester", industry: "Real Estate Data", year: "2023", category: "Data Pipelines" },
   { file: "chatbot-creator.png", title: "1-Click WhatsApp / Web Chatbot Creator", industry: "Conversational AI", year: "2024", category: "AI & Agents" },
   { file: "cinqcare.png", title: "Patient-Specific Healthcare Automation", industry: "Healthcare", year: "2024", category: "AI & Agents" },
+  { file: "realtime-signals.png", title: "Realtime Trading Signals API", industry: "Fintech Infrastructure", year: "2025", category: "APIs" },
+  { file: "research-agent.png", title: "Autonomous Research Agent", industry: "AI / Knowledge Work", year: "2025", category: "AI & Agents" },
+  { file: "catalog-etl.png", title: "Product Catalog ETL & Sync", industry: "E-Commerce Data", year: "2023", category: "Data Pipelines" },
 ];
 
 const escapeXml = (s) => s.replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" })[c]);
