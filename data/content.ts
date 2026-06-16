@@ -206,6 +206,46 @@ export const services: Service[] = [
   },
 ];
 
+// ──────────────────────────────────────────────────────── Capabilities ──
+// Home "What I Build" bento (P4). Real, from services/stats/projects above; the
+// full service detail lives on /services. `motif` selects the live visual.
+
+export type Capability = {
+  key: "agents" | "pipelines" | "apis" | "chatbots";
+  title: string;
+  blurb: string;
+  metric?: { value: string; label: string };
+};
+
+export const capabilities: Capability[] = [
+  {
+    key: "agents",
+    title: "AI Agents & Automation",
+    blurb:
+      "Multi-agent swarms that research, write, code, QA, and deploy on their own, built on agency-swarm and multi-model stacks.",
+  },
+  {
+    key: "pipelines",
+    title: "Data Pipelines at Scale",
+    blurb:
+      "Scrapy and Playwright pipelines with proxy rotation that harvest millions of records, reliably and cheap.",
+    metric: { value: "70M+", label: "records / sweep" },
+  },
+  {
+    key: "apis",
+    title: "High-Performance APIs",
+    blurb:
+      "Async FastAPI services with tenant isolation, usage analytics, and sub-second latency under load.",
+    metric: { value: "175+", label: "QPS benchmarked" },
+  },
+  {
+    key: "chatbots",
+    title: "LLM & RAG Chatbots",
+    blurb:
+      "Production chatbots with RAG over your data, deploying to WhatsApp, web, and internal tools in minutes.",
+  },
+];
+
 // ──────────────────────────────────────────────────────────────── Projects ──
 // First three are the homepage featured set (order matters: large card first).
 
@@ -692,6 +732,13 @@ export const sections = {
   services: {
     eyebrow: "WHAT I DO",
     heading: "End-to-End Digital Execution",
+  },
+  capabilities: {
+    // No eyebrow (keeps the page's eyebrow budget low — the heading carries it).
+    heading: "Production Systems, End to End",
+    subheading:
+      "From multi-agent automation to APIs that scale, this is what I design, build, and ship.",
+    viewAll: { label: "Explore Services", href: "/services" },
   },
   process: {
     eyebrow: "MY PROCESS",

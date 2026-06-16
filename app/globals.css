@@ -109,6 +109,22 @@ html {
     0%, 100% { transform: translate3d(0, 0, 0); }
     50%      { transform: translate3d(-20px, 16px, 0); }
   }
+
+  /* Bento "What I Build" motifs (P4). Each reinforces a capability as a live
+     computational visual. Always-on ones are slow/subtle (ambient-loop exemption,
+     like the marquee); the rest are applied on group-hover. All gated motion-safe
+     in the markup, so reduced motion shows the static start frame. */
+  --animate-bento-flow:   bento-flow 1.6s linear infinite;       /* agent edges + pipeline */
+  --animate-bento-node:   bento-node 2.8s ease-in-out infinite;  /* agent nodes pulse */
+  --animate-bento-ripple: bento-ripple 2.2s ease-out infinite;   /* API request rings */
+  --animate-bento-type:   bento-type 1.3s ease-in-out infinite;  /* chat typing dots */
+  --animate-bento-stream: bento-stream 2.4s linear infinite;     /* pipeline records */
+
+  @keyframes bento-flow   { to { stroke-dashoffset: -16; } }
+  @keyframes bento-node   { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @keyframes bento-ripple { 0% { transform: scale(0.35); opacity: 0.5; } 100% { transform: scale(1.75); opacity: 0; } }
+  @keyframes bento-type   { 0%, 70%, 100% { transform: translateY(0); opacity: 0.3; } 35% { transform: translateY(-5px); opacity: 1; } }
+  @keyframes bento-stream { 0% { transform: translateX(-130%); } 100% { transform: translateX(560%); } }
 }
 
 /* Static hero backdrop: always-painted layer under the shader canvas.

@@ -3,7 +3,7 @@ import { Hero } from "@/components/sections/Hero";
 import { Marquee } from "@/components/sections/Marquee";
 import { Stats } from "@/components/sections/Stats";
 import { FeaturedWork } from "@/components/sections/FeaturedWork";
-import { Services } from "@/components/sections/Services";
+import { BentoCapabilities } from "@/components/sections/BentoCapabilities";
 import { Process } from "@/components/sections/Process";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { TechStack } from "@/components/sections/TechStack";
@@ -16,7 +16,7 @@ export default function Home() {
       <Marquee items={hero.marquee} />
       <Stats />
       <FeaturedWork />
-      <Services />
+      <BentoCapabilities />
       <Process />
       <Testimonials />
       <TechStack />

@@ -130,10 +130,14 @@ isolation/mix-blend on a full-screen wrapper) — it would kill the
 
 ## Per-section motion (one moment each)
 
-Home: orchestrated opening + The Field (hero), velocity-skew marquee, kinetic
-counters + LineDraw (stats), sticky stacked cards (featured work), clip-wipe
-(services), connector line-draw (process), masked-line quotes (testimonials),
-mouse-tracked spotlight (tech stack), magnetic CTA + orbs (CTA banner). /about:
+Home: orchestrated opening + The Field + kinetic-weight H1 (hero), velocity-skew
+marquee, kinetic counters + LineDraw (stats), sticky stacked cards (featured work),
+**"What I Build" bento** (`BentoCapabilities` — varied-size tiles with live
+computational motifs: agent node-graph, pipeline flow, API pulse, live 15M+ metric,
+chat typing; staggered clip-reveal + tactile hover; replaced the home services list,
+full detail on /services), connector line-draw (process), masked-line quotes
+(testimonials), mouse-tracked spotlight (tech stack), magnetic CTA + orbs (CTA
+banner). /about:
 teleprompter bio (lights words from `--ink-dim` → `--ink`, contrast-safe) +
 the only timeline (experience) + contour line-draw divider. /work: hover-preview
 row list + Flip filtering. /work/[slug]: sticky split scrollytelling.
