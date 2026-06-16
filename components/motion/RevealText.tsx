@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { gsap, useGSAP, SplitText, DUR } from "@/lib/gsap";
+import { gsap, useGSAP, DUR, useExtraPlugins, getSplitText } from "@/lib/gsap";
 
 type RevealTextProps = {
   children: React.ReactNode;
@@ -36,9 +36,12 @@ export function RevealText({
 }: RevealTextProps) {
   const ref = useRef<HTMLElement>(null);
   const Tag = as;
+  const ready = useExtraPlugins(); // SplitText loads lazily after mount
 
   useGSAP(
     () => {
+      const SplitText = getSplitText();
+      if (!ready || !SplitText) return;
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         const split = SplitText.create(ref.current, {
@@ -60,7 +63,7 @@ export function RevealText({
         return () => split.revert();
       });
     },
-    { scope: ref, dependencies: [type, stagger, start] },
+    { scope: ref, dependencies: [ready, type, stagger, start] },
   );
 
   return (

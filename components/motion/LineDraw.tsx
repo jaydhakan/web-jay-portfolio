@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { gsap, useGSAP, DUR } from "@/lib/gsap";
+import { gsap, useGSAP, DUR, useExtraPlugins } from "@/lib/gsap";
 
 type LineDrawProps = {
   /** SVG children — paths/lines to draw. Each drawn element needs data-draw. */
@@ -34,9 +34,11 @@ export function LineDraw({
   ariaLabel,
 }: LineDrawProps) {
   const ref = useRef<SVGSVGElement>(null);
+  const ready = useExtraPlugins(); // DrawSVG loads lazily after mount
 
   useGSAP(
     () => {
+      if (!ready) return;
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         const strokes = ref.current?.querySelectorAll("[data-draw]");
@@ -60,7 +62,7 @@ export function LineDraw({
         });
       });
     },
-    { scope: ref, dependencies: [scrub, start] },
+    { scope: ref, dependencies: [ready, scrub, start] },
   );
 
   return (

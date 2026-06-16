@@ -4,7 +4,8 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
-import { gsap, useGSAP, Flip, ScrollTrigger } from "@/lib/gsap";
+import { gsap, useGSAP, ScrollTrigger, useExtraPlugins, getFlip } from "@/lib/gsap";
+import type { Flip } from "gsap/Flip";
 import type { Project, ProjectCategory } from "@/data/content";
 import { Tag } from "@/components/ui/Tag";
 import { cn } from "@/lib/utils";
@@ -33,13 +34,18 @@ export function WorkList({ projects, covers, filters }: WorkListProps) {
   const [hovered, setHovered] = useState<Project | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
-  const flipState = useRef<ReturnType<typeof Flip.getState> | null>(null);
+  const flipState = useRef<Flip.FlipState | null>(null);
+  useExtraPlugins(); // kicks the lazy Flip load on mount; ready before any click
 
   const isVisible = (p: Project) => active === "All" || p.category === active;
 
   const onFilter = (filter: Filter) => {
     if (filter === active || !rootRef.current) return;
-    flipState.current = Flip.getState(rootRef.current.querySelectorAll(".work-row"));
+    const Flip = getFlip();
+    // If Flip hasn't loaded yet, fall back to an instant reflow (no animation).
+    flipState.current = Flip
+      ? Flip.getState(rootRef.current.querySelectorAll(".work-row"))
+      : null;
     setActive(filter);
   };
 
@@ -47,16 +53,18 @@ export function WorkList({ projects, covers, filters }: WorkListProps) {
   useGSAP(
     () => {
       const state = flipState.current;
-      if (!state) return;
+      const Flip = getFlip();
       flipState.current = null;
-      Flip.from(state, {
-        duration: 0.5,
-        ease: "expo.out",
-        absolute: true,
-        onEnter: (els) =>
-          gsap.fromTo(els, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "expo.out" }),
-        onLeave: (els) => gsap.to(els, { opacity: 0, y: -10, duration: 0.25 }),
-      });
+      if (state && Flip) {
+        Flip.from(state, {
+          duration: 0.5,
+          ease: "expo.out",
+          absolute: true,
+          onEnter: (els) =>
+            gsap.fromTo(els, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "expo.out" }),
+          onLeave: (els) => gsap.to(els, { opacity: 0, y: -10, duration: 0.25 }),
+        });
+      }
       const r = requestAnimationFrame(() =>
         requestAnimationFrame(() => ScrollTrigger.refresh()),
       );

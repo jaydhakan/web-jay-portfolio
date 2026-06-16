@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { gsap, useGSAP, SplitText } from "@/lib/gsap";
+import { gsap, useGSAP, useExtraPlugins, getSplitText } from "@/lib/gsap";
 
 type TeleprompterProps = {
   children: React.ReactNode;
@@ -19,9 +19,12 @@ type TeleprompterProps = {
 export function Teleprompter({ children, className, as = "p" }: TeleprompterProps) {
   const ref = useRef<HTMLElement>(null);
   const Tag = as;
+  const ready = useExtraPlugins(); // SplitText loads lazily after mount
 
   useGSAP(
     () => {
+      const SplitText = getSplitText();
+      if (!ready || !SplitText) return;
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         const split = SplitText.create(ref.current, {
@@ -46,7 +49,7 @@ export function Teleprompter({ children, className, as = "p" }: TeleprompterProp
         return () => split.revert();
       });
     },
-    { scope: ref },
+    { scope: ref, dependencies: [ready] },
   );
 
   return (

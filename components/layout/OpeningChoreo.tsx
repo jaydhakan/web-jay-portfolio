@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { gsap, useGSAP, ScrollTrigger } from "@/lib/gsap";
+import { gsap, useGSAP, ScrollTrigger, loadExtraPlugins } from "@/lib/gsap";
 import { useLenisInstance } from "@/components/layout/SmoothScrollProvider";
 import { siteConfig } from "@/data/content";
 
@@ -66,8 +66,12 @@ export function OpeningChoreo() {
       const failsafe = window.setTimeout(finish, 3200);
 
       let tl: gsap.core.Timeline | null = null;
+      let cancelled = false;
       const raf = requestAnimationFrame(() =>
         requestAnimationFrame(() => {
+          // ScrambleText is lazy now — load the extras chunk, then build the TL.
+          void loadExtraPlugins().then(() => {
+          if (cancelled) return;
           const heroLines = gsap.utils.toArray<HTMLElement>("[data-hero-line]");
           const heroRise = gsap.utils.toArray<HTMLElement>("[data-hero-rise]");
           const header = document.querySelector("header");
@@ -114,10 +118,12 @@ export function OpeningChoreo() {
           if (header) tl.to(header, { yPercent: 0, opacity: 1, duration: 0.55 }, 1.0);
           if (heroLines.length) tl.to(heroLines, { yPercent: 0, duration: 0.7, stagger: 0.1 }, 1.1);
           if (heroRise.length) tl.to(heroRise, { y: 0, opacity: 1, duration: 0.55, stagger: 0.08 }, 1.3);
+          });
         }),
       );
 
       return () => {
+        cancelled = true;
         cancelAnimationFrame(raf);
         window.clearTimeout(failsafe);
         tl?.kill();
