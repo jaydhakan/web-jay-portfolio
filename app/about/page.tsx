@@ -47,22 +47,26 @@ export default function AboutPage() {
           <SectionLabel>{sections.aboutPage.eyebrow}</SectionLabel>
           <RevealText
             as="h1"
-            className="mt-4 font-display text-4xl font-bold tracking-tight text-ink md:text-6xl"
+            className="mt-4 font-display text-5xl font-bold tracking-[-0.03em] text-ink sm:text-6xl lg:text-7xl"
           >
             {sections.aboutPage.heading}
           </RevealText>
         </header>
 
-        {/* Identity row */}
+        {/* Identity row — avatar gets a tactile hover treatment (scale + accent ring + glow). */}
         <div className="mt-14 flex flex-col gap-8 sm:flex-row sm:items-center">
-          <div className="relative size-28 shrink-0 overflow-hidden rounded-2xl ring-1 ring-line">
+          <div className="group relative size-28 shrink-0 overflow-hidden rounded-2xl ring-1 ring-line transition duration-300 ease-out hover:ring-accent/40">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-tr from-accent/25 via-transparent to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-0"
+            />
             {hasPhoto ? (
               <Image
                 src={profile.photo}
                 alt={`Portrait of ${profile.name}`}
                 fill
                 sizes="112px"
-                className="object-cover"
+                className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
               />
             ) : (
               // TODO(JAY): drop a 400x400+ photo at public/images/profile/jay.jpg
@@ -76,11 +80,9 @@ export default function AboutPage() {
             <p className="mt-1 text-sm text-ink-dim">
               {profile.role}, {profile.location}
             </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {profile.skills.map((skill) => (
-                <Tag key={skill}>{skill}</Tag>
-              ))}
-            </div>
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-ink-dim">
+              {siteConfig.tagline}
+            </p>
           </div>
         </div>
 
@@ -99,6 +101,33 @@ export default function AboutPage() {
           </LineDraw>
           <span aria-hidden className="h-px flex-1 bg-line" />
         </div>
+
+        {/* Toolkit — skills as a categorized tactile grid (P9). */}
+        <section className="pb-24">
+          <RevealText as="h2" className="font-display text-4xl font-bold tracking-tight text-ink">
+            What I Work With
+          </RevealText>
+          <ClipReveal as="div" stagger={0.1} className="mt-12 grid gap-3 sm:grid-cols-2">
+            {profile.toolkit.map((group) => (
+              <div
+                key={group.group}
+                className="group rounded-[1.25rem] bg-surface p-7 ring-1 ring-white/[0.06] transition duration-300 ease-out hover:-translate-y-1 hover:bg-elevated hover:ring-accent/30"
+              >
+                <div className="flex items-baseline justify-between">
+                  <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-accent">{group.group}</h3>
+                  <span className="font-mono text-xs tabular-nums text-ink-dim">
+                    {String(group.items.length).padStart(2, "0")}
+                  </span>
+                </div>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {group.items.map((item) => (
+                    <Tag key={item}>{item}</Tag>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </ClipReveal>
+        </section>
 
         {/* Experience timeline (the only timeline on the site) */}
         <section className="pb-24">

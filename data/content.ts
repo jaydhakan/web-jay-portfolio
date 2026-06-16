@@ -129,6 +129,13 @@ export const profile = {
     "PyTorch & OpenCV",
   ],
   photo: "/images/profile/jay.jpg", // TODO(JAY): add a real 400x400+ photo
+  // Grouped toolkit for the /about tactile grid (real, from resume + case studies).
+  toolkit: [
+    { group: "Languages & Core", items: ["Python", "TypeScript", "FastAPI", "AsyncIO"] },
+    { group: "AI / ML", items: ["LangChain & LangGraph", "RAG & LLM apps", "Multi-agent systems", "OpenAI APIs", "PyTorch & OpenCV"] },
+    { group: "Data & Scraping", items: ["Scrapy & Playwright", "MongoDB", "PostgreSQL", "Redis", "Proxy rotation"] },
+    { group: "Cloud & Infra", items: ["AWS & Azure", "Docker", "CI/CD", "Vercel"] },
+  ],
 };
 
 // ──────────────────────────────────────────────────────────────────── Hero ──
