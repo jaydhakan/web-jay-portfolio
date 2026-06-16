@@ -38,6 +38,7 @@ const fragmentShader = /* glsl */ `
   uniform vec3 uColorC;
   uniform float uIntensity;
   uniform float uScroll;
+  uniform float uInteract;
 
   // Simplex 2D noise (Ashima / Ian McEwan, public domain).
   vec3 permute(vec3 x) { return mod(((x * 34.0) + 1.0) * x, 289.0); }
@@ -86,7 +87,10 @@ const fragmentShader = /* glsl */ `
     vec2 p = uv * vec2(aspectX, 1.0) * 0.9;
 
     float t = uTime * 0.04;
-    vec2 drift = uMouse * 0.1;
+    // Stronger cursor displacement (desktop). uMouse is momentum-eased on the JS
+    // side and stays (0,0) on touch, so quick moves slosh the terrain while
+    // mobile stays calm.
+    vec2 drift = uMouse * 0.18;
 
     // Height field = the loss surface. Slow domain warp reshapes the terrain
     // over time. 2 fbm = 6 simplex evals, the same budget as before.
@@ -94,21 +98,27 @@ const fragmentShader = /* glsl */ `
     float h = fbm(p + warp * 0.9 - t * 0.5 + drift);
     h = h * 0.5 + 0.5; // -> ~[0,1] elevation
 
-    // Energy: one soft gaussian basin upper-right; portrait pushes it higher
-    // and dims it so mobile copy never sits on color.
     float portrait = step(aspectX, 0.85);
-    // Scrolling the hero nudges the basin downhill (the descent picture).
-    vec2 focus = vec2(0.76 + uMouse.x * 0.04,
-                      0.7 + portrait * 0.2 + uMouse.y * 0.04 - uScroll * 0.12);
-    vec2 d = (uv - focus) * vec2(max(aspectX, 1.0), 1.35);
-    float blob = exp(-dot(d, d) * (3.6 + portrait * 2.4));
-    // Hard protection for the left text column and the header band. Thresholds
-    // are tuned to the real layout: the H1 (max-w-3xl, left-set in a centered
-    // max-w-7xl) reaches ~uv.x 0.55-0.59 on a wide viewport, so the fade must
-    // stay dark through there.
-    float sideFade = smoothstep(0.3, 0.66, uv.x + portrait * 0.25);
-    float topFade = smoothstep(1.0, 0.84, uv.y);
-    float energy = blob * sideFade * topFade * mix(1.0, 0.5, portrait);
+    // The bright basin (the optimizer's target) — larger + softer than before so
+    // the field commands the screen; the cursor pulls it, scroll steps it down.
+    vec2 focus = vec2(0.72 + uMouse.x * 0.08,
+                      0.66 + portrait * 0.22 + uMouse.y * 0.08 - uScroll * 0.14);
+    vec2 d = (uv - focus) * vec2(max(aspectX, 1.0), 1.3);
+    float blob = exp(-dot(d, d) * (2.1 + portrait * 2.3));
+
+    // Fuller bleed (P2): the field IS the hero, not a corner texture. It lives
+    // across the right + the top/bottom margins; only the HEADLINE'S BOUNDING BOX
+    // stays dark for AAA contrast (the H1 reaches ~uv.x 0.59, vertically centered
+    // -> a column guard plus a vertical "text row" band leave just that box dark).
+    float colOpen = smoothstep(0.32, 0.63, uv.x + portrait * 0.24);  // 0 over text col, 1 right
+    float rowText = smoothstep(0.26, 0.36, uv.y) * (1.0 - smoothstep(0.64, 0.76, uv.y));
+    float textGuard = max(colOpen, 1.0 - rowText);                   // dark only inside the text box
+    float topFade = smoothstep(1.0, 0.82, uv.y);                     // keep the transparent nav band clean (AA)
+    // Broad ambient presence so contours read everywhere, weighted to the right
+    // and eased off near the nav.
+    float ambient = mix(0.22, 0.4, uv.x) * (1.0 - 0.6 * smoothstep(0.65, 1.0, uv.y));
+    float field = max(blob, ambient);
+    float energy = field * textGuard * topFade * mix(1.0, 0.55, portrait);
 
     // Iso-contours from the single height field. Crisp, resolution-independent
     // lines via fwidth (clamped so flats don't sparkle on low-power / dpr 1).
@@ -124,30 +134,33 @@ const fragmentShader = /* glsl */ `
     float steep = smoothstep(0.0, 0.06, aw); // 0 on flats, 1 on steep walls
 
     // Valley-floor wash so the basin reads as depth, not just outline.
-    float basin = (1.0 - smoothstep(0.25, 0.62, h)) * energy;
+    float basin = (1.0 - smoothstep(0.22, 0.6, h)) * energy;
 
-    // Descent cue: a slow band of light travels through the level sets toward
-    // the basin (period ~17s), brightening lines that are already drawn -> an
-    // optimizer stepping downhill. Gated by energy so it stays upper-right.
-    // Scroll advances the descent band further downhill through the level sets
-    // (uScroll 0->1 across the first viewport) and lifts contour energy, so
-    // scrolling the hero reads as stepping into the loss landscape.
-    float descend = 1.0 - smoothstep(0.0, 0.15, abs(h - fract(uTime * 0.06 + uScroll * 0.6)));
-    float scrollGain = 1.0 + uScroll * 0.35;
+    // Alive: a band of light travels the level sets toward the basin (the
+    // optimizer stepping downhill, scroll advances it) PLUS a cursor "torch"
+    // that brightens the contours under the pointer, so the field warps and glows
+    // under the hand. Both gated by energy, so they never reach the text column;
+    // uInteract is 0 on touch / until the first mouse move -> no torch on mobile.
+    float descend = 1.0 - smoothstep(0.0, 0.13, abs(h - fract(uTime * 0.075 + uScroll * 0.7)));
+    vec2 mp = vec2(0.5 + uMouse.x * 0.5, 0.5 + uMouse.y * 0.5);
+    vec2 td = (uv - mp) * vec2(max(aspectX, 1.0), 1.0);
+    float torch = exp(-dot(td, td) * 6.0) * uInteract;
+    float scrollGain = 1.0 + uScroll * 0.4;
+    float liveGain = 1.0 + 0.4 * descend + 0.7 * torch;
 
-    // Compose: iridescent indigo -> violet -> faint cyan (palette v2). One cool
-    // light shifting with depth, not a rainbow. Bleed + intensity stay restrained
-    // here; P2 amplifies them to make the Field command the screen.
+    // Compose: iridescent indigo -> violet -> cyan (palette v2). One cool light
+    // shifting with depth + energy; the cyan rides the live crest so the field
+    // reads as alive, not as a flat 2nd hue. Fold one is the one place the accent
+    // is allowed to dominate (new_plan Big Swing 1).
     vec3 col = uBase;
-    col = mix(col, uColorB, basin * 0.18 * uIntensity);
-    float minorE = minorLine * energy * (0.55 + 0.3 * steep) * (1.0 + 0.25 * descend) * scrollGain;
+    col = mix(col, uColorB, basin * 0.22 * uIntensity);
+    float minorE = minorLine * energy * (0.6 + 0.3 * steep) * liveGain * scrollGain;
     col = mix(col, uColorA, minorE * uIntensity);
-    float majorE = majorLine * energy * (0.7 + 0.3 * steep) * scrollGain;
-    col = mix(col, uColorB, majorE * uIntensity * 0.9);
-    // The duotone's far stop: a faint cyan shimmer rides only the travelling
-    // descent crest, so it reads as iridescence on the moving light, not a 2nd hue.
-    float crest = majorLine * descend * energy * scrollGain;
-    col = mix(col, uColorC, crest * uIntensity * 0.35);
+    float majorE = majorLine * energy * (0.8 + 0.3 * steep) * liveGain * scrollGain;
+    col = mix(col, uColorB, majorE * uIntensity * 0.95);
+    // The duotone's far stop: a cyan highlight on the travelling crest + torch.
+    float crest = majorLine * (descend + torch) * energy * scrollGain;
+    col = mix(col, uColorC, clamp(crest, 0.0, 1.0) * uIntensity * 0.55);
 
     // Dither to stop gradient banding on the dark base.
     col += (hash(gl_FragCoord.xy) - 0.5) / 255.0 * 3.0;
@@ -164,6 +177,9 @@ const BASE = new THREE.Color("#0b0b11");
 function ShaderPlane() {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   const pointerTarget = useRef({ x: 0, y: 0 });
+  // 0 until a real mouse moves; gates the cursor torch + extra warp so the field
+  // stays calm on touch (where uMouse never updates and would pin the torch).
+  const interacted = useRef(false);
 
   const uniforms = useMemo(
     () => ({
@@ -173,9 +189,10 @@ function ShaderPlane() {
       uBase: { value: new THREE.Color("#0b0b11") },
       uColorA: { value: new THREE.Color("#6b7cff") }, // indigo — field body / minor lines
       uColorB: { value: new THREE.Color("#8b7cff") }, // violet — major lines + valley wash
-      uColorC: { value: new THREE.Color("#67e8f9") }, // cyan   — faint descent-crest shimmer
-      uIntensity: { value: 0.45 },
+      uColorC: { value: new THREE.Color("#67e8f9") }, // cyan   — live-crest highlight
+      uIntensity: { value: 0.6 },
       uScroll: { value: 0 },
+      uInteract: { value: 0 },
     }),
     [],
   );
@@ -184,6 +201,7 @@ function ShaderPlane() {
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") return;
+      interacted.current = true;
       pointerTarget.current = {
         x: (e.clientX / window.innerWidth) * 2 - 1,
         y: -((e.clientY / window.innerHeight) * 2 - 1),
@@ -214,6 +232,10 @@ function ShaderPlane() {
     const scrollUniform = material.uniforms.uScroll as { value: number };
     const target = Math.min(window.scrollY / Math.max(window.innerHeight, 1), 1);
     scrollUniform.value += (target - scrollUniform.value) * ease;
+
+    // Ease the cursor torch in on the first real mouse move (stays 0 on touch).
+    const interact = material.uniforms.uInteract as { value: number };
+    interact.value += ((interacted.current ? 1 : 0) - interact.value) * ease;
   });
 
   return (

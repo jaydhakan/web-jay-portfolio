@@ -99,10 +99,15 @@ isolation/mix-blend on a full-screen wrapper) — it would kill the
 
 ## Signature & atmosphere
 
-- **"The Field"** — the hero WebGL shader: an iridescent indigo → violet → faint-cyan
-  topographic contour field (gradient-descent / loss-landscape). Interaction-armed + offscreen-
-  unmounted (the `.hero-fallback` single-accent radials carry it until then and on
-  mobile/no-WebGL). The **drawn line** (DrawSVG contour ticks) is its sitewide echo.
+- **"The Field"** — the hero WebGL shader and the site's one signature: an iridescent
+  indigo → violet → cyan topographic contour field (gradient-descent / loss-landscape) that
+  **commands the first viewport** (fuller bleed across the right + margins; only the headline's
+  bounding box stays dark, so AAA holds). **Alive:** a travelling descent band + a cursor
+  "torch" that warps and brightens the contours under the pointer (desktop only; touch/mobile
+  stay calm via `uInteract`). One draw call, interaction-armed + offscreen-unmounted (the
+  `.hero-fallback` iridescent radials carry it until then and on mobile/no-WebGL/reduced-motion).
+  The **drawn line** (DrawSVG contour ticks) is its sitewide echo. *Fold one is the one licensed
+  exception to accent ≤ ~5% (P2 / new_plan Big Swing 1).*
 - **Choreographed opening** (desktop only — `pointer:fine`, first visit): a
   session-once preloader scramble-decodes "JAY DHAKAN" from binary, then a `jdFlow`
   clip wipe reveals an orchestrated hero (nav slide → masked H1 line-rise → copy

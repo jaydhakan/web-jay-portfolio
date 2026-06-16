@@ -116,15 +116,23 @@ html {
    Serves as loading state, reduced-motion state, and no-WebGL fallback. */
 .hero-fallback {
   background:
+    /* violet basin (upper-right) — the iridescent duotone's middle stop */
     radial-gradient(
-      ellipse 75% 65% at 74% 36%,
-      oklch(63% 0.21 272 / 22%),
-      transparent 70%
+      ellipse 82% 72% at 72% 30%,
+      oklch(66% 0.19 285 / 26%),
+      transparent 72%
     ),
+    /* faint cyan crest above it — the duotone's far stop */
     radial-gradient(
-      ellipse 45% 45% at 88% 72%,
-      oklch(54% 0.215 272 / 14%),
-      transparent 65%
+      ellipse 55% 50% at 86% 18%,
+      oklch(86% 0.115 207 / 12%),
+      transparent 66%
+    ),
+    /* indigo lower-right bleed so the field reads fuller, not a corner */
+    radial-gradient(
+      ellipse 60% 65% at 64% 86%,
+      oklch(63% 0.21 272 / 14%),
+      transparent 70%
     ),
     var(--base);
 }
