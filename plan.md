@@ -248,7 +248,7 @@ reference — we borrow the *energy*, not the literal car).
 | Phase | Title | Status |
 |---|---|---|
 | P1  | Velocity bus + GPU governance rig | `[x]` |
-| P2  | 3D loss-landscape hero + bloom (S1, S4) | `[ ]` |
+| P2  | 3D loss-landscape hero + bloom (S1, S4) | `[x]` |
 | P3  | Velocity bus everywhere (S2, S10) | `[ ]` |
 | P4  | Gooey morphing cursor + magnetic (S3) | `[ ]` |
 | P5  | Liquid-metal page transitions (S9) | `[ ]` |
@@ -280,4 +280,22 @@ reference — we borrow the *energy*, not the literal car).
   direction captured); RM path correct in a real prod-build browser (no skew, zero console/
   hydration errors). Note: the *visible* skew couldn't be exercised in headless because headless
   Chrome races `prefers-reduced-motion` emulation against hydration and the provider locks the RM
-  decision — a test-harness limit, not a code issue (logic proven separately). **Next: P2.**
+  decision — a test-harness limit, not a code issue (logic proven separately).
+- 2026-06-17 — **P2 DONE, 3D loss-landscape hero + bloom (S1 + S4).** Rewrote `HeroShader` from a
+  flat fullscreen quad into a real 3D terrain: a displaced plane mesh (vertex fbm = rolling hills
+  sinking into a glowing basin), iridescent iso-contours (indigo/violet/cyan, crisp via `fwidth`),
+  a light band sweeping ridges to basin (the optimizer descending; scroll advances it). A perspective
+  camera DIVES from a wide establishing shot down toward the basin as you scroll the first viewport,
+  plus desktop pointer parallax. Desktop-tiered: fine-pointer >=768 gets 96x128 segments + `dpr [1,2]`
+  + an `EffectComposer` Bloom + Vignette (glow + edge-darkening that also protects headline contrast);
+  mobile/coarse gets 40x56 + `dpr [1,1.5]` + no post (the audit profile measures the cheap path).
+  Energy biased right via a screen-space `leftGuard` + `topGuard` so the left H1 column stays
+  AAA-dark; distance fog fades far terrain to base. Added `@react-three/postprocessing@3.0.4` +
+  `postprocessing@6.39.1` (compatible with R3F 9 / three 0.184 / React 19). Uses the P1 governance
+  rig (`DPR_CAP`, `createFpsGuard` drops bloom on sustained frame strain). Still ONE WebGL context;
+  lazy-mount + arm-on-interaction + off-screen-unmount unchanged. **Verified** (prod build, puppeteer
+  + SwiftShader, desktop tier forced via a matchMedia patch): 3D terrain with glowing contours,
+  camera dives on scroll, bloom + vignette glow, headline crisp on dark left, RM gives the iridescent
+  gradient fallback (no canvas), **0 console + 0 shader-compile errors**; build/lint/tsc green. Bloom
+  intensity (0.85) is tunable if more glow is wanted. **Next: P3 (velocity bus visible everywhere +
+  loud type).**
