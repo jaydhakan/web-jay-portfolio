@@ -966,6 +966,18 @@ export const sections = {
     storyEyebrow: "HOW I GOT HERE",
     platformsLabel: "Find me on",
   },
+  // Camera-flight "training run" (V3 P10 / S8). Career as a converging run:
+  // captions resolve char-by-char as the camera flies through the data graph.
+  trainingRun: {
+    eyebrow: "THE TRAINING RUN",
+    heading: "How the Model Converged",
+    epochs: [
+      { tag: "EPOCH 01", title: "High loss", body: "Bespoke builds, scraped data by hand, everything from scratch." },
+      { tag: "EPOCH 02", title: "Finding gradients", body: "Pipelines, APIs, and agents that scale past one-off engagements." },
+      { tag: "EPOCH 03", title: "Descending", body: "15M+ queries a day, 99.9% uptime, an 18h ETL cut to 1.2." },
+      { tag: "CONVERGED", title: "Shipping machine", body: "Production systems, end to end. You talk to the person writing your code." },
+    ],
+  },
   servicesPage: {
     eyebrow: "SERVICES",
     heading: "What I Build & How I Charge",

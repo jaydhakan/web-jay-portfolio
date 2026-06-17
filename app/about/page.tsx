@@ -17,6 +17,7 @@ import { LineDraw } from "@/components/motion/LineDraw";
 import { ExperienceTimeline } from "@/components/sections/ExperienceTimeline";
 import { SkillBag } from "@/components/about/SkillBag";
 import { ParticlePortrait } from "@/components/about/ParticlePortrait";
+import { TrainingRun } from "@/components/about/TrainingRun";
 import { CTABanner } from "@/components/sections/CTABanner";
 
 export const metadata: Metadata = {
@@ -177,6 +178,13 @@ export default function AboutPage() {
           </div>
         </section>
       </div>
+
+      {/* Camera-flight "training run" (V3 P10 / S8) — full-bleed pinned flight. */}
+      <TrainingRun
+        eyebrow={sections.trainingRun.eyebrow}
+        heading={sections.trainingRun.heading}
+        epochs={sections.trainingRun.epochs}
+      />
 
       <CTABanner />
     </main>

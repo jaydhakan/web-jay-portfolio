@@ -256,7 +256,7 @@ reference — we borrow the *energy*, not the literal car).
 | P7  | Horizontal cinematic work reel (S6) | `[x]` |
 | P8  | Throwable physics playground (S11) | `[x]` |
 | P9  | Particle portrait (S7) | `[x]` |
-| P10 | Camera-flight training run (S8) | `[ ]` |
+| P10 | Camera-flight training run (S8) | `[x]` |
 | P11 | GPU particle finale (S12) | `[ ]` |
 | P12 | /services + case-study elevation | `[ ]` |
 | P13 | Mobile parity + QA + cleanup | `[ ]` |
@@ -442,3 +442,20 @@ reference — we borrow the *energy*, not the literal car).
   does this); **needs a real-machine eyeball to confirm the visual.** Placeholder-flagged: samples the
   current `JD` profile JPEG until Jay drops a real photo. Zero new deps. **Next: P10 (camera-flight
   training run).**
+- 2026-06-18 — **P10 DONE, camera-flight "training run" (S8).** New `components/about/TrainingRun.tsx`
+  (pin + caption choreography) + `TrainingRunCanvas.tsx` (R3F flight). A full-bleed pinned /about
+  section turns vertical scroll into a CAMERA FLIGHT through a 3D skill/knowledge graph: an instanced
+  node cloud (220 nodes, deterministic seed) wired with glowing edges, tightening from a wide tunnel
+  into a converged cluster; a CatmullRomCurve3 path flies the camera wide -> diving -> into the basin
+  as scroll progresses (the "epochs"), with fog for depth. The epoch captions (new
+  `sections.trainingRun` copy — career as a converging run, EPOCH 01 -> CONVERGED) cross-fade in/out at
+  their scroll windows in sync with the flight. Scroll progress is pushed to the canvas via a REF (no
+  React re-render); pin via one scrubbed ScrollTrigger (`+=320%`). Governed: canvas mounts only while
+  the stage is in view, dpr-capped, FPS guard drops dpr to 1 on strain. Reduced motion / mobile / no-JS
+  = a static iridescent gradient + the epoch captions stacked as a plain list (all copy is real DOM
+  text — a11y unchanged). **Verified** (prod build, puppeteer + SwiftShader): desktop mounts the canvas
+  + the section PINS (position flips to fixed) + all 4 epoch captions present with real text; reduced
+  motion = no canvas + static caption list; mobile = no canvas + static list; **0 console errors** in
+  all three; tsc + lint + build green. The flight uses meshBasicMaterial / instancedMesh
+  (SwiftShader-friendly, unlike P9's custom point-size) so it likely renders headlessly too; the
+  cinematic FEEL is still a real-machine confirm. Zero new deps. **Next: P11 (GPU particle finale).**
