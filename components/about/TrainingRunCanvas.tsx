@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { silenceThreeClockDeprecation } from "@/lib/three-console";
@@ -98,6 +98,10 @@ function Flight({ progress, onStrain }: { progress: React.RefObject<number>; onS
     g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     return g;
   }, [nodes, edges]);
+
+  // Geometry passed as a `geometry` prop (not a declarative child) is not
+  // auto-disposed by R3F on unmount — dispose it explicitly to free the buffer.
+  useEffect(() => () => lineGeo.dispose(), [lineGeo]);
 
   // Seed the instanced node colours/positions once.
   const colors = useMemo(() => {
