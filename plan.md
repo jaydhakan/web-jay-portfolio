@@ -259,7 +259,7 @@ reference — we borrow the *energy*, not the literal car).
 | P10 | Camera-flight training run (S8) | `[x]` |
 | P11 | GPU particle finale (S12) | `[x]` |
 | P12 | /services + case-study elevation | `[x]` |
-| P13 | Mobile parity + QA + cleanup | `[ ]` |
+| P13 | Mobile parity + QA + cleanup | `[x]` |
 
 ### Changelog
 - 2026-06-17 — V3 "Go Loud" plan. Recalibrated from the first (too-cautious) V3 draft: maximal
@@ -493,3 +493,21 @@ reference — we borrow the *energy*, not the literal car).
   transition on click. **Verified** (prod build, puppeteer): services = 6 bento tiles with motif SVGs
   and animations running; case study = results dl with 4 stats + numbers; **0 console errors**; tsc +
   lint + build green. Zero new deps. **Next: P13 (mobile parity + full QA + cleanup).**
+- 2026-06-18 — **P13 DONE, mobile parity + full QA sweep. ALL 13 PHASES COMPLETE.** Ran a full
+  automated audit: 6 routes (/ /work /work/[slug] /about /services /contact) x 4 modes
+  (desktop / mobile / reduced-motion / no-JS) = 24 audits + a 7-hop navigation leak test. **Results:
+  0 console errors across all 24** (and 0 across the nav test); exactly 1 `<h1>` + 1
+  `<main#main-content>` per route per mode (heading/landmark structure correct even with JS disabled);
+  **0 `aria-label` on `<p>`** (the recurring SplitText footgun stayed fixed); 0 images missing `alt`;
+  WebGL canvases mount only where + when expected and **RM / no-JS = 0 canvases everywhere** (every
+  fallback holds); the **nav-leak test held canvases flat at 0 across 7 route changes** (no WebGL /
+  canvas / ScrollTrigger accumulation — the P1 governance rig holds through the whole loud stack).
+  Mobile is bold-not-broken on every route (full content + correct structure + the tuned spectacle
+  tier; the hero canvas runs on mobile by design, the heavy set-pieces gate to posters/static). No
+  fixes were required — the per-phase gates kept the codebase clean. Remaining real-machine eyeball
+  items (documented, not blockers): the *animated feel* of the flowmap/reel/cursor, and the particle
+  PIXELS for P9/P11 (headless SwiftShader clamps custom `gl_PointSize`; always-present posters/ghost
+  wordmark mean nothing ever reads blank). Content still placeholder-flagged per V3-4 (real covers,
+  photo, testimonials, contact env vars are the Jay-blocked swap-ins in §8). **The V3 "Go Loud" build
+  is complete: every route has its flagship moment, one ML-system concept throughout, A11y + CLS held,
+  governed GPU, designed fallbacks.**
