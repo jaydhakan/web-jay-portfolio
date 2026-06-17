@@ -1,371 +1,283 @@
-# Jay Dhakan Portfolio — V3 "Crazy Animation" Plan
+# Jay Dhakan Portfolio — V3 "Go Loud" Animation Plan
 
 > Fresh start. Supersedes the V2 motion rebuild + the P1–P12 elevation track (both shipped,
-> docs deleted). This is the **single source of truth** for the bold redesign: design bible
-> **and** live execution tracker in one file. Built from a deep-research pass (4 web lanes:
-> Awwwards-cinematic / kinetic-type / playful-experimental / 2026 trends) + a full codebase
-> map + a creative-director synthesis.
+> their docs deleted). **Single source of truth** for the bold redesign: design bible **and**
+> live execution tracker. Built from a deep-research pass (4 web lanes: Awwwards-cinematic /
+> kinetic-type / playful-experimental / 2026 trends) + a full codebase map + a synthesis pass.
 >
-> `PRODUCT.md` (brand/users) and `DESIGN.md` (the *shipped* baseline system) remain — read
-> them for context, but where this plan disagrees (notably the perf gate), **this plan wins.**
+> `PRODUCT.md` (brand/users) and `DESIGN.md` (the *shipped V2 baseline*) remain for context.
+> Where they disagree with this plan, **this plan wins.**
 
 ---
 
-## 0. Why this plan exists
+## 0. The mandate
 
-The site shipped a lot of *polished, disciplined* motion — and it reads as premium-but-safe
-(a Linear/Vercel-grade page, not an Awwwards "wow"). The owner's call: stop playing it safe.
-Go **genuinely bold**. The previous philosophy was "restraint = premium, crazy ≠ noisy"; we
-keep the craft, but spend a much bigger boldness budget on a handful of show-stoppers.
+The V2 site is polished — and forgettable. It reads as a premium SaaS page, not a site people
+screenshot and send to a friend. **We are done playing safe.** The goal now: a portfolio that
+makes a visitor say "how is this real," on *every* page, in the first three seconds.
+
+This plan is **maximal by default.** Every page gets a flagship moment. Sections can layer
+*multiple* effects. The hero is a full 3D world. Imagery is never flat. The cursor is alive.
+Type is loud. Transitions are liquid. The finale is a GPU particle storm. We spend the boldness
+budget everywhere and only pull back where pulling back is the difference between "wild" and
+"broken."
+
+### What changed from the first draft (why it read safe, and the fix)
+| Was (timid) | Now (loud) |
+|---|---|
+| "Bold the signature, restrain everything else." | **Every surface is alive.** The signature leads; nothing else is sleepy. |
+| "One moment per section." | **Layered moments** — orchestrated, not minimal. Sections can have entrance + ambient + interaction. |
+| "Home is the showcase." | **Every route is a showcase.** /work, /about, /services, /contact each get a flagship set-piece. |
+| "Compositor-cheap connective tissue so the gate is never spent." | **We spend the GPU freely on desktop.** Bloom, particles, real 3D, post-processing. |
+| "Perf ≥ 95 hard gate." | **Perf measured, not capped** (see §2). The only hard line is "doesn't break / still loads." |
 
 ### Decisions (locked with the owner)
-
-| #        | Decision         | Locked value                                                                                                                                                                                       |
-|----------|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **V3-1** | Boldness vs perf | **Bold first.** Relax the hard gate to **~90 desktop / ~85 mobile** to allow heavier WebGL, scroll-storytelling, particles. A11y stays **100**, CLS stays **0**.                                   |
-| **V3-2** | Direction        | **Awwwards-cinematic + kinetic-typography + playful-experimental** — a real step-change, not just cranking the current look.                                                                       |
-| **V3-3** | Content          | **Placeholder / temporary data is allowed** to make pages feel full and let an effect ship; flag every placeholder (`TODO(JAY)` / `isPlaceholder`), never silently fake a metric or a testimonial. |
-| **V3-4** | Docs             | **Deleted** `plan.md`(old)/`new_plan.md`/`PHASES.md`; this fresh `plan.md` + `DESIGN.md` + `PRODUCT.md` + `README.md` remain.                                                                      |
-| **V3-5** | Brand invariants | Dark-only, electric-indigo (+ the iridescent indigo→violet→cyan duotone), first-person voice, **no em/en dashes**, all visible copy in `data/content.ts`.                                          |
-
----
-
-## 1. North star — the ONE idea
-
-> **THE SITE COMPILES ITSELF — a portfolio that runs like a model, not a brochure.**
-
-Every "crazy" effect is a literal demonstration of an ML system in motion, driven by **one
-shared velocity/scroll signal** (read once per frame off Lenis — the same signal that already
-feeds The Field's `uScroll`/`uMouse`/`uInteract`). We promote the existing gradient-descent
-shader from ambient backdrop to the site's **protagonist**, and make the whole experience read
-as *inference running on the page*:
-
-- **DECODES** on load (scramble/binary → Syne; already shipped in `OpeningChoreo`).
-- **CONVERGES** on scroll (the loss landscape tightens into its basin as you descend).
-- **REACTS** to you (the field warps under the cursor, type fattens, marquees streak — one signal).
-- **MORPHS** between states (your portrait is "just data / an embedding" assembling from a
-  particle cloud; page changes are interpolations through latent space).
-- **CLOSES** with a GPU set-piece that is physically impossible to fake in the DOM.
-
-This is still **"bold the signature, restrain everything else"** — we go genuinely crazy on
-**~6 earned WebGL moments inside the ONE context we already pay for**, and keep the connective
-tissue compositor-cheap so the relaxed 90/85 gate is *never actually spent*. The visitor doesn't
-read that Jay engineers state and motion — they **feel** a controlled, converging system the
-entire scroll. The medium proves the message.
-
-### The decision rule
-
-If a proposed effect doesn't make "an ML system, alive and converging, that you can perturb"
-more legible, it's decoration — cut it or bend it to the idea. Bold the idea; restrain everything
-that isn't it.
+| # | Decision | Value |
+|---|---|---|
+| **V3-1** | Posture | **Maximal.** Crazy, attractive, best-in-class UI/UX is the primary goal. Spectacle on every page. |
+| **V3-2** | Direction | **Awwwards-cinematic + kinetic-typography + playful-experimental** — full 3D, particles, physics, liquid transitions, loud type. |
+| **V3-3** | Perf | Desktop: **spend freely**, no Lighthouse cap — just must load fast + run smooth on a real machine. Mobile: **bold but functional** (target ~80+, never broken/janky). **A11y = 100 always. CLS = 0.** |
+| **V3-4** | Content | **Placeholder / temporary data allowed** to make pages full and let effects ship; always flag (`TODO(JAY)` / `isPlaceholder`), never silently fake a metric or testimonial. |
+| **V3-5** | Docs | Deleted old `plan.md`/`new_plan.md`/`PHASES.md`/`docs/final_prompt.md`; this `plan.md` + `DESIGN.md` + `PRODUCT.md` + `README.md` remain. |
+| **V3-6** | Brand | Dark-first, electric-indigo + **iridescent indigo→violet→cyan**, now with **controlled neon glow / bloom** (more energy than V2). First-person voice, **no em/en dashes**, copy in `data/content.ts`. |
 
 ---
 
-## 2. Guardrails (every new effect passes these)
+## 1. North star — the ONE idea that makes the crazy cohere
 
-The gate relaxed; the *craft rules* did not.
+> **THE SITE COMPILES ITSELF — a portfolio that runs like a live ML system, and you can touch it.**
 
-- **Gate:** Lighthouse **Perf ≥ 90 desktop / ≥ 85 mobile**, **A11y = 100**, **CLS 0**.
-  *(Desktop measured with `lighthouse --preset=desktop`.)*
-- **ONE WebGL context, always.** Never a second live `<Canvas>`. Every WebGL effect (flowmap
-  planes, transition quad, particle portrait, finale) renders **inside** the existing
-  `HeroShader` Canvas via render-target swaps / shared scene, **or** is its own single
-  route-scoped canvas that fully unmounts the hero one. Never two live at once. (See Risks.)
-- **Animate only** `transform` / `opacity` / `clip-path` / `filter` / shader uniforms.
-  Never width/height/margin/top.
-- **DOM/text stays authoritative.** WebGL is `aria-hidden` + `pointer-events-none`; a real DOM
-  heading lives under every kinetic word; sr-only copy backs every aria-hidden kinetic statement.
-- **`prefers-reduced-motion` decided up front** (`gsap.matchMedia`), never post-hoc disabled.
-  Every WebGL set-piece has a **premium static poster fallback** (reuse `lib/blur.ts` LQIP).
-- **Mobile is adapted, not absent** — it degrades to a deliberate lighter experience, never a
-  broken desktop one and never scroll-jacked.
-- **Lenis stays the single scroll source of truth** (synced to the GSAP ticker). Use `scrub`,
-  not snap-traps; cap pin lengths; always a native-scroll fallback.
-- **LCP element never covered on first paint.** Heavy canvases lazy-mount + pause off-screen.
-- **Slop test:** couldn't be mistaken for a generic SaaS/Linear page or an AI template; it makes
-  the one idea more legible, not just prettier.
+The crazy is not random spectacle — it's *one concept executed obsessively* so the site couldn't
+be mistaken for anyone else's. Every effect is an ML system in motion, all driven from one shared
+signal (Lenis velocity/scroll, already feeding The Field). The whole experience reads as inference
+running on the page:
 
----
+- **DECODES** on load (scramble/binary → Syne — already shipped in `OpeningChoreo`, now louder).
+- **CONVERGES** on scroll — you fly down into a 3D loss-landscape as the optimizer finds its basin.
+- **REACTS** to you — the field warps, type fattens and skews, imagery ripples, the cursor morphs,
+  everything leaning on one momentum signal.
+- **MORPHS** between states — your portrait is "just data" that assembles from a particle cloud;
+  every page change is an interpolation through latent space (liquid shader transition).
+- **CLOSES** with a GPU particle storm that is physically impossible to fake in the DOM.
 
-## 3. Signature moves (the things people screenshot)
+This is the thread that turns "a pile of effects" into a site that wins awards: a visitor doesn't
+*read* that Jay engineers state and motion — they *feel* a living, converging system the whole way
+down. **The medium proves the message.** That coherence is what makes "loud" land as "designed"
+instead of "noisy."
 
-~8 earned moments. Each is grounded in the research and reuses the one WebGL context.
-
-| #      | Move                                                                                                                                                                                                                                   | Where                       | Wow                                                                                                            | Perf risk |
-|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------|----------------------------------------------------------------------------------------------------------------|-----------|
-| **S1** | **Loss-Landscape Hero, Act II** — pin the hero ~150–200vh; a stateless `uProgress` scrub tightens the iso-contours and steps the descent band into the basin as the H1 "converges."                                                    | Home hero                   | The signature you own becomes a story you *feel*. Zero new GPU budget.                                         | low       |
-| **S2** | **One velocity bus** — read Lenis velocity once/frame, broadcast to marquee timeScale+direction, headline skewY/scaleY + `wght` nudge, section-label streak, AND the Field uniforms.                                                   | Global                      | The Lando-Norris "Site of the Year" momentum signature: everything physically connected.                       | low       |
-| **S3** | **WebGL flowmap work grid** — covers become WebGL planes (inside the existing Canvas, synced to DOM rects); cursor-velocity flowmap warps UVs + per-channel RGB chromatic smear; magnetic card lean + VIEW cursor.                     | /work + FeaturedWork        | Each project reacts to *how* you approach it (Cyd Stumpel / Codrops flowmap).                                  | medium    |
-| **S4** | **"You, as data" particle portrait** — headshot assembles from ~50–70k GPU particles from a color+depth WebP pair (~30KB), breathes with curl noise, disperses→reforms into the first project on CTA.                                  | /about identity             | The Phantom.land "photo becomes a living cloud" for ~30KB. The gag *is* the ML thesis.                         | medium    |
-| **S5** | **Latent-space page transitions** — upgrade the enter curtain to a shader block-dissolve (pixels flip in noise order + chromatic flash) via the View Transitions API + a `uProgress` noise quad in the existing context.               | Global routes               | The Active-Theory "one continuous experience," framed as walking the latent space.                             | medium    |
-| **S6** | **Train-in-public camera scroll** — pin a lightweight instanced skill-graph/data landscape; fly a CatmullRom camera path on scroll (epochs = scroll, descending to a converged cluster); SplitText copy resolves char-by-char in sync. | /about journey              | Scrolling becomes operating a film camera through your own training run.                                       | medium    |
-| **S7** | **Throwable skill bag** — stack chips (Python, PyTorch, FastAPI, CUDA…) you grab, fling, and watch settle, self-healing back to a grid. GSAP Draggable + Inertia + Flip (all free). DOM-synced text stays crisp/selectable.            | /about toolkit or TechStack | People spend 20s tossing your skills around; the self-healing pile reads "I model state carefully."            | low       |
-| **S8** | **GPU finale** — one flagship surface runs 200k+ compute particles (WebGPU/TSL, ships inside three 0.184) forming the logo / "LET'S BUILD," morphing on interaction; feature-detect → falls back to the S4 WebGL particle path.        | Contact CTA                 | Particle counts impossible to fake in DOM = self-evidently real engineering; signals 2026 GPU-compute tooling. | high      |
+### The only filter for an effect
+Does it make "a live ML system you can perturb" more visceral, more attractive, or more fun? If
+yes, go big. If it's just decoration that could sit on any template, it's not crazy enough — make
+it on-concept or make it bigger.
 
 ---
 
-## 4. The phased build plan
+## 2. Non-negotiables — the rig that lets us go loud without breaking
 
-> Cadence (proven on this repo): **one shippable bold move per phase → meet the exit gate
-> (build green + Lighthouse target + RM/no-JS/responsive screenshots + no ST/GPU leaks) →
-> owner reviews → next phase.** Foundation first; riskiest last on a proven base. Any phase
-> can be reordered/cut — the goal leads, not the list.
+Not restraint. These are the things that keep "wild" from becoming "crashed phone / dead lead."
 
-### P1 — Velocity bus + perf/a11y governance harness *(foundation — no visible big effect yet)*
+- **A11y = 100, always.** Free wow, and real clients (and their legal teams) need it. DOM/text
+  stays authoritative under every effect: WebGL is `aria-hidden` + `pointer-events-none`; a real
+  heading lives under every kinetic/3D word; sr-only copy backs every aria-hidden statement.
+- **It must still LOAD fast.** Heavy WebGL/particles lazy-mount and *arm after first paint* (the
+  pattern The Field already uses). The first screen paints instantly; the spectacle ignites a beat
+  later. Spectacle that delays the LCP past ~2.5s is retuned, never shipped as-is.
+- **Don't kill the GPU.** You can have several big canvases across the site — but only what's
+  on-screen runs. Off-screen canvases pause (`frameloop` gated) or unmount. Cap `dpr [1,2]`; an FPS
+  guard drops particle resolution if a frame takes > 20ms. (This is about *simultaneity*, not
+  ambition — go as big as you want on the surface the user is looking at.)
+- **`prefers-reduced-motion` is a real, designed path** (`gsap.matchMedia`) — a premium static
+  poster (reuse `lib/blur.ts` LQIP) for every WebGL set-piece. A fraction of users get motion sick;
+  this is one media query and it keeps A11y at 100.
+- **Mobile is bold, not broken.** It gets its own tuned spectacle (lighter particle counts, native
+  scroll-driven CSS, no scroll-jacking on touch) — never a stripped or janky desktop.
+- **Animate** `transform`/`opacity`/`clip-path`/`filter`/shader uniforms. Never width/height/margin.
+- **Quality bar (replaces the old "slop test"):** every effect is unmistakably *intentional* and
+  *on-concept*. Loud is the goal; sloppy is not. If it looks like a default AOS/template effect,
+  it's not bold enough.
 
-- **Build:** a `useVelocityBus` hook (reads Lenis velocity/progress once per frame off the
-  existing ticker, broadcasts via a tiny store) + a WebGL governance layer: a
-  `useWebGLVisibility` gate (flip `HeroShader` from `frameloop="always"` to gated/paused
-  off-screen), a `dpr` cap helper, an FPS guard that can drop particle texture res when frame
-  time > 20ms, and a reduced-motion→poster swap path (reuse `lib/blur.ts`). Centralize the
-  `gsap.matchMedia` RM branches. Extend `ScrollTriggerLeakCounter` discipline to GPU work.
-- **First cheap proof:** hook the existing marquee `timeScale` + hero H1 skew to the bus.
-- **Exit gate:** build green; desktop 100, mobile ≥ 85, A11y 100; no ST/GPU leaks over 10 navs.
-
-### P2 — Loss-Landscape Hero, Act II *(S1)*
-
-- **Build:** add a **stateless** `uProgress` uniform to The Field; pin the hero ~150–200vh; a
-  ScrollTrigger `scrub` drives `uProgress` so contours tighten and the descent band lands in the
-  basin, the H1 resolving on the same timeline. One `cinematicSilk` CustomEase. Keep the shader
-  stateless (no JS branching on scroll). Reuse `Pin` + the `OpeningChoreo` H1 reveal.
-- **Exit gate:** hero converges on scroll; RM = static field; no second context; desktop 100,
-  mobile ≥ 85.
-
-### P3 — One velocity bus, visible everywhere *(S2)*
-
-- **Build:** marquee speed + direction follow scroll (flip on scroll-up) with a `skewX` streak;
-  Syne headline `skewY`/`scaleY` + `wght` nudge on velocity (`gsap.quickTo`, debounced snap-back);
-  section labels streak. All compositor/paint-cheap, fine-pointer + motion-safe only.
-- **Exit gate:** page feels like one connected momentum system; desktop 100, mobile ≥ 85 (DOM-only),
-  A11y 100.
-
-### P4 — WebGL flowmap on the work grid *(S3)*
-
-- **Build:** mirror /work + FeaturedWork covers as WebGL planes **inside the existing Canvas**
-  (drei `<Image>` synced to DOM rects); a cursor-velocity flowmap (RG ping-pong, inline GLSL)
-  offsets UVs + per-channel RGB chromatic aberration gated by velocity; displacement cross-fade
-  to a 2nd texture on hover; magnetic card lean (reuse `MagneticButton` pattern) + VIEW cursor.
-  DOM text authoritative; canvas `aria-hidden`.
-- **Exit gate:** every tile reacts to the cursor; one context; desktop ≥ 95, mobile static fallback,
-  no leak growth.
-
-### P5 — Depth-map particle portrait *(S4)*
-
-- **Build:** generate color+depth WebPs **offline** from Jay's headshot (Depth-Anything/MiDaS —
-  no runtime model); build the ~50–70k point cloud (BufferGeometry, depth→z, color→tint,
-  curl-noise drift, `uMorph` scatter/reform), lazy-mounted (`next/dynamic` `ssr:false`) +
-  IntersectionObserver pause; additive blend + soft circular point mask. GSAP tweens `uMorph` on
-  load and on the CTA (face disperses → reforms into the first project silhouette).
-- **Placeholder note:** generate the depth pair from the current `JD` placeholder avatar so it
-  ships now; `TODO(JAY)` real photo upgrade stays flagged.
-- **Exit gate:** living self-portrait on /about; poster fallback under RM/no-WebGL; desktop ≥ 92,
-  mobile poster, FPS guard active.
-
-### P6 — Latent-space page transitions *(S5)*
-
-- **Build:** upgrade the enter-only curtain to a shader **block-dissolve** rendered inside the
-  existing Canvas (render-target swap; `step(noise, uProgress)` flips pixels in noise order +
-  chromatic flash), wired to **Next 16 View Transitions** + `flushSync` at the cover peak; reuse
-  `ScrambleText` for the loading string. Keep the current CSS clip curtain as the RM/no-JS fallback.
-- **Exit gate:** site feels like one continuous GPU experience; no 2nd context; cursor blend
-  verified mid-wipe; RM = instant swap; LCP never covered on first paint.
-
-### P7 — Throwable skill bag *(S7)*
-
-- **Build:** replace the flat toolkit/TechStack list with a Draggable + Inertia + Flip physics
-  pile of stack chips (DOM-synced text, bounded, elastic, self-healing to grid; slight rotation
-  on throw). Desktop-only; static readable grid under RM/mobile. **Zero new deps** (all free GSAP).
-- **Exit gate:** tactile, memorable skills section; desktop 100, mobile static, A11y 100 (text
-  selectable/readable).
-
-### P8 — Train-in-public camera-path scroll *(S6)*
-
-- **Build:** pin a lightweight **instanced** 3D skill-graph/data landscape on /about; fly a
-  `CatmullRomCurve3` camera path on scroll (descending toward a converged cluster) with SplitText
-  copy resolving char-by-char on position labels; matcaps + instancing, no realtime shadows.
-  Reuse `Pin` + SplitText + the ticker. (Renders in a route-scoped canvas that unmounts cleanly.)
-- **Exit gate:** a journey act that restates the optimization theme; desktop ≥ 92; mobile collapses
-  to a static/vertical narrative; no leaks.
-
-### P9 — GPU finale: WebGPU/TSL compute particles *(S8 — highest risk, last)*
-
-- **Build:** on ONE flagship surface (contact CTA), switch that Canvas to `WebGPURenderer` via
-  the R3F `gl` factory; ~200k+ particles via TSL `Fn().compute(n)` (`instancedArray`,
-  `SpriteNodeMaterial`) forming the logo / "LET'S BUILD," morphing on interaction + mouse
-  repulsion; **feature-detect `navigator.gpu`** → fall back to the P5 depth-map/GPGPU WebGL
-  particles. Lazy-loaded, one route only. (WebGPU/TSL ship inside three 0.184 — no install.)
-- **Exit gate:** the closing-argument set-piece; desktop ≥ 90 (relaxed gate); hard fallback
-  verified; FPS guard + dpr cap; one context.
-
-### P10 — Mobile motion parity pass
-
-- **Build:** address the "desktop-first animation" gap. Give touch users an *adapted* experience:
-  native **scroll-driven CSS animations** (`animation-timeline: view()`, compositor, zero JS) for
-  entrance parity, a lighter scroll-scrubbed Field, the velocity-marquee (bus-lite), and verified
-  premium static posters for every WebGL set-piece. No scroll-jacking on touch.
-- **Exit gate:** mobile reads as "motion that adapts to device"; mobile Perf ≥ 85 all routes; A11y
-  100; no horizontal overflow at 375.
-
-### P11 — Full QA matrix + leak/perf sweep + launch cleanup
-
-- **Build:** re-run the 5-route × mobile/desktop Lighthouse matrix at the relaxed gate
-  (`--preset=desktop` for the 100); 10-nav ScrollTrigger + GPU-context leak sweep; RM + no-JS +
-  JS-off verification; em-dash grep; content/asset swap-in where real assets have landed. Confirm
-  every WebGL surface lazy-mounts, pauses off-screen, caps dpr, and has a static RM fallback.
-- **Exit gate:** desktop ~100, mobile ≥ 85, A11y 100, CLS 0, zero leaks, single context honored;
-  this `plan.md` status board updated.
+> Strategic note (read once): your sales pitch is "I build fast, polished software," and most
+> prospects arrive on a phone. The above keeps the crazy from undercutting that pitch. If you want
+> to push mobile even harder at some perf cost, that's a knob we can turn — flag it and I will.
 
 ---
 
-## 5. Risk register (top items + mitigation)
+## 3. Signature moves — the things people screenshot
 
-1. **Second WebGL context = the cardinal sin** (doubles memory, context-loss risk, extra rAF).
-   → Everything WebGL renders **inside the one existing Canvas** via render-target swaps / shared
-   scene, OR is a single route-scoped canvas that fully unmounts the hero one. Never two live.
-   Enforced in P1's governance layer.
-2. **The relaxed 90/85 gate getting actually spent** by heavy WebGL (P5/P8/P9).
-   → Every canvas lazy-mounts (`ssr:false`), pauses off-screen, caps `dpr [1,1.75]`,
-   `antialias:false` + low-power on ambient / high-performance only on the finale; FPS guard drops
-   particle res when frame time > 20ms; WebGPU finale is one lazy route.
-3. **A11y regression from canvas-rendered text/imagery** (loses selection + SR access; SplitText
-   has put a prohibited `aria-label` on `<p>` twice on this project).
-   → DOM/text authoritative + visible, canvases `aria-hidden` + `pointer-events-none`; real
-   headings under every kinetic word; sr-only copy for aria-hidden statements; re-verify A11y=100
-   every phase.
-4. **Scroll-jacking** on pinned hero (P2), horizontal/work acts, camera-path (P8).
-   → Lenis stays the single source of truth; `scrub` not snap-traps; cap pin length; clear visual
-   progress; native vertical fallback under RM; never disable scroll on touch.
-5. **Mobile reading cheap** (the dossier's "desktop-first" flag).
-   → P10 is a dedicated parity pass: scroll-driven CSS + bus-lite + premium static posters for
-   every WebGL set-piece; mobile gate ≥ 85.
-6. **Scope creep diluting the "wow."** 11 phases of crazy can become noise.
-   → ONE bold move per phase with a hard exit gate before the next; only ~6 earned WebGL moments,
-   the rest compositor-cheap; apply the slop test each phase.
-7. **New dependency surface.** → WebGPU/TSL ship inside three 0.184 (no install); depth generation
-   is **offline** (no runtime dep); curl/flowmap are inline GLSL; add `@react-three/postprocessing`
-   only if bloom is truly needed on the finale; prefer 2D GSAP physics (free) over `matter-js`;
-   avoid OGL (would add a 2nd WebGL pathway).
+Maximal set. Each is grounded in the research dossier. Most reuse the one hero WebGL context;
+the heaviest get their own route-scoped canvas.
+
+| # | Move | Where | The wow |
+|---|---|---|---|
+| **S1** | **3D loss-landscape hero you fly into** — promote The Field from a flat shader to a real 3D terrain: camera parallaxes on mouse, *dives into the basin* on scroll, bloom-lit glowing descent path, sparks. The H1 lives in/over the 3D space and resolves as the optimizer converges. Full-bleed, commands the screen. | Home hero | The first screen is a living 3D ML visualization, not a gradient. Immediate "how is this real." |
+| **S2** | **One velocity bus** — read Lenis velocity once/frame, broadcast to marquee speed+direction, headline skew/scale + variable `wght`, section-label streak, AND the hero uniforms. The whole page moves like one physical system. | Global | The Lando-Norris "Site of the Year" momentum feel — everything connected, motion as inertia. |
+| **S3** | **Gooey morphing cursor + magnetic everything** — the cursor is a liquid indigo blob that stretches toward velocity, morphs into labels/arrows ("view ↗", "drag", "play"), leaves a faint trail; every interactive element leans toward it. | Global | The Cuberto "cursor is the brand" signature. Makes the entire site feel hand-built. |
+| **S4** | **Bloom + post-processing glow layer** — an EffectComposer pass (bloom, subtle chromatic aberration, grain) over the WebGL so the iridescence *glows* like expensive liquid light. | Hero + finale | The "this cost money" sheen that separates Awwwards sites from CSS gradients. |
+| **S5** | **WebGL flowmap on ALL imagery** — every cover (work grid, featured, case study) is a WebGL plane that ripples + chromatically smears with cursor velocity and melts through a displacement map on hover. Imagery is never flat anywhere. | /work, home, case study | Each project reacts to *how* you approach it (Cyd Stumpel / Codrops flowmap). |
+| **S6** | **Horizontal cinematic work reel** — a pinned sideways scroll act through featured projects with WebGL covers, parallax layers, and scrubbed clip-reveals. Vertical wheel drives a cinematic lateral journey. | Home (or /work) | The Unseen "year in review" rhythm-break — a film, not a list. |
+| **S7** | **"You, as data" particle portrait** — your headshot assembles from ~60–100k GPU particles (color + depth WebP, ~30KB), breathes with curl noise, and disperses → reforms into your first project on a CTA. | /about | The Phantom.land "photo becomes a living cloud." The gag *is* the ML thesis. |
+| **S8** | **Cinematic camera-flight "training run"** — pin a 3D skill-graph / data landscape and fly a keyframed camera through it on scroll (epochs as scroll, descending to a converged cluster), copy resolving char-by-char in sync. | /about journey | Scrolling becomes operating a film camera through your own career. |
+| **S9** | **Liquid-metal latent-space page transitions** — every route change is a full-screen shader morph: pixels dissolve in noise order with a chromatic flash / mercury blob wipe, framed as walking the latent space between projects. | Global routes | The Active-Theory "one continuous experience" — navigation itself is a set-piece. |
+| **S10** | **Loud kinetic + distortion typography** — oversized Syne headings; key words run a distortion/wave shader; scramble-decode on load, scroll, and hover; marquees that streak and flip with scroll. | Global / section headers | Type that "refuses to be ignored" (Obys / kinetic-type lane). |
+| **S11** | **Throwable physics playground** — skill chips you grab, fling, and watch settle, self-healing back to a grid; draggable project cards; an idle easter-egg toy that wakes after a few seconds. | /about toolkit, /work, global | Tactile, memorable, "controlled chaos" — people stay and play (GSAP Draggable/Inertia/Flip, free). |
+| **S12** | **GPU particle finale** — one flagship surface runs 200k+ compute-driven particles (WebGPU/TSL, ships inside three 0.184) forming the logo / "LET'S BUILD," morphing on interaction; graceful WebGL2 fallback. | Contact CTA | Particle counts impossible to fake in DOM = self-evidently real engineering. The closing argument. |
 
 ---
 
-## 6. Reuse vs new
+## 4. Per-page elevation — no route left at "fine"
 
-**REUSE (do not rebuild):**
-
-- The single `HeroShader` R3F Canvas + "The Field" shader and its `uTime`/`uScroll`/`uMouse`/
-  `uInteract` uniforms — **add a stateless `uProgress`; render the flowmap planes / transition
-  quad / portrait into THIS context.**
-- `HeroBackground` mount gates (RM probe, WebGL probe, IntersectionObserver, deferred-arm).
-- `SmoothScrollProvider` Lenis↔GSAP ticker sync (the velocity bus reads from here).
-- `lib/gsap.ts` (`jdFlow` ease, `DUR` scale, lazy SplitText/DrawSVG/Flip/ScrambleText — all free,
-  installed).
-- Motion primitives `Pin`/`RevealText`/`ClipReveal`/`FadeUp`/`LineDraw`/`Counter`.
-- UI `SlideText`/`ScrambleText`/`KineticHeadline`/`MagneticButton` (the V2.1 award layer).
-- `PageTransition` curtain → becomes the **RM fallback** for the shader transition.
-- `CustomCursor` + its VIEW state; `lib/blur.ts` + `image-blur.ts` (LQIP posters = the WebGL
-  static fallbacks); `ScrollTriggerLeakCounter` (extend to GPU); `gsap.matchMedia` RM branching.
-
-**NEW (add only when a phase proves it):**
-
-- `useVelocityBus` + `useWebGLVisibility`/FPS-guard hooks (P1).
-- A `uProgress` scrubbed-Field controller (P2).
-- A flowmap RG ping-pong + DOM-synced WebGL plane component (P4 — inline GLSL, no dep).
-- Offline depth-map generation (build-time) + a depth-particle component (P5).
-- A View-Transitions router shim + shader block-dissolve quad (P6).
-- A `SkillBag` using already-installed GSAP Draggable/Inertia/Flip (P7 — zero deps).
-- A camera-path /about scene with drei CatmullRom + Instances (P8).
-- A `WebGPURenderer` gl-factory + TSL compute module — ships inside three 0.184, **no install** (
-  P9).
-- *Optional, only if proven needed:* `@react-three/postprocessing` (bloom on the finale);
-  `@react-three/rapier` (only if the skill bag goes 3D — its WASM is already a transitive).
+- **`/` Home** — S1 3D hero you fly into · S2 velocity bus · S4 bloom · S6 horizontal work reel ·
+  S5 flowmap covers · S10 loud headers + reactive marquee · loud impact-stats set-piece. *The site's overture.*
+- **`/work` Index** — S5 flowmap on every cover · S11 draggable/throwable cards · S3 morphing
+  cursor with "view" state · animated filter morphs (Flip) · ambient index numbers. *The proof, alive.*
+- **`/work/[slug]` Case study** — cinematic WebGL cover hero (flowmap + ken-burns + bloom) ·
+  oversized scrubbed results set-piece · S9 morph into the next project. *The depth.*
+- **`/about`** — S7 particle portrait · S8 camera-flight training run · S11 throwable skill bag ·
+  loud kinetic intro · cinematic timeline. *The person, as a system.*
+- **`/services`** — bento tiles with live computational motifs (always-on, not hover-only) ·
+  neon-glow hover · oversized header · a process visualization that draws on scroll. *The offer, animated.*
+- **`/contact`** — S12 GPU particle finale behind the form · kinetic statement headline · charged
+  focus states + satisfying submit animation. *The close, unforgettable.*
+- **404 / error** — keep the branded "off the contour" pages; inherit the louder palette + glow.
 
 ---
 
-## 7. Content / placeholder track *(can run alongside any phase)*
+## 5. The phased build plan
 
-Placeholder data is allowed (V3-3) so pages feel full and effects can ship. Flag everything.
+> Cadence: **one shippable loud move per phase → exit gate (build green + perf sane + RM/no-JS/
+> responsive shots + no leaks) → owner reviews → next.** Foundation + the global "loud" layers
+> first (they change everything beneath them), then page by page, riskiest GPU work last.
 
-**Standing — blocked on Jay (the biggest real upgrade, far more than any effect):**
+| # | Phase | Ships | Risk |
+|---|---|---|---|
+| **P1** | Velocity bus + GPU governance rig | `useVelocityBus` + `useWebGLVisibility`/FPS-guard + centralized `gsap.matchMedia` RM branches + leak counter extended to GPU. First proof: marquee + hero H1 react to the bus. | low |
+| **P2** | 3D loss-landscape hero + bloom (S1, S4) | The Field becomes a 3D terrain you fly into on scroll; mouse-parallax camera; EffectComposer bloom/CA/grain; glowing descent path; H1 converges. | med |
+| **P3** | Velocity bus everywhere (S2, S10) | Marquee speed+direction, headline skew/scale + `wght`, section-label streak; scramble-decode headers; reactive marquees. | low |
+| **P4** | Gooey morphing cursor + magnetic (S3) | Liquid cursor with velocity stretch + contextual label morphs + trail; magnetic lean on all interactive elements. | low |
+| **P5** | Liquid-metal page transitions (S9) | Shader block-dissolve / mercury wipe via View Transitions API + `flushSync`; scramble loading string; CSS-curtain RM fallback. | med |
+| **P6** | WebGL flowmap on all imagery (S5) | DOM-synced WebGL cover planes inside the hero context; flowmap ripple + chromatic smear + hover displacement, on /work + home + case study. | med |
+| **P7** | Horizontal cinematic work reel (S6) | Pinned lateral scroll act with parallax + scrubbed reveals over the flowmap covers; vertical-list RM/mobile fallback. | med |
+| **P8** | Throwable physics playground (S11) | Draggable/Inertia/Flip skill bag + draggable cards + idle easter-egg toy. Zero new deps. | low |
+| **P9** | Particle portrait (S7) | ~60–100k-point depth-map portrait (offline color+depth WebP), curl-noise drift, scatter→reform on CTA; poster fallback. | med |
+| **P10** | Camera-flight training run (S8) | Pinned instanced 3D skill-graph; CatmullRom camera path on scroll; char-by-char copy in sync. | med |
+| **P11** | GPU particle finale (S12) | WebGPU/TSL compute particles on /contact forming the logo; mouse repulsion; WebGL2 fallback; lazy, one route. | high |
+| **P12** | /services + /work/[slug] elevation | Live bento motifs + neon hover (services); cinematic cover hero + scrubbed results + next-project morph (case study). | med |
+| **P13** | Mobile parity + full QA + cleanup | Tuned mobile spectacle (scroll-driven CSS, lighter particles), full LH/A11y/leak/no-JS sweep, content swap-in, this board updated. | low |
 
-- [ ] Real project **covers** → `public/images/projects/*.png` (branded placeholders in place;
-  overwrite, then re-run `scripts/gen-placeholders.mjs` to refresh the LQIP map).
-- [ ] Real **profile photo** → `public/images/profile/jay.jpg` (needed for the P5 depth portrait;
-  placeholder depth pair ships from the `JD` avatar until then).
-- [ ] Real **testimonials** (6 are `isPlaceholder`).
-- [ ] Replace the **3 placeholder projects** on /work (currently `// PLACEHOLDER`).
-- [ ] Confirm **email / LinkedIn / Upwork URLs**, timeline date conflict, the "50+ projects" claim.
+> Recommended start: **P1 → P2.** P1 is the rig that lets every loud move run without killing the
+> GPU; P2 (the 3D hero you fly into) is the single biggest "how is this real" and sets the tone.
+
+---
+
+## 6. Risk register (top items + mitigation)
+
+1. **Multiple WebGL contexts killing the GPU / context-loss.** → Only on-screen canvases run;
+   off-screen pause or unmount (P1 governance). Prefer rendering extra effects into the existing
+   hero context; give the heaviest (finale, camera-flight) their own *route-scoped* canvas that
+   unmounts the others. Cap `dpr`, FPS-guard the particle counts.
+2. **Spectacle delaying load / LCP.** → Everything heavy lazy-mounts and *arms after first paint*;
+   the first screen paints instantly. Retune anything that pushes LCP past ~2.5s.
+3. **A11y regression from canvas text/imagery.** → DOM/text authoritative + visible; canvases
+   aria-hidden; real headings under kinetic words; sr-only copy for aria-hidden statements
+   (SplitText has put a prohibited `aria-label` on `<p>` twice here — watch it). Re-verify A11y=100 each phase.
+4. **Scroll-jacking feeling trapped** (pinned hero, horizontal reel, camera-flight). → Lenis stays
+   the single scroll source; use `scrub` not snap-traps; cap pin length; clear progress cues;
+   native scroll under RM; never disable scroll on touch.
+5. **Mobile reading cheap or janky.** → P13 is a dedicated parity pass; lighter particle counts +
+   scroll-driven CSS + premium posters; mobile target ~80+, never broken.
+6. **Scope: 13 loud phases is a lot.** → One move per phase with a hard exit gate; ship and review
+   before the next; cut/reorder freely — the goal leads.
+7. **New deps.** → WebGPU/TSL ship inside three 0.184 (no install); depth-map gen is offline (no
+   runtime dep); flowmap/curl are inline GLSL; GSAP physics is free. Add `@react-three/postprocessing`
+   for bloom (P2 — the one likely new dep) and avoid OGL (a 2nd WebGL pathway).
+
+---
+
+## 7. Reuse vs new
+
+**REUSE:** the hero R3F Canvas + The Field shader (+ uniforms) — extend it; `HeroBackground` mount
+gates; `SmoothScrollProvider` Lenis↔ticker sync (the bus reads here); `lib/gsap.ts` (jdFlow, DUR,
+lazy free plugins); `Pin`/`RevealText`/`ClipReveal`/`FadeUp`/`LineDraw`/`Counter`;
+`SlideText`/`ScrambleText`/`KineticHeadline`/`MagneticButton`; `PageTransition` (→ RM fallback for
+the shader transition); `CustomCursor` (→ upgraded to the gooey morphing cursor); `lib/blur.ts` +
+`image-blur.ts` (posters); `ScrollTriggerLeakCounter`.
+
+**NEW:** `useVelocityBus` + `useWebGLVisibility`/FPS-guard (P1); a 3D-terrain Field + EffectComposer
+bloom (P2, likely `@react-three/postprocessing`); flowmap RG ping-pong + DOM-synced plane (P6,
+inline GLSL); offline depth-map gen + depth-particle component (P9); View-Transitions router shim +
+shader morph quad (P5); a `SkillBag`/draggable system (P8, free GSAP); a CatmullRom camera scene
+(P10); a `WebGPURenderer` gl-factory + TSL compute module (P11, inside three — no install).
+
+---
+
+## 8. Content / placeholder track *(runs alongside any phase)*
+
+Placeholders allowed (V3-4), always flagged. **Blocked on Jay — the biggest single upgrade:**
+- [ ] Real project **covers** → `public/images/projects/*` (placeholders in place; overwrite + re-run `scripts/gen-placeholders.mjs` to refresh the LQIP map).
+- [ ] Real **profile photo** → `public/images/profile/jay.jpg` (drives the P9 particle portrait — ships from the `JD` placeholder until then).
+- [ ] Real **testimonials** (6 placeholders) · replace the **3 placeholder projects** on /work.
+- [ ] Confirm email / LinkedIn / Upwork URLs, timeline dates, the "50+ projects" claim.
 - [ ] `RESEND_API_KEY` + verified `from:` domain; `NEXT_PUBLIC_SITE_URL`.
 
 ---
 
-## 8. Reference sites (study the *feeling* + the technique, not the code)
-
-**Cinematic / WebGL**
-
-- Active Theory — `activetheory.net` (one continuous GPU experience; no "pages").
-- Lusion — `lusion.co` (physical, throwable 3D with weight/momentum).
-- Unseen 2025 — `2025.unseen.co` (horizontal scroll cinematic journey; Developer Award).
-- Cyd Stumpel — `awwwards.com/sites/cyd-stumpel-portfolio-2025` (a SOLO dev hitting SOTD with
-  tasteful WebGL — our exact situation).
-- Phantom.land particle face — Codrops "Invisible Forces" (depth-map particle portrait; the single
-  most ML-relevant technique).
-- Codrops "Cinematic 3D Scroll with GSAP" (2025-11) and "Shader Uniforms to Clip-Path Wipes" (
-  2026-05) — our exact stack patterns.
-- three.js `webgpu_tsl_compute_attractors_particles` (the 2026-forward finale path).
-
-**Kinetic type**
-
-- Obys Agency — `obys.agency` (type-as-layout-system).
-- Lando Norris — `awwwards.com/sites/lando-norris` (Site of the Year: one velocity signal drives
-  everything — our S2).
-- Codrops dual-wave (2026-01) + organic text distortion (2024-11) — DOM-only velocity waves (cheap
-  big-wow).
-
-**Playful**
-
-- Bruno Simon — `bruno-simon.com` (the canonical "navigation as game" — and the trope we
-  deliberately do NOT imitate; too gamey for a precise-engineer brand).
-- Cuberto — `cuberto.com` (morphing cursor as brand).
-- Codrops free-GSAP-plugins demos (InertiaPlugin spring-away grid, Physics2D text smash, MorphSVG).
+## 9. Reference sites (study the feeling + the technique)
+Active Theory `activetheory.net` · Lusion `lusion.co` · Unseen `2025.unseen.co` · Cyd Stumpel
+(SOTD solo dev) · Phantom.land particle face (Codrops "Invisible Forces") · Codrops "Cinematic 3D
+Scroll with GSAP" (2025-11) + "Shader Uniforms to Clip-Path Wipes" (2026-05) · three.js
+`webgpu_tsl_compute_attractors_particles` · Obys `obys.agency` · Lando Norris (SOTY, velocity bus) ·
+Cuberto `cuberto.com` (morphing cursor) · Bruno Simon `bruno-simon.com` (the "navigation as game"
+reference — we borrow the *energy*, not the literal car).
 
 ---
 
-## 9. Definition of done (every new effect)
-
-1. Makes the one idea (an ML system, alive and converging, that you can perturb) more legible.
+## 10. Definition of done (every effect)
+1. Makes "a live ML system you can perturb" more visceral / attractive / fun — and is unmistakably intentional.
 2. `transform`/`opacity`/`clip-path`/`filter`/uniforms only; RM + mobile paths designed in.
-3. One WebGL context honored; LCP never covered on first paint.
+3. Only on-screen canvases run; LCP never covered on first paint; loads fast.
 4. DOM/text authoritative; A11y = 100; CLS = 0.
-5. Verified: desktop ≥ 90 (`--preset=desktop`), mobile ≥ 85; no ST/GPU leaks.
+5. Runs smooth on a real machine (desktop) / functional + bold on mobile; no leaks.
 6. Copy in `content.ts`; no em/en dashes; placeholders flagged.
-7. Passes the slop test.
 
 ---
 
-## 10. Status board
+## 11. Status board
 
 `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked
 
-| Phase | Title                                       | Status |
-|-------|---------------------------------------------|--------|
-| P1    | Velocity bus + perf/a11y governance harness | `[ ]`  |
-| P2    | Loss-Landscape Hero, Act II (S1)            | `[ ]`  |
-| P3    | One velocity bus, visible everywhere (S2)   | `[ ]`  |
-| P4    | WebGL flowmap on the work grid (S3)         | `[ ]`  |
-| P5    | Depth-map particle portrait (S4)            | `[ ]`  |
-| P6    | Latent-space page transitions (S5)          | `[ ]`  |
-| P7    | Throwable skill bag (S7)                    | `[ ]`  |
-| P8    | Train-in-public camera-path scroll (S6)     | `[ ]`  |
-| P9    | GPU finale: WebGPU/TSL particles (S8)       | `[ ]`  |
-| P10   | Mobile motion parity pass                   | `[ ]`  |
-| P11   | Full QA matrix + leak/perf sweep + cleanup  | `[ ]`  |
-
-> Recommended start: **P1 → P2.** P1 is the spine every bold move hangs on; P2 (the hero becoming
-> a convergence story) is the single highest concept-payoff move and reuses the GPU you already pay
-> for.
+| Phase | Title | Status |
+|---|---|---|
+| P1  | Velocity bus + GPU governance rig | `[x]` |
+| P2  | 3D loss-landscape hero + bloom (S1, S4) | `[ ]` |
+| P3  | Velocity bus everywhere (S2, S10) | `[ ]` |
+| P4  | Gooey morphing cursor + magnetic (S3) | `[ ]` |
+| P5  | Liquid-metal page transitions (S9) | `[ ]` |
+| P6  | WebGL flowmap on all imagery (S5) | `[ ]` |
+| P7  | Horizontal cinematic work reel (S6) | `[ ]` |
+| P8  | Throwable physics playground (S11) | `[ ]` |
+| P9  | Particle portrait (S7) | `[ ]` |
+| P10 | Camera-flight training run (S8) | `[ ]` |
+| P11 | GPU particle finale (S12) | `[ ]` |
+| P12 | /services + case-study elevation | `[ ]` |
+| P13 | Mobile parity + QA + cleanup | `[ ]` |
 
 ### Changelog
-
-- 2026-06-17 — V3 plan created from a deep-research pass (4 web lanes + codebase map + synthesis).
-  Old V2 trackers (`plan.md`/`new_plan.md`/`PHASES.md`) deleted per owner. Gate relaxed to
-  90/85 (A11y 100, CLS 0 held). Awaiting owner go-ahead on P1.
+- 2026-06-17 — V3 "Go Loud" plan. Recalibrated from the first (too-cautious) V3 draft: maximal
+  posture, spectacle on every page, perf measured-not-capped (A11y 100 + CLS 0 held, mobile must
+  stay functional). Old V2 trackers deleted.
+- 2026-06-17 — **P1 DONE — velocity bus + GPU governance rig.** New `lib/velocity-bus.ts` (one
+  imperative per-frame signal: smoothed scroll velocity + progress + direction, eased + decaying,
+  on the GSAP ticker only while subscribed; `subscribeVelocity` for non-React consumers like the
+  shader + `useVelocityFrame` hook, RM-gated). `lib/webgl-governance.ts` (`useInViewport`,
+  `DPR_CAP`, `createFpsGuard` — the standard gate for every WebGL surface). `SmoothScrollProvider`
+  feeds the bus every frame from the live Lenis instance off the ticker (robust to ref timing).
+  `Marquee` is the first proof: velocity-reactive `skewX` streak on a wrapper (compositor-only,
+  never overwrites the CSS loop), RM-off. `HeroBackground` adopts `useInViewport`.
+  `ScrollTriggerLeakCounter` extended to log canvas + bus-subscriber counts. Also fixed a
+  pre-existing `react-hooks/refs` lint error in `KineticHeadline` (render-time ref mutation →
+  query chars in the effect). **Verified:** build + lint + tsc green; bus logic PASS via a
+  deterministic tsx node test (peak velocity 44.5 under per-frame feed, decays to 0, progress/
+  direction captured); RM path correct in a real prod-build browser (no skew, zero console/
+  hydration errors). Note: the *visible* skew couldn't be exercised in headless because headless
+  Chrome races `prefers-reduced-motion` emulation against hydration and the provider locks the RM
+  decision — a test-harness limit, not a code issue (logic proven separately). **Next: P2.**

@@ -23,8 +23,6 @@ export function KineticHeadline({
   className?: string;
 }) {
   const rootRef = useRef<HTMLSpanElement>(null);
-  const charRefs = useRef<HTMLSpanElement[]>([]);
-  const centers = useRef<number[]>([]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -35,10 +33,16 @@ export function KineticHeadline({
       !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!active) return;
 
+    // Collect the (server-rendered) char spans in the effect — no render-time ref
+    // mutation. Matches the HeroHeadlineKinetic pattern.
+    const chars = Array.from(root.querySelectorAll<HTMLSpanElement>("[data-kh-char]"));
+    if (!chars.length) return;
+
     let raf = 0;
     let pendingX = -1;
+    let centers: number[] = [];
     const measure = () => {
-      centers.current = charRefs.current.map((el) => {
+      centers = chars.map((el) => {
         const r = el.getBoundingClientRect();
         return r.left + r.width / 2;
       });
@@ -46,10 +50,10 @@ export function KineticHeadline({
     const apply = () => {
       raf = 0;
       const x = pendingX;
-      for (let i = 0; i < charRefs.current.length; i++) {
-        const d = centers.current[i] - x;
+      for (let i = 0; i < chars.length; i++) {
+        const d = centers[i] - x;
         const w = Math.round(REST + (PEAK - REST) * Math.exp(-(d * d) / (2 * SIGMA * SIGMA)));
-        charRefs.current[i].style.fontVariationSettings = `"wght" ${w}`;
+        chars[i].style.fontVariationSettings = `"wght" ${w}`;
       }
     };
     const onMove = (e: PointerEvent) => {
@@ -58,7 +62,7 @@ export function KineticHeadline({
       if (!raf) raf = requestAnimationFrame(apply);
     };
     const onLeave = () => {
-      for (const el of charRefs.current) el.style.fontVariationSettings = `"wght" ${REST}`;
+      for (const el of chars) el.style.fontVariationSettings = `"wght" ${REST}`;
     };
 
     measure();
@@ -73,7 +77,6 @@ export function KineticHeadline({
     };
   }, []);
 
-  charRefs.current = [];
   const words = text.split(" ");
 
   return (
@@ -89,9 +92,7 @@ export function KineticHeadline({
             {[...word].map((ch, ci) => (
               <span
                 key={ci}
-                ref={(el) => {
-                  if (el) charRefs.current.push(el);
-                }}
+                data-kh-char
                 className="inline-block transition-[font-variation-settings] duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
               >
                 {ch}

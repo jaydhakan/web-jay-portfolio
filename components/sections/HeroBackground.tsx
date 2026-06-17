@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
+import { useInViewport } from "@/lib/webgl-governance";
 
 const HeroShader = dynamic(() => import("./HeroShader"), { ssr: false });
 
@@ -31,17 +32,9 @@ export function HeroBackground() {
   );
   const ref = useRef<HTMLDivElement>(null);
   // Mount/unmount the shader as the hero enters/leaves view (so the GPU idles on
-  // the rest of the page). IntersectionObserver replaces Motion's useInView.
-  const [inView, setInView] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
-      rootMargin: "200px 0px",
-    });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
+  // the rest of the page). Shared governance hook (V3 P1) — the standard gate for
+  // every WebGL surface from here on.
+  const inView = useInViewport(ref, "200px 0px");
   // false during SSR/hydration, cached WebGL probe on the client.
   const webglOk = useSyncExternalStore(noopSubscribe, probeWebgl, () => false);
 

@@ -4,6 +4,7 @@ import { ReactLenis, type LenisRef } from "lenis/react";
 import type Lenis from "lenis";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { publishScroll } from "@/lib/velocity-bus";
 
 /**
  * Smooth-scroll root (plan.md §6.2). Drives Lenis's rAF off the GSAP ticker so
@@ -43,7 +44,13 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     setInstance(lenis);
 
     function update(time: number) {
-      lenisRef.current?.lenis?.raf(time * 1000);
+      const l = lenisRef.current?.lenis;
+      if (!l) return;
+      l.raf(time * 1000);
+      // Feed the velocity bus every frame from the LIVE instance (plan.md S2).
+      // Driven off the ticker (re-reading the ref) rather than the scroll event,
+      // so it's robust to ref-attach timing and frame-synced with the bus decay.
+      publishScroll({ velocity: l.velocity, progress: l.progress, direction: l.direction });
     }
     gsap.ticker.add(update);
     gsap.ticker.lagSmoothing(0);
