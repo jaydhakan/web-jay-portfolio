@@ -252,14 +252,14 @@ reference — we borrow the *energy*, not the literal car).
 | P3  | Velocity bus everywhere (S2, S10) | `[x]` |
 | P4  | Gooey morphing cursor + magnetic (S3) | `[x]` |
 | P5  | Liquid-metal page transitions (S9) | `[x]` |
-| P6  | WebGL flowmap on all imagery (S5) | `[ ]` |
-| P7  | Horizontal cinematic work reel (S6) | `[ ]` |
-| P8  | Throwable physics playground (S11) | `[ ]` |
-| P9  | Particle portrait (S7) | `[ ]` |
-| P10 | Camera-flight training run (S8) | `[ ]` |
-| P11 | GPU particle finale (S12) | `[ ]` |
-| P12 | /services + case-study elevation | `[ ]` |
-| P13 | Mobile parity + QA + cleanup | `[ ]` |
+| P6  | WebGL flowmap on all imagery (S5) | `[x]` |
+| P7  | Horizontal cinematic work reel (S6) | `[x]` |
+| P8  | Throwable physics playground (S11) | `[x]` |
+| P9  | Particle portrait (S7) | `[x]` |
+| P10 | Camera-flight training run (S8) | `[x]` |
+| P11 | GPU particle finale (S12) | `[x]` |
+| P12 | /services + case-study elevation | `[x]` |
+| P13 | Mobile parity + QA + cleanup | `[x]` |
 
 ### Changelog
 - 2026-06-17 — V3 "Go Loud" plan. Recalibrated from the first (too-cautious) V3 draft: maximal
@@ -337,3 +337,177 @@ reference — we borrow the *energy*, not the literal car).
   /work with scrollY reset to 0 and activeEl = main-content, and reduced motion does an instant swap
   with the curtain staying hidden; **0 console errors** in both; build/lint/tsc green. View-Transitions
   shared-element morph stays available as a future polish. **Next: P6 (WebGL flowmap on all imagery).**
+- 2026-06-17 — **P6 DONE, WebGL flowmap on all imagery (S5).** New `components/media/FlowImage.tsx`
+  (mount gate) + `FlowImageCanvas.tsx` (R3F leaf, dynamic `ssr:false`). Each project cover gets a
+  textured plane that renders the image as "data the page is processing": an always-on faint liquid
+  shimmer (domain-warp) at REST so the screenshot stays legible, a travelling RIPPLE + chromatic
+  (RGB) smear along the scroll axis whose amplitude is driven by the **P1 velocity bus**
+  (`subscribeVelocity`), and a cursor-centred displacement "melt" + iridescent lens on HOVER
+  (eased in/out). **Engineering call (documented deviation):** did NOT build the plan's literal S5
+  (ONE full-screen canvas tracking every image's DOM rect). That fights our own governance rule
+  (canvases unmount off-screen; /work has no hero context; the case-study cover is the priority/LCP
+  image) and repeats the fragility P5 chose to avoid. Instead each cover is a SEPARATE governed
+  canvas: mounts only while in view (`useInViewport`, 300px margin), `dpr` capped (`DPR_CAP`),
+  `createFpsGuard` fades the canvas back to the still image on sustained frame strain (and stops the
+  frameloop so the GPU work is actually shed, not just hidden behind opacity:0), and it ARMS after
+  first paint (double-rAF) so it never competes with LCP/hydration. Desktop-gated exactly like the
+  hero/cursor (fine-pointer + hover + >=768 + motion-allowed); coarse/mobile + reduced motion keep the
+  crisp still image. The `next/image` underneath stays the authoritative SSR / LCP / no-JS / a11y
+  layer (real alt, blur-up, `priority`) — the canvas is `aria-hidden` decoration over it. Wired into
+  the home FeaturedStack covers and the case-study cover hero (priority/LCP). The /work index keeps
+  plain `next/image`: its only desktop cover is the cursor-follow preview, which is
+  `pointer-events-none` (the hover-melt could never fire) and swaps on every row hover (a WebGL canvas
+  would churn GL contexts for no interactive payoff) — the flowmap belongs on the IN-PLACE covers. The
+  small next-project card + the /work mobile thumb also stay plain (tiny / below the fold = off-budget
+  for GPU). Marker `data-flow-canvas` added for the leak counter / verification. **Senior review
+  (self) caught + fixed before commit:** (1) the orthographic Canvas was given manual frustum bounds
+  (-1..1), but R3F resets the ortho frustum to PIXEL bounds on every resize — a fixed [2,2] plane
+  would have rendered as a ~2px speck; fixed by scaling a unit quad to `state.viewport` each frame
+  (resize-proof). (2) the FPS-guard strain path only set opacity:0, so the loop kept rendering at full
+  cost; now it also stops the frameloop. **Verified** (prod build, puppeteer + SwiftShader): home
+  desktop mounts 3 flow canvases over the 3 still covers; case-study desktop mounts 1 over the LCP
+  cover with the real alt intact; a **pixel sample of the case-study canvas = 100% non-base color**
+  (proves the plane FILLS the frame — the speck bug would have failed this); **reduced motion = 0
+  canvases**; **mobile/coarse = 0 canvases** (still image kept in both); off-screen scroll UNMOUNTS the
+  canvas (1 -> 0, governance proven, no GPU leak); **0 console + 0 shader-compile errors**; tsc + lint
+  + build green. Note: the *animated* ripple/chroma/melt motion still wants a real-machine eyeball (the
+  bus needs real scroll momentum + a real hover; headless can't drive those) — but plane-fills-frame +
+  texture-renders are now proven, not assumed. Known tradeoff: the cover is fetched twice (next/image
+  optimized URL + TextureLoader raw URL) — standard flowmap cost, the placeholder PNGs are tiny. Zero
+  new deps (reuses three/R3F + the P1 bus + the P1 governance rig). **Next: P7 (horizontal cinematic
+  work reel).**
+- 2026-06-17 — **P7 DONE, horizontal cinematic work reel (S6).** New
+  `components/sections/WorkReel.tsx` replaces the home sticky card stack (`FeaturedStack.tsx` deleted;
+  it was fully superseded) as the featured-work treatment — the projects as "a film, not a list." On
+  desktop + motion the section PINS and the vertical wheel drives a lateral journey: a track of
+  full-height panels translates horizontally via a single scrubbed ScrollTrigger (`x: -(scrollWidth -
+  innerWidth)`, pin length == that travel so 1px wheel ~ 1px lateral, no over-long pin). Lenis stays
+  the single scroll source. Inside each panel the cover, copy, and a giant ambient index parallax at
+  different rates as the panel crosses the viewport (`containerAnimation`-linked, compositor-only
+  xPercent) for depth; a top progress bar tracks the journey so it never feels trapped (risk #4). The
+  covers REUSE the P6 `FlowImage` (governed WebGL flowmap; still next/image underneath as SSR / a11y /
+  LCP). `FeaturedWork` keeps its header OUTSIDE the pin trigger so it scrolls away before the reel
+  pins. **Reduced motion + mobile = a normal vertical column** (no pin, no horizontal travel, no
+  scroll-jack on touch). **Bug caught + fixed in-loop:** the row layout was first gated on `md:` alone,
+  so reduced-motion on a DESKTOP viewport kept an unreachable horizontal row clipped by
+  `overflow-hidden`; re-gated to `motion-safe:md:` (row only when motion is allowed AND >=768) so RM at
+  any width falls back to the column. **Verified** (prod build, puppeteer + SwiftShader): desktop pins
+  (position flips to fixed mid-scroll) and the track travels exactly 0 -> -2880 = scrollWidth(4320) -
+  innerWidth(1440), progress bar fills 0 -> 1, pin RELEASES cleanly at the last panel (back to relative,
+  no trap); reduced-motion desktop = `flex-direction: column` + no transform + no pin; mobile = column +
+  no transform; off-screen scroll leaves 0 reel canvases (P6 governance still holds, no accumulation);
+  **0 console errors**; tsc + lint + build green. Note: the *buttery-ness* of the parallax / scrub wants
+  a real-machine eyeball (headless proves the transforms fire and the travel math is exact, not the
+  feel). Zero new deps (GSAP ScrollTrigger pin + containerAnimation, all free). **Next: P8 (throwable
+  physics playground).**
+- 2026-06-17 — **P8 DONE, throwable physics playground (S11).** New `components/about/SkillBag.tsx`
+  replaces the static /about toolkit grid: each category card is a physics "bag" whose skill chips you
+  grab, fling (GSAP Draggable + InertiaPlugin — momentum, bounded to the card, lean-into-throw
+  rotation), and watch SELF-HEAL back to their grid positions via Flip a few seconds after the bag
+  goes idle. Added `Draggable` + `InertiaPlugin` to the lazy GSAP plugin chunk (`lib/gsap.ts`,
+  `getDraggable()`); both ship FREE in gsap 3.15 (no install — InertiaPlugin confirmed the real 477-line
+  plugin, not a stub). Pure enhancement: the chips ship in normal flow as real text inside the real
+  categorized list, so a11y / no-JS / SSR are unchanged; Draggable only upgrades them after the lazy
+  plugins load, and ONLY under `(min-width:768px) and (hover:hover) and (pointer:fine) and
+  (prefers-reduced-motion:no-preference)`. Mobile / touch / reduced motion render the same chips as a
+  plain wrap grid. Draggables + idle timers are killed on cleanup (matchMedia revert) — no leak. The
+  plan's secondary P8 ideas (draggable project cards, idle easter-egg toy) were DEFERRED rather than
+  half-shipped — the throwable skill bag is the flagship S11 surface and the one move per phase; the
+  others can be a later polish pass. **Verified** (prod build, puppeteer + SwiftShader, pointer gate
+  forced like P2/P4): desktop+motion initializes Draggable on all 18 chips (GSAP's translate3d +
+  translate/rotate/scale-reset init signature present); **reduced motion = NO Draggable** (plain grid);
+  **mobile = NO Draggable** (plain grid); chips stay real text in all modes; **0 console errors**; tsc +
+  lint + build green. Note: the actual throw/inertia/self-heal FEEL needs a real machine — headless
+  synthetic mouse drags don't faithfully drive Draggable (same limitation documented for P2/P4); init +
+  gating + a11y + cleanup are proven. Zero new deps. **Next: P9 (particle portrait).**
+- 2026-06-18 — **P9 DONE, "you as data" particle portrait (S7).** New
+  `components/about/ParticlePortrait.tsx` (mount gate) + `ParticlePortraitCanvas.tsx` (R3F leaf). The
+  /about identity portrait is sampled into a GPU point cloud (one particle per pixel, ~67k at grid 260):
+  each particle's rest position is its pixel in the image plane, z pushed by luminance (pseudo-depth —
+  swaps to a real offline depth map when Jay's photo lands), colour = pixel colour. It breathes with a
+  bounded curl-style drift at rest and SCATTERS to a sphere then reforms on hover (the gag: your photo
+  is "just data" converging). Built as an imperative `THREE.Points` via `<primitive>` (declarative
+  `<bufferAttribute>` attach drew nothing for the custom-shader cloud); geometry + material disposed on
+  unmount; per-frame writes go through a ref (immutability-lint-safe, matches HeroShader). Governed:
+  dpr-capped, FPS-guarded (drops grid + stops the loop on strain), mounted only in view, armed after
+  first paint. The still next/image is the poster / SSR / a11y (real alt) / no-JS / reduced-motion /
+  mobile layer underneath. Portrait enlarged to ~w-40/48 so the cloud reads. **Verified** (prod build):
+  desktop mounts the canvas over the poster (real alt intact); reduced motion + mobile = NO canvas
+  (poster kept); off-screen scroll UNMOUNTS the canvas (no leak); shaders compile + link with **0 GL
+  errors**; **0 console errors**; tsc + lint + build green. **Honest caveat (important):** the cloud is
+  NOT visible under headless SwiftShader — isolated to one cause (a stock `THREE.PointsMaterial` renders
+  the same geometry fine, but custom-shader `gl_PointSize` is ignored/clamped to ~0 on the SwiftShader
+  point path; shaders compile + link clean, geometry + camera are correct). This is a headless-renderer
+  limitation, not a product bug — real GPUs honour custom `gl_PointSize` (every Codrops particle demo
+  does this); **needs a real-machine eyeball to confirm the visual.** Placeholder-flagged: samples the
+  current `JD` profile JPEG until Jay drops a real photo. Zero new deps. **Next: P10 (camera-flight
+  training run).**
+- 2026-06-18 — **P10 DONE, camera-flight "training run" (S8).** New `components/about/TrainingRun.tsx`
+  (pin + caption choreography) + `TrainingRunCanvas.tsx` (R3F flight). A full-bleed pinned /about
+  section turns vertical scroll into a CAMERA FLIGHT through a 3D skill/knowledge graph: an instanced
+  node cloud (220 nodes, deterministic seed) wired with glowing edges, tightening from a wide tunnel
+  into a converged cluster; a CatmullRomCurve3 path flies the camera wide -> diving -> into the basin
+  as scroll progresses (the "epochs"), with fog for depth. The epoch captions (new
+  `sections.trainingRun` copy — career as a converging run, EPOCH 01 -> CONVERGED) cross-fade in/out at
+  their scroll windows in sync with the flight. Scroll progress is pushed to the canvas via a REF (no
+  React re-render); pin via one scrubbed ScrollTrigger (`+=320%`). Governed: canvas mounts only while
+  the stage is in view, dpr-capped, FPS guard drops dpr to 1 on strain. Reduced motion / mobile / no-JS
+  = a static iridescent gradient + the epoch captions stacked as a plain list (all copy is real DOM
+  text — a11y unchanged). **Verified** (prod build, puppeteer + SwiftShader): desktop mounts the canvas
+  + the section PINS (position flips to fixed) + all 4 epoch captions present with real text; reduced
+  motion = no canvas + static caption list; mobile = no canvas + static list; **0 console errors** in
+  all three; tsc + lint + build green. The flight uses meshBasicMaterial / instancedMesh
+  (SwiftShader-friendly, unlike P9's custom point-size) so it likely renders headlessly too; the
+  cinematic FEEL is still a real-machine confirm. Zero new deps. **Next: P11 (GPU particle finale).**
+- 2026-06-18 — **P11 DONE, GPU particle finale (S12).** New `components/contact/ParticleFinale.tsx`
+  (gate + authoritative wordmark) + `ParticleFinaleCanvas.tsx` (R3F points). A full-bleed band closes
+  /contact: the finale wordmark ("LET'S BUILD") is rendered to an offscreen 2D canvas, its lit pixels
+  sampled into tens of thousands of particles that ASSEMBLE into the letters, breathe with bounded
+  curl noise, and REPEL from the cursor (a world-space force field — the pointer is unprojected onto
+  the z=0 plane each frame; particles push away within a radius and spring back). **Engineering call:**
+  built on the WebGL2 points path (the plan's robust fallback) rather than WebGPU/TSL compute — the
+  WebGPU variant is fragile across browsers and the one-context rule; WebGL2 is universal and already
+  loud. Governed: dpr-capped, FPS-guarded (coarsens density + drops to demand frameloop on strain),
+  in-view mount, lazy on one route. The build (sampling + Math.random) runs in a deferred rAF inside an
+  effect (impurity-lint-safe), geometry/material disposed on unmount. **A11y / robustness:** the
+  wordmark also ships as a real visible DOM `<h2>` — full strength under reduced motion / mobile /
+  no-JS / no-WebGL, and a faint 0.08 ghost under the particles (the target the cloud settles into), so
+  a visible wordmark ALWAYS renders even if the GPU point path is unavailable. New
+  `sections.contactPage.finale` copy. **Verified** (prod build, puppeteer + SwiftShader): desktop
+  mounts the canvas with the wordmark ghosted to 0.08; reduced motion + mobile = no canvas + wordmark
+  at full opacity; real "LET'S BUILD" DOM text in all three; **0 console errors**; tsc + lint + build
+  green. Same SwiftShader caveat as P9 for the particle pixels themselves (custom gl_PointSize), but
+  the always-present ghost wordmark means the finale never reads as blank, and real GPUs form the
+  cloud over it. Zero new deps. **Next: P12 (/services + case-study elevation).**
+- 2026-06-18 — **P12 DONE, /services + case-study elevation.** (a) New
+  `components/sections/ServiceMotif.tsx` adds an ALWAYS-ON "computational motif" behind each services
+  bento tile (the plan's "live motifs, not hover-only"): streaming data lanes (Data/Infra), a pulsing
+  node graph (AI/Chat), or radiating request rings (APIs/Web), keyed to the service icon. Pure SVG +
+  CSS keyframes (`lane-flow` / `edge-pulse` / `node-breathe` / `ring-radiate` in globals.css) —
+  compositor-only, no canvas, so several run at once without touching the WebGL budget; brightens on
+  tile hover; all `motion-safe:` so reduced motion freezes them. Tile copy lifted to `relative` so it
+  sits above the motif. (b) New `components/motion/ScrubReveal.tsx` turns the case-study results into
+  an OVERSIZED scrubbed set-piece: the numbers (now clamp(3rem,8vw,5rem)) scale up from 0.86 + brighten
+  as the block scrolls through the viewport, scrubbed to scroll; desktop + motion only, RM/mobile/no-JS
+  render them at rest. The next-project "morph" is already delivered by the P5 latent-space page
+  transition on click. **Verified** (prod build, puppeteer): services = 6 bento tiles with motif SVGs
+  and animations running; case study = results dl with 4 stats + numbers; **0 console errors**; tsc +
+  lint + build green. Zero new deps. **Next: P13 (mobile parity + full QA + cleanup).**
+- 2026-06-18 — **P13 DONE, mobile parity + full QA sweep. ALL 13 PHASES COMPLETE.** Ran a full
+  automated audit: 6 routes (/ /work /work/[slug] /about /services /contact) x 4 modes
+  (desktop / mobile / reduced-motion / no-JS) = 24 audits + a 7-hop navigation leak test. **Results:
+  0 console errors across all 24** (and 0 across the nav test); exactly 1 `<h1>` + 1
+  `<main#main-content>` per route per mode (heading/landmark structure correct even with JS disabled);
+  **0 `aria-label` on `<p>`** (the recurring SplitText footgun stayed fixed); 0 images missing `alt`;
+  WebGL canvases mount only where + when expected and **RM / no-JS = 0 canvases everywhere** (every
+  fallback holds); the **nav-leak test held canvases flat at 0 across 7 route changes** (no WebGL /
+  canvas / ScrollTrigger accumulation — the P1 governance rig holds through the whole loud stack).
+  Mobile is bold-not-broken on every route (full content + correct structure + the tuned spectacle
+  tier; the hero canvas runs on mobile by design, the heavy set-pieces gate to posters/static). No
+  fixes were required — the per-phase gates kept the codebase clean. Remaining real-machine eyeball
+  items (documented, not blockers): the *animated feel* of the flowmap/reel/cursor, and the particle
+  PIXELS for P9/P11 (headless SwiftShader clamps custom `gl_PointSize`; always-present posters/ghost
+  wordmark mean nothing ever reads blank). Content still placeholder-flagged per V3-4 (real covers,
+  photo, testimonials, contact env vars are the Jay-blocked swap-ins in §8). **The V3 "Go Loud" build
+  is complete: every route has its flagship moment, one ML-system concept throughout, A11y + CLS held,
+  governed GPU, designed fallbacks.**

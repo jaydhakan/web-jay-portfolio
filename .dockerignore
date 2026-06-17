@@ -1,0 +1,32 @@
+# Build artifacts + deps (reinstalled/rebuilt in the image)
+node_modules
+.next
+out
+build
+
+# Local env / secrets — never bake into the image
+.env
+.env.local
+.env*.local
+
+# VCS + tooling
+.git
+.gitignore
+.idea
+.vscode
+
+# Docs / meta not needed at build
+*.md
+plan.md
+DESIGN.md
+PRODUCT.md
+README.md
+
+# OS / logs
+.DS_Store
+*.log
+npm-debug.log*
+
+# Alternate lockfiles (npm is the source of truth in the image)
+pnpm-lock.yaml
+pnpm-workspace.yaml

@@ -6,9 +6,11 @@ import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { projects, sections } from "@/data/content";
 import { publicImageExists } from "@/lib/images";
 import { blurProps } from "@/lib/blur";
+import { FlowImage } from "@/components/media/FlowImage";
 import { Tag } from "@/components/ui/Tag";
 import { Counter } from "@/components/motion/Counter";
 import { RevealText } from "@/components/motion/RevealText";
+import { ScrubReveal } from "@/components/motion/ScrubReveal";
 import { CaseStudySidebar } from "@/components/work/CaseStudySidebar";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -108,14 +110,12 @@ export default async function CaseStudyPage({ params }: PageProps) {
                   className="pointer-events-none absolute inset-0 z-10 opacity-60 [box-shadow:inset_0_0_80px_-20px_var(--color-base)]"
                 />
                 {hasCover ? (
-                  <Image
+                  <FlowImage
                     src={project.coverImage}
                     alt={`${project.title}: ${project.description}`}
-                    fill
                     priority
                     sizes="(min-width: 1024px) 768px, 100vw"
-                    className="ken-burns object-cover"
-                    {...blurProps(project.coverImage)}
+                    imageClassName="ken-burns"
                   />
                 ) : (
                   // TODO(JAY): drop the real screenshot at public{project.coverImage}
@@ -172,10 +172,15 @@ export default async function CaseStudyPage({ params }: PageProps) {
                 <h2 className="mt-14 font-display text-2xl font-semibold text-ink">
                   {labels.results}
                 </h2>
-                <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4">
+                {/* Oversized scrubbed results set-piece (V3 P12) — the numbers
+                    scale up + brighten through the viewport as a cinematic beat. */}
+                <ScrubReveal
+                  as="dl"
+                  className="mt-10 grid grid-cols-2 gap-x-6 gap-y-12 sm:grid-cols-4"
+                >
                   {caseStudy.results.map((stat) => (
                     <div key={stat.label}>
-                      <dd className="font-mono text-[clamp(2.5rem,6vw,3.75rem)] font-semibold leading-none tracking-tight text-accent">
+                      <dd className="font-mono text-[clamp(3rem,8vw,5rem)] font-semibold leading-none tracking-tight text-accent">
                         <Counter
                           value={stat.value}
                           prefix={stat.prefix}
@@ -186,7 +191,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
                       <dt className="mt-3 text-sm leading-snug text-ink-dim">{stat.label}</dt>
                     </div>
                   ))}
-                </dl>
+                </ScrubReveal>
               </section>
             )}
 

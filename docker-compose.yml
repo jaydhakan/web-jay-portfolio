@@ -1,0 +1,18 @@
+# Convenience runner for the production image.
+#   docker compose up --build        # build + run on http://localhost:3000
+#   RESEND_API_KEY=... docker compose up --build   # with working contact form
+services:
+  web:
+    build:
+      context: .
+      args:
+        # Set this to your real public URL for correct absolute/OG URLs.
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    ports:
+      - "3000:3000"
+    environment:
+      # Runtime secret for the contact form (optional — the site runs without it,
+      # the form just can't send mail). Provide via your shell or a .env file.
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    restart: unless-stopped

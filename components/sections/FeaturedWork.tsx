@@ -3,12 +3,14 @@ import { ArrowRight } from "lucide-react";
 import { projects, sections } from "@/data/content";
 import { publicImageExists } from "@/lib/images";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { FeaturedStack } from "@/components/sections/FeaturedStack";
+import { WorkReel } from "@/components/sections/WorkReel";
 
 /**
- * Featured work header + the sticky card stack (catalog #12, D8 #1). Stays a
- * server component so it can resolve covers via publicImageExists (fs-only);
- * the GSAP sticky-stack lives in the FeaturedStack client leaf.
+ * Featured work — header + the horizontal cinematic reel (V3 P7 / S6). Stays a
+ * server component so it can resolve covers via publicImageExists (fs-only); the
+ * pinned lateral-scroll act + parallax live in the WorkReel client leaf. The
+ * header sits OUTSIDE the reel's pin trigger so it scrolls away normally before
+ * the reel pins.
  */
 export function FeaturedWork() {
   const featured = projects.filter((p) => p.featured).slice(0, 3);
@@ -37,8 +39,10 @@ export function FeaturedWork() {
             />
           </Link>
         </div>
+      </div>
 
-        <FeaturedStack featured={featured} covers={covers} />
+      <div className="mt-12">
+        <WorkReel featured={featured} covers={covers} />
       </div>
     </section>
   );

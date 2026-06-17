@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import {
   MessagesSquare,
   Rocket,
@@ -8,16 +7,17 @@ import {
 } from "lucide-react";
 import { howIWork, profile, sections, seo, siteConfig, timeline } from "@/data/content";
 import { publicImageExists } from "@/lib/images";
-import { blurProps } from "@/lib/blur";
 import { GitHubIcon, LinkedInIcon, UpworkIcon } from "@/components/ui/BrandIcon";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { Tag } from "@/components/ui/Tag";
 import { RevealText } from "@/components/motion/RevealText";
 import { ScrambleHeading } from "@/components/motion/ScrambleHeading";
 import { Teleprompter } from "@/components/motion/Teleprompter";
 import { ClipReveal } from "@/components/motion/ClipReveal";
 import { LineDraw } from "@/components/motion/LineDraw";
 import { ExperienceTimeline } from "@/components/sections/ExperienceTimeline";
+import { SkillBag } from "@/components/about/SkillBag";
+import { ParticlePortrait } from "@/components/about/ParticlePortrait";
+import { TrainingRun } from "@/components/about/TrainingRun";
 import { CTABanner } from "@/components/sections/CTABanner";
 
 export const metadata: Metadata = {
@@ -54,26 +54,29 @@ export default function AboutPage() {
           />
         </header>
 
-        {/* Identity row — avatar gets a tactile hover treatment (scale + accent ring + glow). */}
+        {/* Identity row — "you, as data" particle portrait (V3 P9 / S7): the
+            headshot assembles from a GPU point cloud, breathes, and scatters to
+            a sphere then reforms on hover. Plain photo poster under mobile /
+            reduced motion / no-JS / no-WebGL (and it is the SSR + a11y layer). */}
         <div className="mt-14 flex flex-col gap-8 sm:flex-row sm:items-center">
-          <div className="group relative size-28 shrink-0 overflow-hidden rounded-2xl ring-1 ring-line transition duration-300 ease-out hover:ring-accent/40">
+          <div className="group relative aspect-square w-40 shrink-0 overflow-hidden rounded-2xl ring-1 ring-line transition duration-300 ease-out hover:ring-accent/40 sm:w-48">
             <span
               aria-hidden
               className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-tr from-accent/25 via-transparent to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-0"
             />
             {hasPhoto ? (
-              <Image
+              // TODO(JAY): the particle cloud samples this file's luminance as
+              // pseudo-depth; drop a real 400x400+ photo (+ optional offline
+              // depth map) at public/images/profile/jay.jpg and it upgrades.
+              <ParticlePortrait
                 src={profile.photo}
                 alt={`Portrait of ${profile.name}`}
-                fill
-                sizes="112px"
-                className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                {...blurProps(profile.photo)}
+                sizes="192px"
               />
             ) : (
               // TODO(JAY): drop a 400x400+ photo at public/images/profile/jay.jpg
               <div className="flex size-full items-center justify-center bg-elevated">
-                <span className="font-display text-3xl font-bold text-accent">JD</span>
+                <span className="font-display text-4xl font-bold text-accent">JD</span>
               </div>
             )}
           </div>
@@ -104,31 +107,13 @@ export default function AboutPage() {
           <span aria-hidden className="h-px flex-1 bg-line" />
         </div>
 
-        {/* Toolkit — skills as a categorized tactile grid (P9). */}
+        {/* Toolkit — throwable skill bag (V3 P8 / S11): grab, fling, self-heal.
+            Plain wrap grid under mobile / touch / reduced motion / no-JS. */}
         <section className="pb-24">
           <RevealText as="h2" className="font-display text-4xl font-bold tracking-tight text-ink">
             What I Work With
           </RevealText>
-          <ClipReveal as="div" stagger={0.1} className="mt-12 grid gap-3 sm:grid-cols-2">
-            {profile.toolkit.map((group) => (
-              <div
-                key={group.group}
-                className="group rounded-[1.25rem] bg-surface p-7 ring-1 ring-white/[0.06] transition duration-300 ease-out hover:-translate-y-1 hover:bg-elevated hover:ring-accent/30"
-              >
-                <div className="flex items-baseline justify-between">
-                  <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-accent">{group.group}</h3>
-                  <span className="font-mono text-xs tabular-nums text-ink-dim">
-                    {String(group.items.length).padStart(2, "0")}
-                  </span>
-                </div>
-                <div className="mt-5 flex flex-wrap gap-2">
-                  {group.items.map((item) => (
-                    <Tag key={item}>{item}</Tag>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </ClipReveal>
+          <SkillBag toolkit={profile.toolkit} />
         </section>
 
         {/* Experience timeline (the only timeline on the site) */}
@@ -193,6 +178,13 @@ export default function AboutPage() {
           </div>
         </section>
       </div>
+
+      {/* Camera-flight "training run" (V3 P10 / S8) — full-bleed pinned flight. */}
+      <TrainingRun
+        eyebrow={sections.trainingRun.eyebrow}
+        heading={sections.trainingRun.heading}
+        epochs={sections.trainingRun.epochs}
+      />
 
       <CTABanner />
     </main>
