@@ -250,7 +250,7 @@ reference — we borrow the *energy*, not the literal car).
 | P1  | Velocity bus + GPU governance rig | `[x]` |
 | P2  | 3D loss-landscape hero + bloom (S1, S4) | `[x]` |
 | P3  | Velocity bus everywhere (S2, S10) | `[x]` |
-| P4  | Gooey morphing cursor + magnetic (S3) | `[ ]` |
+| P4  | Gooey morphing cursor + magnetic (S3) | `[x]` |
 | P5  | Liquid-metal page transitions (S9) | `[ ]` |
 | P6  | WebGL flowmap on all imagery (S5) | `[ ]` |
 | P7  | Horizontal cinematic work reel (S6) | `[ ]` |
@@ -310,5 +310,16 @@ reference — we borrow the *energy*, not the literal car).
   scrambles; screen readers always read the real copy. **Verified** (prod build, puppeteer): SSR
   shows the correct sr-only + aria-hidden structure with real text, scramble resolves to the real
   heading on all three routes, the marquee GSAP loop animates, and **0 console/hydration errors**
-  across / /work /about /services; build/lint/tsc green. **Next: P4 (gooey morphing cursor +
-  magnetic).**
+  across / /work /about /services; build/lint/tsc green.
+- 2026-06-17 — **P4 DONE, gooey morphing cursor + magnetic (S3).** Rewrote `CustomCursor` from a
+  dot+ring into a liquid, morphing cursor driven by one `gsap.ticker` loop: an instant dot, a
+  lagging ring that STRETCHES along its velocity (elongates + rotates toward motion, settles to a
+  circle at rest), a soft trailing blob, and a contextual label (VIEW over project rows/cards, or
+  any element's `[data-cursor-label]`). The ring is MAGNETIC — over a button/link it eases toward
+  the element's center (0.45 pull) so the cursor "sticks". Kept the z-60 `mix-blend-difference`
+  blend contract and the fine-pointer + hover + motion-safe mount gate (touch / reduced motion
+  return null and keep the native cursor). **Verified** (prod build, puppeteer, fine-pointer forced
+  via matchMedia patch): blend layer present at z-60 with `mix-blend-difference`, `has-custom-cursor`
+  set, ring stretches on fast movement (peak scaleX/scaleY ratio 2.31), and on coarse-pointer the
+  cursor is absent + the native cursor kept; **0 console errors** in both; build/lint/tsc green.
+  **Next: P5 (liquid-metal latent-space page transitions).**
