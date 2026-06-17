@@ -253,7 +253,7 @@ reference — we borrow the *energy*, not the literal car).
 | P4  | Gooey morphing cursor + magnetic (S3) | `[x]` |
 | P5  | Liquid-metal page transitions (S9) | `[x]` |
 | P6  | WebGL flowmap on all imagery (S5) | `[x]` |
-| P7  | Horizontal cinematic work reel (S6) | `[ ]` |
+| P7  | Horizontal cinematic work reel (S6) | `[x]` |
 | P8  | Throwable physics playground (S11) | `[ ]` |
 | P9  | Particle portrait (S7) | `[ ]` |
 | P10 | Camera-flight training run (S8) | `[ ]` |
@@ -376,3 +376,27 @@ reference — we borrow the *energy*, not the literal car).
   optimized URL + TextureLoader raw URL) — standard flowmap cost, the placeholder PNGs are tiny. Zero
   new deps (reuses three/R3F + the P1 bus + the P1 governance rig). **Next: P7 (horizontal cinematic
   work reel).**
+- 2026-06-17 — **P7 DONE, horizontal cinematic work reel (S6).** New
+  `components/sections/WorkReel.tsx` replaces the home sticky card stack (`FeaturedStack.tsx` deleted;
+  it was fully superseded) as the featured-work treatment — the projects as "a film, not a list." On
+  desktop + motion the section PINS and the vertical wheel drives a lateral journey: a track of
+  full-height panels translates horizontally via a single scrubbed ScrollTrigger (`x: -(scrollWidth -
+  innerWidth)`, pin length == that travel so 1px wheel ~ 1px lateral, no over-long pin). Lenis stays
+  the single scroll source. Inside each panel the cover, copy, and a giant ambient index parallax at
+  different rates as the panel crosses the viewport (`containerAnimation`-linked, compositor-only
+  xPercent) for depth; a top progress bar tracks the journey so it never feels trapped (risk #4). The
+  covers REUSE the P6 `FlowImage` (governed WebGL flowmap; still next/image underneath as SSR / a11y /
+  LCP). `FeaturedWork` keeps its header OUTSIDE the pin trigger so it scrolls away before the reel
+  pins. **Reduced motion + mobile = a normal vertical column** (no pin, no horizontal travel, no
+  scroll-jack on touch). **Bug caught + fixed in-loop:** the row layout was first gated on `md:` alone,
+  so reduced-motion on a DESKTOP viewport kept an unreachable horizontal row clipped by
+  `overflow-hidden`; re-gated to `motion-safe:md:` (row only when motion is allowed AND >=768) so RM at
+  any width falls back to the column. **Verified** (prod build, puppeteer + SwiftShader): desktop pins
+  (position flips to fixed mid-scroll) and the track travels exactly 0 -> -2880 = scrollWidth(4320) -
+  innerWidth(1440), progress bar fills 0 -> 1, pin RELEASES cleanly at the last panel (back to relative,
+  no trap); reduced-motion desktop = `flex-direction: column` + no transform + no pin; mobile = column +
+  no transform; off-screen scroll leaves 0 reel canvases (P6 governance still holds, no accumulation);
+  **0 console errors**; tsc + lint + build green. Note: the *buttery-ness* of the parallax / scrub wants
+  a real-machine eyeball (headless proves the transforms fire and the travel math is exact, not the
+  feel). Zero new deps (GSAP ScrollTrigger pin + containerAnimation, all free). **Next: P8 (throwable
+  physics playground).**
