@@ -220,6 +220,10 @@ export function WorkList({ projects, covers, filters }: WorkListProps) {
           <div className="relative aspect-video w-[min(26vw,340px)] overflow-hidden rounded-xl bg-elevated shadow-glow ring-1 ring-line">
             {hovered &&
               (hoveredHasCover ? (
+                // Plain image on purpose: this floating preview is pointer-events-none
+                // (so the flow hover-melt can never fire) and swaps on every row hover
+                // (a WebGL canvas would churn GL contexts for no interactive payoff).
+                // The flowmap lives on the IN-PLACE covers — home featured + case study.
                 <Image src={hovered.coverImage} alt="" fill sizes="340px" className="object-cover" {...blurProps(hovered.coverImage)} />
               ) : (
                 <div className="flex size-full items-end p-4" style={{ backgroundImage: PLACEHOLDER_BG }}>

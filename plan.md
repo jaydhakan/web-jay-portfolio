@@ -252,7 +252,7 @@ reference — we borrow the *energy*, not the literal car).
 | P3  | Velocity bus everywhere (S2, S10) | `[x]` |
 | P4  | Gooey morphing cursor + magnetic (S3) | `[x]` |
 | P5  | Liquid-metal page transitions (S9) | `[x]` |
-| P6  | WebGL flowmap on all imagery (S5) | `[ ]` |
+| P6  | WebGL flowmap on all imagery (S5) | `[x]` |
 | P7  | Horizontal cinematic work reel (S6) | `[ ]` |
 | P8  | Throwable physics playground (S11) | `[ ]` |
 | P9  | Particle portrait (S7) | `[ ]` |
@@ -337,3 +337,42 @@ reference — we borrow the *energy*, not the literal car).
   /work with scrollY reset to 0 and activeEl = main-content, and reduced motion does an instant swap
   with the curtain staying hidden; **0 console errors** in both; build/lint/tsc green. View-Transitions
   shared-element morph stays available as a future polish. **Next: P6 (WebGL flowmap on all imagery).**
+- 2026-06-17 — **P6 DONE, WebGL flowmap on all imagery (S5).** New `components/media/FlowImage.tsx`
+  (mount gate) + `FlowImageCanvas.tsx` (R3F leaf, dynamic `ssr:false`). Each project cover gets a
+  textured plane that renders the image as "data the page is processing": an always-on faint liquid
+  shimmer (domain-warp) at REST so the screenshot stays legible, a travelling RIPPLE + chromatic
+  (RGB) smear along the scroll axis whose amplitude is driven by the **P1 velocity bus**
+  (`subscribeVelocity`), and a cursor-centred displacement "melt" + iridescent lens on HOVER
+  (eased in/out). **Engineering call (documented deviation):** did NOT build the plan's literal S5
+  (ONE full-screen canvas tracking every image's DOM rect). That fights our own governance rule
+  (canvases unmount off-screen; /work has no hero context; the case-study cover is the priority/LCP
+  image) and repeats the fragility P5 chose to avoid. Instead each cover is a SEPARATE governed
+  canvas: mounts only while in view (`useInViewport`, 300px margin), `dpr` capped (`DPR_CAP`),
+  `createFpsGuard` fades the canvas back to the still image on sustained frame strain (and stops the
+  frameloop so the GPU work is actually shed, not just hidden behind opacity:0), and it ARMS after
+  first paint (double-rAF) so it never competes with LCP/hydration. Desktop-gated exactly like the
+  hero/cursor (fine-pointer + hover + >=768 + motion-allowed); coarse/mobile + reduced motion keep the
+  crisp still image. The `next/image` underneath stays the authoritative SSR / LCP / no-JS / a11y
+  layer (real alt, blur-up, `priority`) — the canvas is `aria-hidden` decoration over it. Wired into
+  the home FeaturedStack covers and the case-study cover hero (priority/LCP). The /work index keeps
+  plain `next/image`: its only desktop cover is the cursor-follow preview, which is
+  `pointer-events-none` (the hover-melt could never fire) and swaps on every row hover (a WebGL canvas
+  would churn GL contexts for no interactive payoff) — the flowmap belongs on the IN-PLACE covers. The
+  small next-project card + the /work mobile thumb also stay plain (tiny / below the fold = off-budget
+  for GPU). Marker `data-flow-canvas` added for the leak counter / verification. **Senior review
+  (self) caught + fixed before commit:** (1) the orthographic Canvas was given manual frustum bounds
+  (-1..1), but R3F resets the ortho frustum to PIXEL bounds on every resize — a fixed [2,2] plane
+  would have rendered as a ~2px speck; fixed by scaling a unit quad to `state.viewport` each frame
+  (resize-proof). (2) the FPS-guard strain path only set opacity:0, so the loop kept rendering at full
+  cost; now it also stops the frameloop. **Verified** (prod build, puppeteer + SwiftShader): home
+  desktop mounts 3 flow canvases over the 3 still covers; case-study desktop mounts 1 over the LCP
+  cover with the real alt intact; a **pixel sample of the case-study canvas = 100% non-base color**
+  (proves the plane FILLS the frame — the speck bug would have failed this); **reduced motion = 0
+  canvases**; **mobile/coarse = 0 canvases** (still image kept in both); off-screen scroll UNMOUNTS the
+  canvas (1 -> 0, governance proven, no GPU leak); **0 console + 0 shader-compile errors**; tsc + lint
+  + build green. Note: the *animated* ripple/chroma/melt motion still wants a real-machine eyeball (the
+  bus needs real scroll momentum + a real hover; headless can't drive those) — but plane-fills-frame +
+  texture-renders are now proven, not assumed. Known tradeoff: the cover is fetched twice (next/image
+  optimized URL + TextureLoader raw URL) — standard flowmap cost, the placeholder PNGs are tiny. Zero
+  new deps (reuses three/R3F + the P1 bus + the P1 governance rig). **Next: P7 (horizontal cinematic
+  work reel).**

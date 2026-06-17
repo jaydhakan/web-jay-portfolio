@@ -2,11 +2,10 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowUpRight, TrendingUp } from "lucide-react";
 import type { Project } from "@/data/content";
 import { gsap, useGSAP } from "@/lib/gsap";
-import { blurProps } from "@/lib/blur";
+import { FlowImage } from "@/components/media/FlowImage";
 import { Tag } from "@/components/ui/Tag";
 
 const PLACEHOLDER_BG =
@@ -66,13 +65,11 @@ export function FeaturedStack({
               <div className="grid overflow-hidden rounded-[1.125rem] bg-surface ring-1 ring-inset ring-white/[0.04] lg:grid-cols-2">
                 <div className="relative aspect-[16/10] lg:aspect-auto lg:min-h-[24rem]">
                   {hasCover ? (
-                    <Image
+                    <FlowImage
                       src={project.coverImage}
                       alt=""
-                      fill
                       sizes="(min-width: 1024px) 40vw, 100vw"
-                      className="ken-burns object-cover"
-                      {...blurProps(project.coverImage)}
+                      imageClassName="ken-burns"
                     />
                   ) : (
                     <div aria-hidden className="size-full" style={{ backgroundImage: PLACEHOLDER_BG }} />

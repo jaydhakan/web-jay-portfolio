@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { projects, sections } from "@/data/content";
 import { publicImageExists } from "@/lib/images";
 import { blurProps } from "@/lib/blur";
+import { FlowImage } from "@/components/media/FlowImage";
 import { Tag } from "@/components/ui/Tag";
 import { Counter } from "@/components/motion/Counter";
 import { RevealText } from "@/components/motion/RevealText";
@@ -108,14 +109,12 @@ export default async function CaseStudyPage({ params }: PageProps) {
                   className="pointer-events-none absolute inset-0 z-10 opacity-60 [box-shadow:inset_0_0_80px_-20px_var(--color-base)]"
                 />
                 {hasCover ? (
-                  <Image
+                  <FlowImage
                     src={project.coverImage}
                     alt={`${project.title}: ${project.description}`}
-                    fill
                     priority
                     sizes="(min-width: 1024px) 768px, 100vw"
-                    className="ken-burns object-cover"
-                    {...blurProps(project.coverImage)}
+                    imageClassName="ken-burns"
                   />
                 ) : (
                   // TODO(JAY): drop the real screenshot at public{project.coverImage}
