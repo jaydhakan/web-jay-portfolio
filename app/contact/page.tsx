@@ -7,6 +7,7 @@ import { FadeUp } from "@/components/motion/FadeUp";
 import { Spotlight } from "@/components/motion/Spotlight";
 import { KineticHeadline } from "@/components/ui/KineticHeadline";
 import { ContactForm } from "@/components/contact/ContactForm";
+import { ParticleFinale } from "@/components/contact/ParticleFinale";
 
 export const metadata: Metadata = {
   title: seo.contact.title,
@@ -110,6 +111,12 @@ export default function ContactPage() {
             ))}
           </FadeUp>
         </section>
+
+        {/* GPU particle finale (V3 P11 / S12) — the closing argument. */}
+        <ParticleFinale
+          text={sections.contactPage.finale.wordmark}
+          tagline={sections.contactPage.finale.tagline}
+        />
       </div>
     </main>
   );

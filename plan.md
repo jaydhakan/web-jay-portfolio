@@ -257,7 +257,7 @@ reference — we borrow the *energy*, not the literal car).
 | P8  | Throwable physics playground (S11) | `[x]` |
 | P9  | Particle portrait (S7) | `[x]` |
 | P10 | Camera-flight training run (S8) | `[x]` |
-| P11 | GPU particle finale (S12) | `[ ]` |
+| P11 | GPU particle finale (S12) | `[x]` |
 | P12 | /services + case-study elevation | `[ ]` |
 | P13 | Mobile parity + QA + cleanup | `[ ]` |
 
@@ -459,3 +459,23 @@ reference — we borrow the *energy*, not the literal car).
   all three; tsc + lint + build green. The flight uses meshBasicMaterial / instancedMesh
   (SwiftShader-friendly, unlike P9's custom point-size) so it likely renders headlessly too; the
   cinematic FEEL is still a real-machine confirm. Zero new deps. **Next: P11 (GPU particle finale).**
+- 2026-06-18 — **P11 DONE, GPU particle finale (S12).** New `components/contact/ParticleFinale.tsx`
+  (gate + authoritative wordmark) + `ParticleFinaleCanvas.tsx` (R3F points). A full-bleed band closes
+  /contact: the finale wordmark ("LET'S BUILD") is rendered to an offscreen 2D canvas, its lit pixels
+  sampled into tens of thousands of particles that ASSEMBLE into the letters, breathe with bounded
+  curl noise, and REPEL from the cursor (a world-space force field — the pointer is unprojected onto
+  the z=0 plane each frame; particles push away within a radius and spring back). **Engineering call:**
+  built on the WebGL2 points path (the plan's robust fallback) rather than WebGPU/TSL compute — the
+  WebGPU variant is fragile across browsers and the one-context rule; WebGL2 is universal and already
+  loud. Governed: dpr-capped, FPS-guarded (coarsens density + drops to demand frameloop on strain),
+  in-view mount, lazy on one route. The build (sampling + Math.random) runs in a deferred rAF inside an
+  effect (impurity-lint-safe), geometry/material disposed on unmount. **A11y / robustness:** the
+  wordmark also ships as a real visible DOM `<h2>` — full strength under reduced motion / mobile /
+  no-JS / no-WebGL, and a faint 0.08 ghost under the particles (the target the cloud settles into), so
+  a visible wordmark ALWAYS renders even if the GPU point path is unavailable. New
+  `sections.contactPage.finale` copy. **Verified** (prod build, puppeteer + SwiftShader): desktop
+  mounts the canvas with the wordmark ghosted to 0.08; reduced motion + mobile = no canvas + wordmark
+  at full opacity; real "LET'S BUILD" DOM text in all three; **0 console errors**; tsc + lint + build
+  green. Same SwiftShader caveat as P9 for the particle pixels themselves (custom gl_PointSize), but
+  the always-present ghost wordmark means the finale never reads as blank, and real GPUs form the
+  cloud over it. Zero new deps. **Next: P12 (/services + case-study elevation).**

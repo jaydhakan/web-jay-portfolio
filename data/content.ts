@@ -988,6 +988,11 @@ export const sections = {
     eyebrow: "GET IN TOUCH",
     heading: "Let's Build Something Together",
     subheading: "I take on 2-3 new projects a month. Tell me what you're building.",
+    // GPU particle finale (V3 P11 / S12) — the closing wordmark the cloud forms.
+    finale: {
+      wordmark: "LET'S BUILD",
+      tagline: "Tens of thousands of particles, one idea: ship it.",
+    },
   },
 };
 
