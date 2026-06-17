@@ -11,13 +11,13 @@ import { publicImageExists } from "@/lib/images";
 import { blurProps } from "@/lib/blur";
 import { GitHubIcon, LinkedInIcon, UpworkIcon } from "@/components/ui/BrandIcon";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { Tag } from "@/components/ui/Tag";
 import { RevealText } from "@/components/motion/RevealText";
 import { ScrambleHeading } from "@/components/motion/ScrambleHeading";
 import { Teleprompter } from "@/components/motion/Teleprompter";
 import { ClipReveal } from "@/components/motion/ClipReveal";
 import { LineDraw } from "@/components/motion/LineDraw";
 import { ExperienceTimeline } from "@/components/sections/ExperienceTimeline";
+import { SkillBag } from "@/components/about/SkillBag";
 import { CTABanner } from "@/components/sections/CTABanner";
 
 export const metadata: Metadata = {
@@ -104,31 +104,13 @@ export default function AboutPage() {
           <span aria-hidden className="h-px flex-1 bg-line" />
         </div>
 
-        {/* Toolkit — skills as a categorized tactile grid (P9). */}
+        {/* Toolkit — throwable skill bag (V3 P8 / S11): grab, fling, self-heal.
+            Plain wrap grid under mobile / touch / reduced motion / no-JS. */}
         <section className="pb-24">
           <RevealText as="h2" className="font-display text-4xl font-bold tracking-tight text-ink">
             What I Work With
           </RevealText>
-          <ClipReveal as="div" stagger={0.1} className="mt-12 grid gap-3 sm:grid-cols-2">
-            {profile.toolkit.map((group) => (
-              <div
-                key={group.group}
-                className="group rounded-[1.25rem] bg-surface p-7 ring-1 ring-white/[0.06] transition duration-300 ease-out hover:-translate-y-1 hover:bg-elevated hover:ring-accent/30"
-              >
-                <div className="flex items-baseline justify-between">
-                  <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-accent">{group.group}</h3>
-                  <span className="font-mono text-xs tabular-nums text-ink-dim">
-                    {String(group.items.length).padStart(2, "0")}
-                  </span>
-                </div>
-                <div className="mt-5 flex flex-wrap gap-2">
-                  {group.items.map((item) => (
-                    <Tag key={item}>{item}</Tag>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </ClipReveal>
+          <SkillBag toolkit={profile.toolkit} />
         </section>
 
         {/* Experience timeline (the only timeline on the site) */}

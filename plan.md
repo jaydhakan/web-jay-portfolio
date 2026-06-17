@@ -254,7 +254,7 @@ reference — we borrow the *energy*, not the literal car).
 | P5  | Liquid-metal page transitions (S9) | `[x]` |
 | P6  | WebGL flowmap on all imagery (S5) | `[x]` |
 | P7  | Horizontal cinematic work reel (S6) | `[x]` |
-| P8  | Throwable physics playground (S11) | `[ ]` |
+| P8  | Throwable physics playground (S11) | `[x]` |
 | P9  | Particle portrait (S7) | `[ ]` |
 | P10 | Camera-flight training run (S8) | `[ ]` |
 | P11 | GPU particle finale (S12) | `[ ]` |
@@ -400,3 +400,23 @@ reference — we borrow the *energy*, not the literal car).
   a real-machine eyeball (headless proves the transforms fire and the travel math is exact, not the
   feel). Zero new deps (GSAP ScrollTrigger pin + containerAnimation, all free). **Next: P8 (throwable
   physics playground).**
+- 2026-06-17 — **P8 DONE, throwable physics playground (S11).** New `components/about/SkillBag.tsx`
+  replaces the static /about toolkit grid: each category card is a physics "bag" whose skill chips you
+  grab, fling (GSAP Draggable + InertiaPlugin — momentum, bounded to the card, lean-into-throw
+  rotation), and watch SELF-HEAL back to their grid positions via Flip a few seconds after the bag
+  goes idle. Added `Draggable` + `InertiaPlugin` to the lazy GSAP plugin chunk (`lib/gsap.ts`,
+  `getDraggable()`); both ship FREE in gsap 3.15 (no install — InertiaPlugin confirmed the real 477-line
+  plugin, not a stub). Pure enhancement: the chips ship in normal flow as real text inside the real
+  categorized list, so a11y / no-JS / SSR are unchanged; Draggable only upgrades them after the lazy
+  plugins load, and ONLY under `(min-width:768px) and (hover:hover) and (pointer:fine) and
+  (prefers-reduced-motion:no-preference)`. Mobile / touch / reduced motion render the same chips as a
+  plain wrap grid. Draggables + idle timers are killed on cleanup (matchMedia revert) — no leak. The
+  plan's secondary P8 ideas (draggable project cards, idle easter-egg toy) were DEFERRED rather than
+  half-shipped — the throwable skill bag is the flagship S11 surface and the one move per phase; the
+  others can be a later polish pass. **Verified** (prod build, puppeteer + SwiftShader, pointer gate
+  forced like P2/P4): desktop+motion initializes Draggable on all 18 chips (GSAP's translate3d +
+  translate/rotate/scale-reset init signature present); **reduced motion = NO Draggable** (plain grid);
+  **mobile = NO Draggable** (plain grid); chips stay real text in all modes; **0 console errors**; tsc +
+  lint + build green. Note: the actual throw/inertia/self-heal FEEL needs a real machine — headless
+  synthetic mouse drags don't faithfully drive Draggable (same limitation documented for P2/P4); init +
+  gating + a11y + cleanup are proven. Zero new deps. **Next: P9 (particle portrait).**

@@ -23,6 +23,7 @@ import { CustomEase } from "gsap/CustomEase";
 import { useSyncExternalStore } from "react";
 import type { SplitText as SplitTextClass } from "gsap/SplitText";
 import type { Flip as FlipClass } from "gsap/Flip";
+import type { Draggable as DraggableClass } from "gsap/Draggable";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger, CustomEase);
 
@@ -38,6 +39,7 @@ export const DUR = { micro: 0.4, std: 0.8, hero: 1.2 } as const;
 
 let splitText: typeof SplitTextClass | null = null;
 let flip: typeof FlipClass | null = null;
+let draggable: typeof DraggableClass | null = null;
 let ready = false;
 let pending: Promise<void> | null = null;
 const listeners = new Set<() => void>();
@@ -50,10 +52,20 @@ export function loadExtraPlugins(): Promise<void> {
       import("gsap/DrawSVGPlugin"),
       import("gsap/Flip"),
       import("gsap/ScrambleTextPlugin"),
-    ]).then(([st, draw, fl, scr]) => {
-      gsap.registerPlugin(st.SplitText, draw.DrawSVGPlugin, fl.Flip, scr.ScrambleTextPlugin);
+      import("gsap/Draggable"),
+      import("gsap/InertiaPlugin"),
+    ]).then(([st, draw, fl, scr, drag, inertia]) => {
+      gsap.registerPlugin(
+        st.SplitText,
+        draw.DrawSVGPlugin,
+        fl.Flip,
+        scr.ScrambleTextPlugin,
+        drag.Draggable,
+        inertia.InertiaPlugin,
+      );
       splitText = st.SplitText;
       flip = fl.Flip;
+      draggable = drag.Draggable;
       ready = true;
       for (const l of listeners) l();
     });
@@ -81,6 +93,10 @@ export function getSplitText() {
 /** The Flip class — non-null only after the extra plugins have loaded. */
 export function getFlip() {
   return flip;
+}
+/** The Draggable class — non-null only after the extra plugins have loaded. */
+export function getDraggable() {
+  return draggable;
 }
 
 export { gsap, useGSAP, ScrollTrigger };
