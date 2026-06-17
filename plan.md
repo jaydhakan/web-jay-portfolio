@@ -255,7 +255,7 @@ reference — we borrow the *energy*, not the literal car).
 | P6  | WebGL flowmap on all imagery (S5) | `[x]` |
 | P7  | Horizontal cinematic work reel (S6) | `[x]` |
 | P8  | Throwable physics playground (S11) | `[x]` |
-| P9  | Particle portrait (S7) | `[ ]` |
+| P9  | Particle portrait (S7) | `[x]` |
 | P10 | Camera-flight training run (S8) | `[ ]` |
 | P11 | GPU particle finale (S12) | `[ ]` |
 | P12 | /services + case-study elevation | `[ ]` |
@@ -420,3 +420,25 @@ reference — we borrow the *energy*, not the literal car).
   lint + build green. Note: the actual throw/inertia/self-heal FEEL needs a real machine — headless
   synthetic mouse drags don't faithfully drive Draggable (same limitation documented for P2/P4); init +
   gating + a11y + cleanup are proven. Zero new deps. **Next: P9 (particle portrait).**
+- 2026-06-18 — **P9 DONE, "you as data" particle portrait (S7).** New
+  `components/about/ParticlePortrait.tsx` (mount gate) + `ParticlePortraitCanvas.tsx` (R3F leaf). The
+  /about identity portrait is sampled into a GPU point cloud (one particle per pixel, ~67k at grid 260):
+  each particle's rest position is its pixel in the image plane, z pushed by luminance (pseudo-depth —
+  swaps to a real offline depth map when Jay's photo lands), colour = pixel colour. It breathes with a
+  bounded curl-style drift at rest and SCATTERS to a sphere then reforms on hover (the gag: your photo
+  is "just data" converging). Built as an imperative `THREE.Points` via `<primitive>` (declarative
+  `<bufferAttribute>` attach drew nothing for the custom-shader cloud); geometry + material disposed on
+  unmount; per-frame writes go through a ref (immutability-lint-safe, matches HeroShader). Governed:
+  dpr-capped, FPS-guarded (drops grid + stops the loop on strain), mounted only in view, armed after
+  first paint. The still next/image is the poster / SSR / a11y (real alt) / no-JS / reduced-motion /
+  mobile layer underneath. Portrait enlarged to ~w-40/48 so the cloud reads. **Verified** (prod build):
+  desktop mounts the canvas over the poster (real alt intact); reduced motion + mobile = NO canvas
+  (poster kept); off-screen scroll UNMOUNTS the canvas (no leak); shaders compile + link with **0 GL
+  errors**; **0 console errors**; tsc + lint + build green. **Honest caveat (important):** the cloud is
+  NOT visible under headless SwiftShader — isolated to one cause (a stock `THREE.PointsMaterial` renders
+  the same geometry fine, but custom-shader `gl_PointSize` is ignored/clamped to ~0 on the SwiftShader
+  point path; shaders compile + link clean, geometry + camera are correct). This is a headless-renderer
+  limitation, not a product bug — real GPUs honour custom `gl_PointSize` (every Codrops particle demo
+  does this); **needs a real-machine eyeball to confirm the visual.** Placeholder-flagged: samples the
+  current `JD` profile JPEG until Jay drops a real photo. Zero new deps. **Next: P10 (camera-flight
+  training run).**
