@@ -3,6 +3,7 @@ import { ArrowUpRight, Bot, Database, MessageSquareText, Zap } from "lucide-reac
 import { capabilities, sections, type Capability } from "@/data/content";
 import { cn } from "@/lib/utils";
 import { RevealText } from "@/components/motion/RevealText";
+import { VelocityText } from "@/components/motion/VelocityText";
 import { ClipReveal } from "@/components/motion/ClipReveal";
 import { Counter } from "@/components/motion/Counter";
 
@@ -189,12 +190,14 @@ export function BentoCapabilities() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
-            <RevealText
-              as="h2"
-              className="font-display text-4xl font-bold tracking-tight text-ink md:text-5xl"
-            >
-              {sections.capabilities.heading}
-            </RevealText>
+            <VelocityText>
+              <RevealText
+                as="h2"
+                className="font-display text-4xl font-bold tracking-tight text-ink md:text-5xl"
+              >
+                {sections.capabilities.heading}
+              </RevealText>
+            </VelocityText>
             <p className="mt-4 max-w-md text-ink-dim">{sections.capabilities.subheading}</p>
           </div>
           <Link

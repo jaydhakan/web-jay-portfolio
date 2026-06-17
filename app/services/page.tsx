@@ -13,6 +13,7 @@ import { pricing, sections, seo, services } from "@/data/content";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Button } from "@/components/ui/Button";
 import { RevealText } from "@/components/motion/RevealText";
+import { ScrambleHeading } from "@/components/motion/ScrambleHeading";
 import { FadeUp } from "@/components/motion/FadeUp";
 import { ClipReveal } from "@/components/motion/ClipReveal";
 import { LineDraw } from "@/components/motion/LineDraw";
@@ -39,12 +40,11 @@ export default function ServicesPage() {
       <div className="mx-auto max-w-7xl px-6">
         <header className="max-w-3xl">
           <SectionLabel>{sections.servicesPage.eyebrow}</SectionLabel>
-          <RevealText
+          <ScrambleHeading
             as="h1"
+            text={sections.servicesPage.heading}
             className="mt-4 font-display text-5xl font-bold tracking-[-0.03em] text-ink sm:text-6xl lg:text-7xl"
-          >
-            {sections.servicesPage.heading}
-          </RevealText>
+          />
           <FadeUp delay={0.1} className="mt-5 max-w-xl text-base leading-relaxed text-ink-dim sm:text-lg">
             {sections.servicesPage.subheading}
           </FadeUp>

@@ -249,7 +249,7 @@ reference — we borrow the *energy*, not the literal car).
 |---|---|---|
 | P1  | Velocity bus + GPU governance rig | `[x]` |
 | P2  | 3D loss-landscape hero + bloom (S1, S4) | `[x]` |
-| P3  | Velocity bus everywhere (S2, S10) | `[ ]` |
+| P3  | Velocity bus everywhere (S2, S10) | `[x]` |
 | P4  | Gooey morphing cursor + magnetic (S3) | `[ ]` |
 | P5  | Liquid-metal page transitions (S9) | `[ ]` |
 | P6  | WebGL flowmap on all imagery (S5) | `[ ]` |
@@ -297,5 +297,18 @@ reference — we borrow the *energy*, not the literal car).
   + SwiftShader, desktop tier forced via a matchMedia patch): 3D terrain with glowing contours,
   camera dives on scroll, bloom + vignette glow, headline crisp on dark left, RM gives the iridescent
   gradient fallback (no canvas), **0 console + 0 shader-compile errors**; build/lint/tsc green. Bloom
-  intensity (0.85) is tunable if more glow is wanted. **Next: P3 (velocity bus visible everywhere +
-  loud type).**
+  intensity (0.85) is tunable if more glow is wanted.
+- 2026-06-17 — **P3 DONE, velocity bus everywhere + loud type (S2 + S10).** (a) `Marquee` converted
+  from a CSS loop to a GSAP loop fully on the velocity bus: scroll velocity scales its speed and
+  FLIPS direction (scroll up reverses it), plus the skew streak; static under reduced motion.
+  (b) New `VelocityText` wrapper (compositor skewY from the bus, off under RM) applied to the two
+  big home statements (ImpactStats + BentoCapabilities headings) so they lean as you scroll past.
+  (c) New `ScrambleHeading` (decode-from-glyphs on scroll-in via the lazy ScrambleText plugin)
+  replaces the plain RevealText h1 on /work, /about, /services (contact already has the kinetic
+  headline) — the "site compiles itself" loud-type signature. a11y/LCP-safe: real text ships as an
+  sr-only span (the accessible name + no-JS/SSR copy) with a separate aria-hidden visual span that
+  scrambles; screen readers always read the real copy. **Verified** (prod build, puppeteer): SSR
+  shows the correct sr-only + aria-hidden structure with real text, scramble resolves to the real
+  heading on all three routes, the marquee GSAP loop animates, and **0 console/hydration errors**
+  across / /work /about /services; build/lint/tsc green. **Next: P4 (gooey morphing cursor +
+  magnetic).**

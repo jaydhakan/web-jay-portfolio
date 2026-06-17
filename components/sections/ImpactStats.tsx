@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { impact } from "@/data/content";
 import { RevealText } from "@/components/motion/RevealText";
+import { VelocityText } from "@/components/motion/VelocityText";
 import { FadeUp } from "@/components/motion/FadeUp";
 import { Counter } from "@/components/motion/Counter";
 import { LineDraw } from "@/components/motion/LineDraw";
@@ -18,12 +19,14 @@ export function ImpactStats() {
   return (
     <section className="border-y border-line py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-6">
-        <RevealText
-          as="h2"
-          className="max-w-2xl font-display text-4xl font-bold tracking-tight text-ink md:text-5xl"
-        >
-          {impact.heading}
-        </RevealText>
+        <VelocityText className="max-w-2xl">
+          <RevealText
+            as="h2"
+            className="font-display text-4xl font-bold tracking-tight text-ink md:text-5xl"
+          >
+            {impact.heading}
+          </RevealText>
+        </VelocityText>
         <FadeUp as="p" delay={0.1} className="mt-4 max-w-xl text-ink-dim">
           {impact.intro}
         </FadeUp>

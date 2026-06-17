@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { projects, sections, seo } from "@/data/content";
 import { publicImageExists } from "@/lib/images";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { RevealText } from "@/components/motion/RevealText";
+import { ScrambleHeading } from "@/components/motion/ScrambleHeading";
 import { FadeUp } from "@/components/motion/FadeUp";
 import { WorkList } from "@/components/work/WorkList";
 
@@ -26,12 +26,11 @@ export default function WorkPage() {
               {String(projects.length).padStart(2, "0")} shipped
             </span>
           </div>
-          <RevealText
+          <ScrambleHeading
             as="h1"
+            text={sections.workPage.heading}
             className="mt-5 font-display text-5xl font-bold tracking-[-0.03em] text-ink sm:text-6xl lg:text-7xl"
-          >
-            {sections.workPage.heading}
-          </RevealText>
+          />
           <FadeUp delay={0.1} className="mt-5 max-w-xl text-base leading-relaxed text-ink-dim sm:text-lg">
             {sections.workPage.subheading}
           </FadeUp>

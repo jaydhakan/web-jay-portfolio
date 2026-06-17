@@ -13,6 +13,7 @@ import { GitHubIcon, LinkedInIcon, UpworkIcon } from "@/components/ui/BrandIcon"
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Tag } from "@/components/ui/Tag";
 import { RevealText } from "@/components/motion/RevealText";
+import { ScrambleHeading } from "@/components/motion/ScrambleHeading";
 import { Teleprompter } from "@/components/motion/Teleprompter";
 import { ClipReveal } from "@/components/motion/ClipReveal";
 import { LineDraw } from "@/components/motion/LineDraw";
@@ -46,12 +47,11 @@ export default function AboutPage() {
       <div className="mx-auto max-w-7xl px-6">
         <header className="max-w-3xl">
           <SectionLabel>{sections.aboutPage.eyebrow}</SectionLabel>
-          <RevealText
+          <ScrambleHeading
             as="h1"
+            text={sections.aboutPage.heading}
             className="mt-4 font-display text-5xl font-bold tracking-[-0.03em] text-ink sm:text-6xl lg:text-7xl"
-          >
-            {sections.aboutPage.heading}
-          </RevealText>
+          />
         </header>
 
         {/* Identity row — avatar gets a tactile hover treatment (scale + accent ring + glow). */}

@@ -1,41 +1,62 @@
 "use client";
 
 import { useRef } from "react";
+import { gsap, useGSAP } from "@/lib/gsap";
 import { useVelocityFrame } from "@/lib/velocity-bus";
 
 type MarqueeProps = {
   items: readonly string[];
 };
 
-/** Four copies so translateX(-50%) loops seamlessly on wide viewports. */
+/** Four copies so xPercent:-50 (= 2 copies) loops seamlessly. */
 const COPIES = 4;
-/** Max streak, in degrees, at full scroll velocity. */
-const MAX_SKEW = 7;
+const MAX_SKEW = 7; // deg streak at full velocity
 
 /**
- * Service-category ticker directly below the hero. Decorative (aria-hidden),
- * CSS-driven base loop, frozen under reduced motion via the global safety net.
+ * Service-category ticker below the hero, now fully on the velocity bus
+ * (plan.md S2 / V3 P3). A GSAP loop drives the base drift; scroll velocity
+ * scales its speed and FLIPS its direction (scroll up -> it reverses), and the
+ * strip skews into a streak. Decorative (aria-hidden); under reduced motion the
+ * bus is silent and no GSAP loop is created, so it stays static.
  *
- * V3 P1 — first proof of the velocity bus: the strip skews with scroll velocity
- * and snaps back at rest, so it reads as part of one momentum system rather than
- * a dumb ticker. The skew is written imperatively (no re-render) to a WRAPPER, so
- * the animated row's own translateX transform is never overwritten. The full
- * speed/direction-follows-scroll treatment lands in P3.
+ * The loop transform lives on the inner strip and the skew on a separate
+ * wrapper, so the two never overwrite each other.
  */
 export function Marquee({ items }: MarqueeProps) {
+  const scope = useRef<HTMLDivElement>(null);
   const skewRef = useRef<HTMLDivElement>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+  const tween = useRef<gsap.core.Tween | null>(null);
+  const dir = useRef(1); // last non-zero scroll direction (keeps drifting at rest)
+
+  useGSAP(
+    () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      tween.current = gsap.to(stripRef.current, {
+        xPercent: -50,
+        duration: 24,
+        ease: "none",
+        repeat: -1,
+      });
+    },
+    { scope },
+  );
 
   useVelocityFrame((s) => {
+    if (s.direction !== 0) dir.current = s.direction;
+    const speed = 1 + Math.min(Math.abs(s.velocity) * 0.06, 4.5);
+    tween.current?.timeScale(speed * dir.current);
     const el = skewRef.current;
-    if (!el) return;
-    const skew = Math.max(-MAX_SKEW, Math.min(MAX_SKEW, s.velocity * 0.45));
-    el.style.transform = `skewX(${skew}deg)`;
+    if (el) {
+      const skew = Math.max(-MAX_SKEW, Math.min(MAX_SKEW, s.velocity * 0.45));
+      el.style.transform = `skewX(${skew}deg)`;
+    }
   });
 
   return (
-    <div aria-hidden className="overflow-hidden border-y border-line">
+    <div ref={scope} aria-hidden className="overflow-hidden border-y border-line">
       <div ref={skewRef} className="will-change-transform">
-        <div className="flex w-max animate-marquee">
+        <div ref={stripRef} className="flex w-max will-change-transform">
           {Array.from({ length: COPIES }, (_, copy) => (
             <ul key={copy} className="flex shrink-0 items-center">
               {items.map((item) => (
