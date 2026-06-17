@@ -258,7 +258,7 @@ reference — we borrow the *energy*, not the literal car).
 | P9  | Particle portrait (S7) | `[x]` |
 | P10 | Camera-flight training run (S8) | `[x]` |
 | P11 | GPU particle finale (S12) | `[x]` |
-| P12 | /services + case-study elevation | `[ ]` |
+| P12 | /services + case-study elevation | `[x]` |
 | P13 | Mobile parity + QA + cleanup | `[ ]` |
 
 ### Changelog
@@ -479,3 +479,17 @@ reference — we borrow the *energy*, not the literal car).
   green. Same SwiftShader caveat as P9 for the particle pixels themselves (custom gl_PointSize), but
   the always-present ghost wordmark means the finale never reads as blank, and real GPUs form the
   cloud over it. Zero new deps. **Next: P12 (/services + case-study elevation).**
+- 2026-06-18 — **P12 DONE, /services + case-study elevation.** (a) New
+  `components/sections/ServiceMotif.tsx` adds an ALWAYS-ON "computational motif" behind each services
+  bento tile (the plan's "live motifs, not hover-only"): streaming data lanes (Data/Infra), a pulsing
+  node graph (AI/Chat), or radiating request rings (APIs/Web), keyed to the service icon. Pure SVG +
+  CSS keyframes (`lane-flow` / `edge-pulse` / `node-breathe` / `ring-radiate` in globals.css) —
+  compositor-only, no canvas, so several run at once without touching the WebGL budget; brightens on
+  tile hover; all `motion-safe:` so reduced motion freezes them. Tile copy lifted to `relative` so it
+  sits above the motif. (b) New `components/motion/ScrubReveal.tsx` turns the case-study results into
+  an OVERSIZED scrubbed set-piece: the numbers (now clamp(3rem,8vw,5rem)) scale up from 0.86 + brighten
+  as the block scrolls through the viewport, scrubbed to scroll; desktop + motion only, RM/mobile/no-JS
+  render them at rest. The next-project "morph" is already delivered by the P5 latent-space page
+  transition on click. **Verified** (prod build, puppeteer): services = 6 bento tiles with motif SVGs
+  and animations running; case study = results dl with 4 stats + numbers; **0 console errors**; tsc +
+  lint + build green. Zero new deps. **Next: P13 (mobile parity + full QA + cleanup).**

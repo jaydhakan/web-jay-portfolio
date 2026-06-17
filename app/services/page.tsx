@@ -17,6 +17,7 @@ import { ScrambleHeading } from "@/components/motion/ScrambleHeading";
 import { FadeUp } from "@/components/motion/FadeUp";
 import { ClipReveal } from "@/components/motion/ClipReveal";
 import { LineDraw } from "@/components/motion/LineDraw";
+import { ServiceMotif } from "@/components/sections/ServiceMotif";
 import { CTABanner } from "@/components/sections/CTABanner";
 import { cn } from "@/lib/utils";
 
@@ -149,6 +150,9 @@ export default function ServicesPage() {
                     aria-hidden
                     className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.1] to-transparent"
                   />
+                  {/* Always-on computational motif (V3 P12) — the tile reads as a
+                      live system, not a static card. Cheap SVG/CSS, RM-safe. */}
+                  <ServiceMotif icon={service.icon} />
                   {Icon && (
                     <span className="relative grid size-11 place-items-center rounded-xl bg-accent/10 ring-1 ring-accent/15 transition-colors duration-300 group-hover:bg-accent/20 group-hover:ring-accent/30">
                       <span
@@ -158,8 +162,8 @@ export default function ServicesPage() {
                       <Icon aria-hidden strokeWidth={1.5} className="relative size-5 text-accent" />
                     </span>
                   )}
-                  <h3 className="mt-5 font-display text-lg font-semibold text-ink">{service.title}</h3>
-                  <p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-ink-dim">{service.description}</p>
+                  <h3 className="relative mt-5 font-display text-lg font-semibold text-ink">{service.title}</h3>
+                  <p className="relative mt-2.5 max-w-2xl text-sm leading-relaxed text-ink-dim">{service.description}</p>
                 </li>
               );
             })}

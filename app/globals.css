@@ -266,6 +266,25 @@ html {
   to   { opacity: 1; }
 }
 
+/* Service bento "computational motifs" (V3 P12) — always-on, compositor-only. */
+@keyframes lane-flow {
+  from { stroke-dashoffset: 0; }
+  to   { stroke-dashoffset: -34; }
+}
+@keyframes edge-pulse {
+  0%, 100% { opacity: 0.18; }
+  50%      { opacity: 0.7; }
+}
+@keyframes node-breathe {
+  0%, 100% { opacity: 0.4; transform: scale(0.85); }
+  50%      { opacity: 1; transform: scale(1.15); }
+}
+@keyframes ring-radiate {
+  0%   { transform: scale(0.2); opacity: 0; }
+  20%  { opacity: 0.8; }
+  100% { transform: scale(3.4); opacity: 0; }
+}
+
 /* Cinematic hero scroll-out — native CSS scroll-driven animation (runs on the
    compositor, zero main-thread JS). At scroll 0 the content rests in its final
    position, so the LCP H1 is untouched; it drifts up and dims only as the first
