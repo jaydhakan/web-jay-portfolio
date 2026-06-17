@@ -178,7 +178,7 @@ export function WorkList({ projects, covers, filters }: WorkListProps) {
                 {/* Mobile inline thumb (desktop uses the cursor-follow preview). */}
                 <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-elevated ring-1 ring-line sm:hidden">
                   {hasCover ? (
-                    <Image src={project.coverImage} alt="" fill sizes="100vw" className="object-cover" {...blurProps(project.coverImage)} />
+                    <Image src={project.coverImage} alt="" fill sizes="(min-width: 640px) 1px, 100vw" className="object-cover" {...blurProps(project.coverImage)} />
                   ) : (
                     <div aria-hidden className="size-full" style={{ backgroundImage: PLACEHOLDER_BG }} />
                   )}
