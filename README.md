@@ -23,6 +23,30 @@ npm run start   # serve the production build
 npm run lint    # eslint
 ```
 
+## Run with Docker
+
+This is a **server app** (server components, the contact server action, SSR/SSG,
+image optimization) — it must run a Node server, not be served as static files.
+The image uses Next's `standalone` output (`node server.js`), so it stays small
+(~230MB) and ships without `node_modules`.
+
+```bash
+# build + run on http://localhost:3000
+docker compose up --build
+
+# with a working contact form (Resend) + a real public URL:
+RESEND_API_KEY=re_... NEXT_PUBLIC_SITE_URL=https://yourdomain.com \
+  docker compose up --build
+
+# or plain docker:
+docker build -t jay-portfolio .
+docker run -p 3000:3000 -e RESEND_API_KEY=re_... jay-portfolio
+```
+
+`NEXT_PUBLIC_SITE_URL` is a **build arg** (Next inlines `NEXT_PUBLIC_*` at build
+time); `RESEND_API_KEY` is a **runtime** env (the site runs without it — the
+contact form just can't send mail).
+
 ## Structure
 
 ```
@@ -39,10 +63,10 @@ lib/gsap.ts          single GSAP registration point (core eager, heavy plugins l
 
 ## Docs
 
-- **`DESIGN.md`** — the shipped design system (tokens, type, motion, components, z-scale, signature).
-- **`plan.md`** — the design bible (rationale, technical patterns, risk register).
-- **`PHASES.md`** — live build tracker (phase status, exit gates, changelog).
-- **`docs/final_prompt.md`** — the master spec (effects catalog, hard rules, banned list, DoD).
+- **`plan.md`** — the V3 "Go Loud" design bible **and** live build tracker (single source of
+  truth: mandate, signature moves S1–S12, per-phase plan P1–P13, risk register, status board + changelog).
+- **`DESIGN.md`** — the shipped V2 design-system baseline (tokens, type, motion, components, z-scale).
+- **`PRODUCT.md`** — brand / users / positioning.
 
 ## Conventions
 
