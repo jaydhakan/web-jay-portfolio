@@ -251,7 +251,7 @@ reference — we borrow the *energy*, not the literal car).
 | P2  | 3D loss-landscape hero + bloom (S1, S4) | `[x]` |
 | P3  | Velocity bus everywhere (S2, S10) | `[x]` |
 | P4  | Gooey morphing cursor + magnetic (S3) | `[x]` |
-| P5  | Liquid-metal page transitions (S9) | `[ ]` |
+| P5  | Liquid-metal page transitions (S9) | `[x]` |
 | P6  | WebGL flowmap on all imagery (S5) | `[ ]` |
 | P7  | Horizontal cinematic work reel (S6) | `[ ]` |
 | P8  | Throwable physics playground (S11) | `[ ]` |
@@ -322,4 +322,18 @@ reference — we borrow the *energy*, not the literal car).
   via matchMedia patch): blend layer present at z-60 with `mix-blend-difference`, `has-custom-cursor`
   set, ring stretches on fast movement (peak scaleX/scaleY ratio 2.31), and on coarse-pointer the
   cursor is absent + the native cursor kept; **0 console errors** in both; build/lint/tsc green.
-  **Next: P5 (liquid-metal latent-space page transitions).**
+- 2026-06-17 — **P5 DONE, latent-space page transitions (S9).** Upgraded `PageTransition` from the
+  single clip-path curtain into a BLOCK/TILE DISSOLVE: the curtain is a 10x6 grid of `--base` tiles
+  that dissolve out in random ("decode") order (`gsap` grid stagger `from:"random"`, scale+autoAlpha)
+  to reveal the new page, with an iridescent indigo->violet->cyan energy flash. Reads as morphing
+  through latent space / the site recompiling itself. **Engineering call (documented deviation):**
+  did NOT use the View-Transitions API or a 2nd live WebGL context (the plan's literal S9) — both
+  are fragile here (VT-in-Next-App-Router + the one-context rule); a compositor-only CSS/GSAP
+  dissolve is loud AND robust, and keeps the existing contracts intact. Kept: SIBLING-of-children
+  blend-safe leaf (no mix-blend/isolation/opacity<1 at rest), first-paint-never-covered (prevPath
+  null), RM/no-JS = identical markup + instant settle, and the route-reset (scroll-top + double-rAF
+  ScrollTrigger.refresh + focus #main-content). **Verified** (prod build, puppeteer, real client nav
+  via a footer link): first paint hidden, the curtain appears + tiles transform mid-nav, lands on
+  /work with scrollY reset to 0 and activeEl = main-content, and reduced motion does an instant swap
+  with the curtain staying hidden; **0 console errors** in both; build/lint/tsc green. View-Transitions
+  shared-element morph stays available as a future polish. **Next: P6 (WebGL flowmap on all imagery).**

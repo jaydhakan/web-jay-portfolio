@@ -6,34 +6,33 @@ import { gsap, useGSAP, ScrollTrigger } from "@/lib/gsap";
 import { useLenisInstance } from "@/components/layout/SmoothScrollProvider";
 
 /**
- * Enter-only page transition (catalog #34, D-8). app/template.tsx remounts this
- * on every client navigation — that remount is the wipe trigger. A --base
- * curtain panel retracts via a clip-path inset wipe (reveals the new page
- * top-first) while a welded accent hairline rides the leading edge down the
- * viewport: the drawn-line echo of "The Field". jdFlow (the licensed signature
- * page-wipe ease) at DUR.std (0.8s).
+ * Latent-space page transition (V3 P5 / S9, supersedes the D-8 clip wipe).
+ * app/template.tsx remounts this on every client navigation — that remount is
+ * the trigger. The curtain is a GRID OF TILES that dissolve out in random
+ * ("decode") order to reveal the new page, with an iridescent energy flash:
+ * navigation reads as morphing through latent space / the site recompiling
+ * itself. Compositor-only (per-tile scale + opacity, one flash opacity) — no
+ * second WebGL context, no View-Transitions dependency, so it's loud AND robust.
  *
- * STRUCTURE (load-bearing): this lives INSIDE {children} (template.tsx), so it
- * is a SIBLING of the z-60 mix-blend-difference CustomCursor, never an ancestor.
- * The cursor keeps inverting over the z-55 curtain. The curtain carries NO
- * mix-blend-mode / NO isolation / NO opacity<1 at rest, so it never creates a
- * blend-isolating context (plan §4.6).
+ * STRUCTURE (load-bearing): lives INSIDE {children} (template.tsx) as a SIBLING
+ * of the z-60 mix-blend-difference CustomCursor, never an ancestor. The wrap
+ * carries NO mix-blend / NO isolation / NO opacity<1 at rest (visibility:hidden,
+ * then autoAlpha:1 during the transition), so it never creates a blend-isolating
+ * context (plan §4.6) and the cursor keeps inverting over it.
  *
- * RM / no-JS: the curtain markup is ALWAYS rendered (same DOM on server and
- * client — never branched on reduced motion, which would cause a hydration
- * mismatch). It ships visibility:hidden; only the motion-allowed branch ever
- * makes it visible and animates it. Under reduced motion it stays hidden and the
- * route-reset (scroll-top + ScrollTrigger.refresh + focus #main-content) runs
- * instantly. The wipe is gated by gsap.matchMedia, so RM is decided by the live
- * media query, not by markup.
- *
- * FIRST PAINT IS NEVER WIPED (prevPath === null): the curtain is hidden so the
- * LCP element is never covered on cold load (protects the 95+ gate, R9). It
- * animates only on subsequent in-app navigations.
+ * RM / no-JS: the markup is ALWAYS rendered identically (no branch on reduced
+ * motion -> no hydration mismatch); it ships visibility:hidden. Only the
+ * motion-allowed matchMedia branch makes it visible + animates. Under reduced
+ * motion the route-reset runs instantly. FIRST PAINT IS NEVER COVERED
+ * (prevPath === null) so the LCP element is never hidden on cold load (R9).
  */
 
-// Module scope: survives template.tsx remounts, resets on a hard reload — so the
-// first paint of a session is detected (prevPath === null) and left un-wiped.
+const COLS = 10;
+const ROWS = 6;
+const TILES = Array.from({ length: COLS * ROWS });
+
+// Module scope: survives template.tsx remounts, resets on hard reload — so the
+// first paint of a session is detected (prevPath === null) and left uncovered.
 let prevPath: string | null = null;
 
 export function PageTransition() {
@@ -41,14 +40,12 @@ export function PageTransition() {
   const pathname = usePathname();
 
   const wrapRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const edgeRef = useRef<HTMLDivElement>(null);
+  const flashRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
-      // Route-reset contract (plan §6.4): reset scroll to top via the active
-      // authority, refresh ScrollTrigger after a double rAF so the revealed
-      // layout is measured, then move focus to <main> for keyboard/SR parity.
+      // Route-reset contract (plan §6.4): scroll to top via the active authority,
+      // refresh ScrollTrigger after a double rAF, then focus <main> for parity.
       const settle = () => {
         if (lenis) lenis.scrollTo(0, { immediate: true });
         else window.scrollTo(0, 0);
@@ -62,41 +59,42 @@ export function PageTransition() {
       prevPath = pathname;
       if (!isNav) return; // first paint / hard reload: leave content uncovered
 
-      // The wipe plays only when motion is allowed; the matchMedia callback runs
-      // synchronously when it matches, so `played` is reliable right after add().
       let played = false;
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         const wrap = wrapRef.current;
         if (!wrap) return;
         played = true;
+
         gsap.set(wrap, { autoAlpha: 1 });
-        gsap.set(panelRef.current, {
-          clipPath: "inset(0% 0% 0% 0%)",
-          willChange: "clip-path",
-        });
-        gsap.set(edgeRef.current, { y: 0, willChange: "transform" });
+        gsap.set(".pt-tile", { scale: 1, autoAlpha: 1, transformOrigin: "center" });
+        gsap.set(flashRef.current, { autoAlpha: 0 });
 
         gsap
           .timeline({
-            defaults: { duration: 0.8, ease: "jdFlow" }, // DUR.std, signature wipe
             onComplete: () => {
               settle();
               gsap.set(wrap, { autoAlpha: 0 });
-              gsap.set([panelRef.current, edgeRef.current], {
-                willChange: "auto",
-              });
             },
           })
-          // Panel recedes top-first; the welded accent edge rides the boundary
-          // down the viewport in lockstep (same ease/duration, position 0).
-          .to(panelRef.current, { clipPath: "inset(100% 0% 0% 0%)" }, 0)
-          .to(edgeRef.current, { y: () => window.innerHeight }, 0);
+          // Iridescent energy pulse as the curtain breaks apart.
+          .to(flashRef.current, { autoAlpha: 0.55, duration: 0.18, ease: "power2.out" }, 0)
+          .to(flashRef.current, { autoAlpha: 0, duration: 0.5, ease: "power2.in" }, 0.18)
+          // Tiles dissolve out in random order (the "decode") to reveal the page.
+          .to(
+            ".pt-tile",
+            {
+              scale: 0,
+              autoAlpha: 0,
+              duration: 0.5,
+              ease: "power2.in",
+              stagger: { amount: 0.45, grid: [ROWS, COLS], from: "random" },
+            },
+            0,
+          );
       });
 
-      // Reduced motion (no wipe): instant route swap + reset + focus.
-      if (!played) settle();
-
+      if (!played) settle(); // reduced motion: instant swap + reset + focus
       return () => mm.revert();
     },
     { dependencies: [pathname], scope: wrapRef },
@@ -109,11 +107,29 @@ export function PageTransition() {
       className="pointer-events-none fixed inset-0 z-[55]"
       style={{ visibility: "hidden" }}
     >
-      <div ref={panelRef} className="absolute inset-0 bg-base" />
       <div
-        ref={edgeRef}
-        className="absolute inset-x-0 top-0 h-[1.5px] bg-accent"
-        style={{ boxShadow: "0 0 24px -6px oklch(63% 0.21 272 / 0.35)" }}
+        className="absolute inset-0 grid"
+        style={{
+          gridTemplateColumns: `repeat(${COLS}, 1fr)`,
+          gridTemplateRows: `repeat(${ROWS}, 1fr)`,
+        }}
+      >
+        {TILES.map((_, i) => (
+          <div
+            key={i}
+            className="pt-tile bg-base"
+            style={{ willChange: "transform, opacity" }}
+          />
+        ))}
+      </div>
+      <div
+        ref={flashRef}
+        className="absolute inset-0"
+        style={{
+          opacity: 0,
+          background:
+            "radial-gradient(ellipse 80% 70% at 60% 40%, oklch(63% 0.21 272 / 0.5), oklch(66% 0.19 285 / 0.32) 45%, oklch(86% 0.115 207 / 0.14) 70%, transparent 85%)",
+        }}
       />
     </div>
   );
