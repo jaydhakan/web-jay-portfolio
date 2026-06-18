@@ -175,8 +175,9 @@ field behind a header), each governed, **one rich instance per route**. *Risk: l
 ### E5 — Housekeeping & lean-up
 - [x] Dead-file cleanup (done): removed `Card`/`Pin`/`Parallax`/`AnimatedText`, the pnpm lockfiles,
   `scripts/screenshot.mjs`, the temp `udpated_plan.md`. (npm is canonical.)
-- [ ] `next/image`: explicit `formats` (AVIF/WebP) + a sensible `quality` default in `next.config.mjs`.
-- [ ] Reconcile the stale README "Lighthouse ≥95 hard gate" line (V3-3 dropped the cap).
+- [x] `next/image`: explicit `formats` (AVIF/WebP) + `qualities: [75]` allowlist in `next.config.mjs`.
+- [x] Reconcile the stale README "Lighthouse ≥95 hard gate" line (now: A11y=100 + CLS=0 hard, perf
+  measured-not-capped) + the stale "one hero shader" line (now the page-wide `LatentField`).
 
 ### Side animations / micro-delights *(small, on-concept, optional — pick as we go)*
 - **Geoline** (E3) — the headline one, above.
@@ -224,10 +225,10 @@ clustering reference) · Cuberto `cuberto.com`.
 | Phase | Title                                                                | Status               |
 |-------|----------------------------------------------------------------------|----------------------|
 | E1    | `LatentField` core + Home page-wide flow→converge backdrop           | `[x]` shipped → review |
-| E2    | Work: page-wide field → project constellation                       | `[ ]`                |
+| E2    | Work: page-wide field → project constellation                       | `[x]` shipped → review |
 | E3    | About: one page-wide field (absorbs portrait+molecules) + **geoline** | `[x]` shipped → review |
-| E4    | Cohere the rest (contact/services echoes)                            | `[ ]`                |
-| E5    | Housekeeping & lean-up                                               | `[~]`                |
+| E4    | Cohere the rest (contact/services echoes)                            | `[x]` shipped → review |
+| E5    | Housekeeping & lean-up                                               | `[x]`                |
 | —     | Content / placeholders                                               | `[!]` blocked on Jay |
 
 **Build order:** **E1 (Home, flagship) → review on the real site → E3 (geoline + portrait) → E2 (Work
@@ -237,6 +238,19 @@ the palette/feel.
 ---
 
 ## 10. Changelog
+- 2026-06-18 — **Phase 2 build COMPLETE (E2, E4, E5).** *E2 (Work):* added a **"constellation"**
+  layout (many tight near-point clusters spread wide = "your outputs as points in latent space") and
+  mounted the page-wide `LatentField` (clusterCount = projects.length) behind the whole /work route;
+  `WorkList` stays the interactive + a11y layer (real links / filter / flowmap preview) — no
+  clickable-particle nav (rejected as recruiter/A11y-hostile). *E4 (cohere the rest):* mounted a quiet
+  default-scatter `LatentField` on /services (ambient behind the opaque cards) so all four content
+  routes speak one language; **/contact left as-is** (its particle finale is the in-family piece; a
+  field there would be a 2nd live canvas). *E5 (housekeeping):* `next.config.mjs` → `images.formats`
+  AVIF+WebP and `qualities:[75]`; reconciled the README (dropped the stale ≥95 hard-gate line → A11y=100
+  + CLS=0 hard, perf measured-not-capped; updated the stale "one hero shader" line to the page-wide
+  `LatentField`). **All five Phase-2 phases (E1–E5) now shipped to main; pending owner real-site
+  review. The "Latent Space" plan is fully built.** Remaining: §6 content track (BLOCKED ON JAY — real
+  photo unlocks the field's face-target on /about; real covers/testimonials/URLs).
 - 2026-06-18 — **E3 shipped (About), two commits.** *E3a:* generalized the rig with a cluster
   `layout` ("scatter" = Home unchanged; **"radial"** = About: a dense core + ring of satellites =
   "you, embedded, skill domains around you"); mounted the **page-wide `LatentField` (radial)** behind

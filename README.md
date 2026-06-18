@@ -1,15 +1,18 @@
 # Jay Dhakan — Portfolio
 
 A premium, motion-led portfolio for Jay Dhakan (Python & AI/ML engineer). Dark,
-indigo-accented, editorial; the site is itself the engineering proof — Lighthouse
-**Performance ≥ 95 / Accessibility = 100** is a hard gate, not a nice-to-have.
+indigo-accented, editorial; the site is itself the engineering proof. **Accessibility
+= 100 and CLS = 0 are hard gates.** Performance is measured, not capped (V3 "Go Loud"):
+the desktop WebGL spectacle spends GPU freely while loading fast, and mobile stays
+bold but functional (static posters for every heavy canvas).
 
 ## Stack
 
 - **Next.js 16** (App Router) · **React 19** · **TypeScript** · **Tailwind CSS 4**
 - **GSAP** (ScrollTrigger, SplitText, Flip, DrawSVG, ScrambleText, CustomEase) for all motion
 - **Lenis** smooth scroll, driven off the GSAP ticker
-- **three / @react-three/fiber** for one hero shader ("The Field"), lazy + interaction-armed
+- **three / @react-three/fiber** for the page-wide `LatentField` particle system (one
+  governed canvas per route, lazy + armed-after-paint; static poster on mobile/RM/no-WebGL)
 - `react-hook-form` + `zod` (contact form) · `resend` (email) · `lucide-react` (icons)
 
 No `motion`/framer-motion — every animation is GSAP or CSS.
