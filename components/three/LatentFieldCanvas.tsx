@@ -151,16 +151,28 @@ type Built = { pts: THREE.Points; geom: THREE.BufferGeometry; mat: THREE.ShaderM
 
 /**
  * Cluster centroid arrangement — the only per-page difference (the "scene"):
- *  - "scatter": K centroids spread across the frame (Home — abstract structure).
- *  - "radial":  one dense core + a ring of satellites (About — "you, embedded,
- *    with skill domains clustered around you").
+ *  - "scatter":       K centroids spread across the frame (Home — abstract structure).
+ *  - "radial":        one dense core + a ring of satellites (About — "you, embedded,
+ *                     with skill domains clustered around you").
+ *  - "constellation": many TIGHT points spread wide (Work — discrete projects as
+ *                     stars/points in latent space).
  */
-export type FieldLayout = "scatter" | "radial";
+export type FieldLayout = "scatter" | "radial" | "constellation";
 
 type Centroid = { x: number; y: number; z: number; r: number; color: THREE.Color };
 
 function makeCentroids(clusterCount: number, layout: FieldLayout): Centroid[] {
   const denom = Math.max(clusterCount - 1, 1);
+  if (layout === "constellation") {
+    // Each cluster is a tight, near-point "star" (one per project), spread wide.
+    return Array.from({ length: clusterCount }, (_, k) => ({
+      x: (Math.random() * 2 - 1) * 12.5,
+      y: (Math.random() * 2 - 1) * 6.5,
+      z: (Math.random() * 2 - 1) * 1.5,
+      r: 0.45 + Math.random() * 0.5,
+      color: rampColor(k / denom),
+    }));
+  }
   if (layout === "radial") {
     return Array.from({ length: clusterCount }, (_, k) => {
       if (k === 0) {
