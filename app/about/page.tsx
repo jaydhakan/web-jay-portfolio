@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import {
   MessagesSquare,
   Rocket,
@@ -7,6 +8,7 @@ import {
 } from "lucide-react";
 import { howIWork, profile, sections, seo, siteConfig, timeline } from "@/data/content";
 import { publicImageExists } from "@/lib/images";
+import { blurProps } from "@/lib/blur";
 import { GitHubIcon, LinkedInIcon, UpworkIcon } from "@/components/ui/BrandIcon";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { RevealText } from "@/components/motion/RevealText";
@@ -14,9 +16,9 @@ import { ScrambleHeading } from "@/components/motion/ScrambleHeading";
 import { Teleprompter } from "@/components/motion/Teleprompter";
 import { ClipReveal } from "@/components/motion/ClipReveal";
 import { LineDraw } from "@/components/motion/LineDraw";
+import { LatentField } from "@/components/three/LatentField";
 import { ExperienceTimeline } from "@/components/sections/ExperienceTimeline";
 import { SkillBag } from "@/components/about/SkillBag";
-import { ParticlePortrait } from "@/components/about/ParticlePortrait";
 import { TrainingRun } from "@/components/about/TrainingRun";
 import { CTABanner } from "@/components/sections/CTABanner";
 
@@ -44,6 +46,11 @@ export default function AboutPage() {
 
   return (
     <main id="main-content" tabIndex={-1} className="pt-32">
+      {/* Page-wide latent field, radial scene: "you, embedded — skill domains as
+          clusters around you" (E3). One governed canvas behind the whole route;
+          poster on mobile/RM. Absorbs the retired /about set-pieces. */}
+      <LatentField layout="radial" />
+
       <div className="mx-auto max-w-7xl px-6">
         <header className="max-w-3xl">
           <SectionLabel>{sections.aboutPage.eyebrow}</SectionLabel>
@@ -54,10 +61,10 @@ export default function AboutPage() {
           />
         </header>
 
-        {/* Identity row — "you, as data" particle portrait (V3 P9 / S7): the
-            headshot assembles from a GPU point cloud, breathes, and scatters to
-            a sphere then reforms on hover. Plain photo poster under mobile /
-            reduced motion / no-JS / no-WebGL (and it is the SSR + a11y layer). */}
+        {/* Identity row — the headshot tile. The "you, as data" particle gag now
+            lives in the page-wide LatentField (E3: the cloud is meant to form the
+            face here once a real photo lands), so this tile is just the still
+            poster / SSR / a11y image — no second canvas on /about. */}
         <div className="mt-14 flex flex-col gap-8 sm:flex-row sm:items-center">
           <div className="group relative aspect-square w-40 shrink-0 overflow-hidden rounded-2xl ring-1 ring-line transition duration-300 ease-out hover:ring-accent/40 sm:w-48">
             <span
@@ -65,13 +72,15 @@ export default function AboutPage() {
               className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-tr from-accent/25 via-transparent to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-0"
             />
             {hasPhoto ? (
-              // TODO(JAY): the particle cloud samples this file's luminance as
-              // pseudo-depth; drop a real 400x400+ photo (+ optional offline
-              // depth map) at public/images/profile/jay.jpg and it upgrades.
-              <ParticlePortrait
+              // TODO(JAY): drop a real 400x400+ photo at public/images/profile/jay.jpg.
+              // Then the page-wide field can sample it as the convergence face target.
+              <Image
                 src={profile.photo}
                 alt={`Portrait of ${profile.name}`}
+                fill
                 sizes="192px"
+                className="object-cover"
+                {...blurProps(profile.photo)}
               />
             ) : (
               // TODO(JAY): drop a 400x400+ photo at public/images/profile/jay.jpg

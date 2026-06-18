@@ -149,21 +149,52 @@ const fragmentShader = /* glsl */ `
 
 type Built = { pts: THREE.Points; geom: THREE.BufferGeometry; mat: THREE.ShaderMaterial };
 
+/**
+ * Cluster centroid arrangement — the only per-page difference (the "scene"):
+ *  - "scatter": K centroids spread across the frame (Home — abstract structure).
+ *  - "radial":  one dense core + a ring of satellites (About — "you, embedded,
+ *    with skill domains clustered around you").
+ */
+export type FieldLayout = "scatter" | "radial";
+
+type Centroid = { x: number; y: number; z: number; r: number; color: THREE.Color };
+
+function makeCentroids(clusterCount: number, layout: FieldLayout): Centroid[] {
+  const denom = Math.max(clusterCount - 1, 1);
+  if (layout === "radial") {
+    return Array.from({ length: clusterCount }, (_, k) => {
+      if (k === 0) {
+        // The core ("you") — central, larger, mid-ramp violet.
+        return { x: 0, y: 0, z: 0, r: 1.8, color: rampColor(0.5) };
+      }
+      // Satellites evenly placed on a slightly squashed ring.
+      const a = ((k - 1) / Math.max(clusterCount - 1, 1)) * Math.PI * 2 + 0.4;
+      return {
+        x: Math.cos(a) * 8.5,
+        y: Math.sin(a) * 4.6,
+        z: (Math.random() * 2 - 1) * 1.0,
+        r: 0.8 + Math.random() * 1.0,
+        color: rampColor(k / denom),
+      };
+    });
+  }
+  return Array.from({ length: clusterCount }, (_, k) => ({
+    x: (Math.random() * 2 - 1) * 10,
+    y: (Math.random() * 2 - 1) * 5.5,
+    z: (Math.random() * 2 - 1) * 1.2,
+    r: 0.9 + Math.random() * 1.5,
+    color: rampColor(k / denom),
+  }));
+}
+
 /** Build the flow homes + cluster targets once (Math.random is impure -> effect). */
-function buildField(count: number, clusterCount: number): Built {
+function buildField(count: number, clusterCount: number, layout: FieldLayout): Built {
   const homes = new Float32Array(count * 3);
   const targets = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
   const seeds = new Float32Array(count);
 
-  // Procedural latent centroids ("learned structure"), spread across the frame.
-  const centroids = Array.from({ length: clusterCount }, (_, k) => ({
-    x: (Math.random() * 2 - 1) * 10,
-    y: (Math.random() * 2 - 1) * 5.5,
-    z: (Math.random() * 2 - 1) * 1.2,
-    r: 0.9 + Math.random() * 1.5,
-    color: rampColor(k / Math.max(clusterCount - 1, 1)),
-  }));
+  const centroids = makeCentroids(clusterCount, layout);
 
   const tmp = new THREE.Color();
   for (let i = 0; i < count; i++) {
@@ -222,9 +253,11 @@ function buildField(count: number, clusterCount: number): Built {
 function FieldPoints({
   count,
   clusterCount,
+  layout,
 }: {
   count: number;
   clusterCount: number;
+  layout: FieldLayout;
 }) {
   const { camera } = useThree();
   const [built, setBuilt] = useState<Built | null>(null);
@@ -243,7 +276,7 @@ function FieldPoints({
     let made: Built | null = null;
     const id = requestAnimationFrame(() => {
       if (disposed) return;
-      made = buildField(count, clusterCount);
+      made = buildField(count, clusterCount, layout);
       rt.current = made.mat;
       setBuilt(made);
     });
@@ -254,7 +287,7 @@ function FieldPoints({
       made?.geom.dispose();
       made?.mat.dispose();
     };
-  }, [count, clusterCount]);
+  }, [count, clusterCount, layout]);
 
   // One shared signal: scroll progress + smoothed velocity from the velocity bus.
   useEffect(() => {
@@ -320,9 +353,11 @@ function FieldPoints({
 export default function LatentFieldCanvas({
   count,
   clusterCount = 9,
+  layout = "scatter",
 }: {
   count?: number;
   clusterCount?: number;
+  layout?: FieldLayout;
 }) {
   // Tier once at mount (the parent gate already guarantees desktop + motion).
   const [tier] = useState<"high" | "low">(() =>
@@ -339,7 +374,7 @@ export default function LatentFieldCanvas({
       frameloop="always"
       aria-hidden
     >
-      <FieldPoints count={resolvedCount} clusterCount={clusterCount} />
+      <FieldPoints count={resolvedCount} clusterCount={clusterCount} layout={layout} />
     </Canvas>
   );
 }

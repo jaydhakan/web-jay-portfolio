@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useGovernedCanvas } from "@/lib/webgl-governance";
+import type { FieldLayout } from "./LatentFieldCanvas";
 
 const LatentFieldCanvas = dynamic(() => import("./LatentFieldCanvas"), { ssr: false });
 
@@ -24,9 +25,12 @@ const LatentFieldCanvas = dynamic(() => import("./LatentFieldCanvas"), { ssr: fa
 export function LatentField({
   count,
   clusterCount,
+  layout,
 }: {
   count?: number;
   clusterCount?: number;
+  /** Cluster arrangement — the per-page "scene" (Home scatter, About radial). */
+  layout?: FieldLayout;
 }) {
   const { ref, show } = useGovernedCanvas<HTMLDivElement>({
     profile: "desktop-motion",
@@ -39,7 +43,7 @@ export function LatentField({
       <div className="hero-fallback absolute inset-0" />
       {show && (
         <div className="absolute inset-0 animate-[rise-in_1.2s_ease-out_both]">
-          <LatentFieldCanvas count={count} clusterCount={clusterCount} />
+          <LatentFieldCanvas count={count} clusterCount={clusterCount} layout={layout} />
         </div>
       )}
     </div>
