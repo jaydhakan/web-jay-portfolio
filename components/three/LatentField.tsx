@@ -42,9 +42,15 @@ export function LatentField({
       {/* Static iridescent poster — load / RM / mobile / no-WebGL state. */}
       <div className="hero-fallback absolute inset-0" />
       {show && (
-        <div className="absolute inset-0 animate-[rise-in_1.2s_ease-out_both]">
-          <LatentFieldCanvas count={count} clusterCount={clusterCount} layout={layout} />
-        </div>
+        <>
+          <div className="absolute inset-0 animate-[rise-in_1.2s_ease-out_both]">
+            <LatentFieldCanvas count={count} clusterCount={clusterCount} layout={layout} />
+          </div>
+          {/* Contrast guard: a thin base scrim over the LIVE field so additive glow
+              never drops body copy below AAA (DOM/text stays authoritative). Dims
+              brightness only — the motion (the "wow") is untouched. */}
+          <div className="absolute inset-0 bg-base/25" />
+        </>
       )}
     </div>
   );

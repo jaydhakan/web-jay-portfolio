@@ -42,8 +42,9 @@ export default function ServicesPage() {
       {/* Quiet page-wide field echo (E4) so /services speaks the same latent-space
           language as home/about/work. Mostly ambient behind the opaque cards; one
           governed canvas, poster on mobile/RM. (/contact keeps its particle finale
-          instead — never a 2nd live canvas on a route.) */}
-      <LatentField />
+          instead — never a 2nd live canvas on a route.) Lighter count: ambient echo
+          mostly behind the opaque cards, so it needn't run the full particle budget. */}
+      <LatentField count={6000} />
 
       <div className="mx-auto max-w-7xl px-6">
         <header className="max-w-3xl">
