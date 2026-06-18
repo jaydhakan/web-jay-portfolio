@@ -17,6 +17,7 @@ import { ScrambleHeading } from "@/components/motion/ScrambleHeading";
 import { FadeUp } from "@/components/motion/FadeUp";
 import { ClipReveal } from "@/components/motion/ClipReveal";
 import { LineDraw } from "@/components/motion/LineDraw";
+import { LatentField } from "@/components/three/LatentField";
 import { ServiceMotif } from "@/components/sections/ServiceMotif";
 import { CTABanner } from "@/components/sections/CTABanner";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,12 @@ const iconMap: Record<string, LucideIcon> = {
 export default function ServicesPage() {
   return (
     <main id="main-content" tabIndex={-1} className="pt-32">
+      {/* Quiet page-wide field echo (E4) so /services speaks the same latent-space
+          language as home/about/work. Mostly ambient behind the opaque cards; one
+          governed canvas, poster on mobile/RM. (/contact keeps its particle finale
+          instead — never a 2nd live canvas on a route.) */}
+      <LatentField />
+
       <div className="mx-auto max-w-7xl px-6">
         <header className="max-w-3xl">
           <SectionLabel>{sections.servicesPage.eyebrow}</SectionLabel>
