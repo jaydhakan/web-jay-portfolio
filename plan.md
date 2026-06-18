@@ -511,3 +511,26 @@ reference — we borrow the *energy*, not the literal car).
   photo, testimonials, contact env vars are the Jay-blocked swap-ins in §8). **The V3 "Go Loud" build
   is complete: every route has its flagship moment, one ML-system concept throughout, A11y + CLS held,
   governed GPU, designed fallbacks.**
+- 2026-06-18 — **R1 — post-build senior refactor pass (engineering + design taste).** No new phases
+  (all 13 shipped); a quality/polish sweep over the shipped V3 stack. **(a) Engineering — governed-canvas
+  consolidation.** Every WebGL surface hand-rolled the SAME mount gate: a cached `webglProbe` +
+  `useSyncExternalStore`, a one-shot matchMedia eligibility check, and (some) an arm-after-paint defer
+  (~25 lines x 5 files). Hoisted into `lib/webgl-governance.ts` as `useWebglSupported()`,
+  `useCanvasEligible(profile)` (two named profiles: `"desktop-fine"` = fine-pointer+hover+motion for
+  cursor-reactive surfaces; `"desktop-motion"` = scroll-driven set-pieces), `useArmedAfterPaint(enabled)`,
+  and the combined `useGovernedCanvas({ ref?, profile?, rootMargin?, arm? }) -> { ref, show, ... }`.
+  Refactored all 5 consumers onto it (`FlowImage`, `ParticlePortrait`, `ParticleFinale`, `TrainingRun`
+  full gate; `HeroBackground` keeps its bespoke interaction-arm, just adopts `useWebglSupported`). Net
+  ~132 lines of duplicated gating deleted; the gate now lives in ONE audited place. Gating semantics are
+  byte-identical (verified each profile resolves the exact same eligibility set), so a11y / CLS / RM /
+  no-JS / mobile fallback behaviour is unchanged. **(b) Design taste (emil-design-eng pass).** The motion
+  layer was already strong (Button has `active:scale`, scoped transitions not `transition: all`, custom
+  cubic-beziers, Tailwind v4 auto-gates `hover:` behind `(hover:hover)`), so two surgical fixes only:
+  killed the lone wasteful `transition-all` on the WorkList row arrow (-> `transition-[transform,color]`),
+  and added press feedback (`active:scale-95` + transform in the transition) to the mobile menu toggle
+  buttons (the only pressable controls missing a `:active` response). **Deliberately NOT changed** (logged
+  as opt-ins, not defects): the small decorative hover-transforms stay RM-ungated to match the codebase's
+  coherent existing stance (it gates large motion like SlideText, treats micro hover nudges as
+  RM-acceptable); `Card`'s `hover:shadow-glow` box-shadow tween stays (converting to a compositor `before`
+  glow like Button's would change the rendered glow and can't be visually verified headless). **Verified:**
+  tsc + lint + prod build all green; all 20 static pages generate.

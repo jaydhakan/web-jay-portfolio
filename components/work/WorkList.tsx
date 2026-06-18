@@ -201,7 +201,7 @@ export function WorkList({ projects, covers, filters }: WorkListProps) {
 
                 <ArrowUpRight
                   aria-hidden
-                  className="size-5 shrink-0 text-ink-dim transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-accent"
+                  className="size-5 shrink-0 text-ink-dim transition-[transform,color] duration-300 ease-out group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-accent"
                 />
               </Link>
             </li>

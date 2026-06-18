@@ -1,20 +1,9 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
-import { useInViewport } from "@/lib/webgl-governance";
+import { useGovernedCanvas } from "@/lib/webgl-governance";
 
 const ParticleFinaleCanvas = dynamic(() => import("./ParticleFinaleCanvas"), { ssr: false });
-
-const noopSubscribe = () => () => {};
-let webglProbe: boolean | null = null;
-function probeWebgl() {
-  if (webglProbe === null) {
-    const c = document.createElement("canvas");
-    webglProbe = Boolean(c.getContext("webgl2") ?? c.getContext("webgl"));
-  }
-  return webglProbe;
-}
 
 /**
  * GPU particle finale (V3 P11 / S12) — a full-bleed band that closes /contact.
@@ -25,18 +14,11 @@ function probeWebgl() {
  * over it. Lazy, governed, one route.
  */
 export function ParticleFinale({ text, tagline }: { text: string; tagline: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  const [eligible] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return (
-      window.innerWidth >= 768 &&
-      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    );
+  // Scroll-driven set-piece (no cursor dependency) -> "desktop-motion".
+  const { ref, show } = useGovernedCanvas<HTMLElement>({
+    profile: "desktop-motion",
+    rootMargin: "200px 0px",
   });
-  const inView = useInViewport(ref, "200px 0px");
-  const webglOk = useSyncExternalStore(noopSubscribe, probeWebgl, () => false);
-  const show = eligible && webglOk && inView;
 
   return (
     <section

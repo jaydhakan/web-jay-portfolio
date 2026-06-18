@@ -1,22 +1,12 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore } from "react";
+import { useRef } from "react";
 import dynamic from "next/dynamic";
 import { gsap, useGSAP, ScrollTrigger } from "@/lib/gsap";
-import { useInViewport } from "@/lib/webgl-governance";
+import { useGovernedCanvas } from "@/lib/webgl-governance";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 
 const TrainingRunCanvas = dynamic(() => import("./TrainingRunCanvas"), { ssr: false });
-
-const noopSubscribe = () => () => {};
-let webglProbe: boolean | null = null;
-function probeWebgl() {
-  if (webglProbe === null) {
-    const c = document.createElement("canvas");
-    webglProbe = Boolean(c.getContext("webgl2") ?? c.getContext("webgl"));
-  }
-  return webglProbe;
-}
 
 type Epoch = { tag: string; title: string; body: string };
 
@@ -34,16 +24,12 @@ export function TrainingRun({ eyebrow, heading, epochs }: { eyebrow: string; hea
   const captionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const progress = useRef(0);
 
-  const [eligible] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return (
-      window.innerWidth >= 768 &&
-      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    );
+  // Reuse rootRef (also the GSAP scope + pin trigger) as the in-view sentinel.
+  const { show: showCanvas } = useGovernedCanvas({
+    ref: rootRef,
+    profile: "desktop-motion",
+    rootMargin: "300px 0px",
   });
-  const inView = useInViewport(rootRef, "300px 0px");
-  const webglOk = useSyncExternalStore(noopSubscribe, probeWebgl, () => false);
-  const showCanvas = eligible && webglOk && inView;
 
   useGSAP(
     () => {

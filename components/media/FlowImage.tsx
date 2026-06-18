@@ -1,23 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { blurProps } from "@/lib/blur";
-import { useInViewport } from "@/lib/webgl-governance";
+import { useGovernedCanvas } from "@/lib/webgl-governance";
 
 const FlowImageCanvas = dynamic(() => import("./FlowImageCanvas"), { ssr: false });
-
-const noopSubscribe = () => () => {};
-let webglProbe: boolean | null = null;
-function probeWebgl() {
-  if (webglProbe === null) {
-    const canvas = document.createElement("canvas");
-    webglProbe = Boolean(canvas.getContext("webgl2") ?? canvas.getContext("webgl"));
-  }
-  return webglProbe;
-}
 
 type FlowImageProps = {
   src: string;
@@ -44,35 +33,14 @@ type FlowImageProps = {
  * exactly like the bare next/image did.
  */
 export function FlowImage({ src, alt, sizes, priority, imageClassName }: FlowImageProps) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  // Resolve gating once before first paint, stable for the mount (matches the
-  // hero shader + cursor desktop-gating; coarse pointer / small screens and
-  // reduced motion never mount the canvas — they keep the crisp still image).
-  const [eligible] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const fine =
-      window.matchMedia("(pointer: fine)").matches &&
-      window.matchMedia("(hover: hover)").matches;
-    const motionOk = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    return fine && motionOk && window.innerWidth >= 768;
+  // Governed gate (shared rig): desktop fine-pointer + motion + WebGL + in-view,
+  // armed after first paint so it never competes with LCP. Coarse / small / reduced
+  // motion keep the crisp still image; off-screen covers run no GPU.
+  const { ref, show: showCanvas } = useGovernedCanvas({
+    profile: "desktop-fine",
+    rootMargin: "300px 0px",
+    arm: true,
   });
-
-  const inView = useInViewport(ref, "300px 0px");
-  const webglOk = useSyncExternalStore(noopSubscribe, probeWebgl, () => false);
-
-  // Arm after first paint (idle) so the canvas init never competes with LCP/
-  // hydration — the still image is the experience until then.
-  const [armed, setArmed] = useState(false);
-  useEffect(() => {
-    if (!eligible || !webglOk) return;
-    const id = window.requestAnimationFrame(() =>
-      window.requestAnimationFrame(() => setArmed(true)),
-    );
-    return () => window.cancelAnimationFrame(id);
-  }, [eligible, webglOk]);
-
-  const showCanvas = eligible && webglOk && inView && armed;
 
   return (
     <div ref={ref} className="absolute inset-0">

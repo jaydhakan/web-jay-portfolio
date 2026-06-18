@@ -1,20 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { useInViewport } from "@/lib/webgl-governance";
+import { useInViewport, useWebglSupported } from "@/lib/webgl-governance";
 
 const HeroShader = dynamic(() => import("./HeroShader"), { ssr: false });
-
-const noopSubscribe = () => () => {};
-let webglProbe: boolean | null = null;
-function probeWebgl() {
-  if (webglProbe === null) {
-    const canvas = document.createElement("canvas");
-    webglProbe = Boolean(canvas.getContext("webgl2") ?? canvas.getContext("webgl"));
-  }
-  return webglProbe;
-}
 
 /**
  * Mount gate for the shader: skipped under reduced motion or missing WebGL
@@ -36,7 +26,7 @@ export function HeroBackground() {
   // every WebGL surface from here on.
   const inView = useInViewport(ref, "200px 0px");
   // false during SSR/hydration, cached WebGL probe on the client.
-  const webglOk = useSyncExternalStore(noopSubscribe, probeWebgl, () => false);
+  const webglOk = useWebglSupported();
 
   // The shader is a heavy, continuously-rendering WebGL layer (R3F runs a rAF
   // loop while mounted). Mounting it during load keeps the main thread busy

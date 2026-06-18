@@ -11,7 +11,7 @@
  * This is about SIMULTANEITY, not ambition: go as big as you want on the surface
  * the user is looking at; just don't keep three of them burning at once.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 /** Shared DPR ceiling for every Canvas — keeps GPU fill cost bounded on retina. */
 export const DPR_CAP: [number, number] = [1, 2];
@@ -59,4 +59,97 @@ export function createFpsGuard(opts: {
       opts.onRelief?.();
     }
   };
+}
+
+/* ---------------------------------------------------------------------------
+   Mount gating — the "should this heavy canvas exist right now?" decision.
+   Every WebGL surface used to hand-roll the three pieces below (a cached WebGL
+   probe, a one-shot matchMedia eligibility check, an arm-after-paint defer);
+   they live here once so the gate is identical and audited in one place.
+--------------------------------------------------------------------------- */
+
+const noopSubscribe = () => () => {};
+let webglProbe: boolean | null = null;
+function probeWebgl(): boolean {
+  if (webglProbe === null) {
+    const canvas = document.createElement("canvas");
+    webglProbe = Boolean(canvas.getContext("webgl2") ?? canvas.getContext("webgl"));
+  }
+  return webglProbe;
+}
+
+/**
+ * Cached WebGL-availability probe. Returns `false` during SSR/hydration (so the
+ * still poster / CSS fallback owns first paint and markup matches) and the real
+ * capability on the client. Result is memoised across the whole app.
+ */
+export function useWebglSupported(): boolean {
+  return useSyncExternalStore(noopSubscribe, probeWebgl, () => false);
+}
+
+/**
+ * Which devices may run a heavy canvas. Resolved ONCE before first paint and
+ * stable for the mount (the decision never flips mid-session):
+ *  - "desktop-fine": desktop fine-pointer + hover + motion — anything that reacts
+ *    to a real cursor (hero shader, flow covers, particle portrait).
+ *  - "desktop-motion": desktop + motion, any pointer — scroll-driven set-pieces
+ *    that don't need a cursor (training-run flight, contact finale).
+ * Reduced motion or a <768px viewport never qualifies; those keep the poster.
+ */
+export type CanvasProfile = "desktop-fine" | "desktop-motion";
+export function useCanvasEligible(profile: CanvasProfile = "desktop-fine"): boolean {
+  const [eligible] = useState(() => {
+    if (typeof window === "undefined") return false;
+    if (window.innerWidth < 768) return false;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
+    if (profile === "desktop-motion") return true;
+    return (
+      window.matchMedia("(pointer: fine)").matches &&
+      window.matchMedia("(hover: hover)").matches
+    );
+  });
+  return eligible;
+}
+
+/**
+ * Defer `true` until after first paint (double rAF) so a canvas init never
+ * competes with LCP / hydration — the still poster is the experience until then.
+ * Pass the gate that makes arming worthwhile (e.g. `eligible && webglOk`) as
+ * `enabled`, so the timer only runs when a canvas will actually mount.
+ */
+export function useArmedAfterPaint(enabled: boolean): boolean {
+  const [armed, setArmed] = useState(false);
+  useEffect(() => {
+    if (!enabled) return;
+    const id = window.requestAnimationFrame(() =>
+      window.requestAnimationFrame(() => setArmed(true)),
+    );
+    return () => window.cancelAnimationFrame(id);
+  }, [enabled]);
+  return armed;
+}
+
+/**
+ * The full "should this WebGL surface mount now?" gate in one hook: device
+ * eligibility + WebGL support + in-view + (optionally) armed-after-paint.
+ * Returns the `ref` to attach to the surface's wrapper and a single `show`
+ * boolean. Pass `ref` to reuse an existing element ref (e.g. a GSAP scope /
+ * pinned section); otherwise one is created. Replaces the duplicated gating that
+ * lived in every canvas mount gate.
+ */
+export function useGovernedCanvas<T extends Element = HTMLDivElement>(opts?: {
+  ref?: React.RefObject<T | null>;
+  profile?: CanvasProfile;
+  rootMargin?: string;
+  /** Defer the canvas until after first paint (covers with an LCP-adjacent poster). */
+  arm?: boolean;
+}) {
+  const internalRef = useRef<T>(null);
+  const ref = opts?.ref ?? internalRef;
+  const eligible = useCanvasEligible(opts?.profile);
+  const webglOk = useWebglSupported();
+  const inView = useInViewport(ref, opts?.rootMargin);
+  const armed = useArmedAfterPaint(opts?.arm ? eligible && webglOk : false);
+  const show = eligible && webglOk && inView && (opts?.arm ? armed : true);
+  return { ref, show, inView, eligible, webglOk };
 }

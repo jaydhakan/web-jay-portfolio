@@ -1,22 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { blurProps } from "@/lib/blur";
-import { useInViewport } from "@/lib/webgl-governance";
+import { useGovernedCanvas } from "@/lib/webgl-governance";
 
 const ParticlePortraitCanvas = dynamic(() => import("./ParticlePortraitCanvas"), { ssr: false });
-
-const noopSubscribe = () => () => {};
-let webglProbe: boolean | null = null;
-function probeWebgl() {
-  if (webglProbe === null) {
-    const canvas = document.createElement("canvas");
-    webglProbe = Boolean(canvas.getContext("webgl2") ?? canvas.getContext("webgl"));
-  }
-  return webglProbe;
-}
 
 /**
  * Mount gate for the P9 particle portrait (S7). The still next/image is the
@@ -35,30 +24,11 @@ export function ParticlePortrait({
   alt: string;
   sizes: string;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  const [eligible] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const fine =
-      window.matchMedia("(pointer: fine)").matches &&
-      window.matchMedia("(hover: hover)").matches;
-    const motionOk = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    return fine && motionOk && window.innerWidth >= 768;
+  const { ref, show } = useGovernedCanvas({
+    profile: "desktop-fine",
+    rootMargin: "200px 0px",
+    arm: true,
   });
-
-  const inView = useInViewport(ref, "200px 0px");
-  const webglOk = useSyncExternalStore(noopSubscribe, probeWebgl, () => false);
-
-  const [armed, setArmed] = useState(false);
-  useEffect(() => {
-    if (!eligible || !webglOk) return;
-    const id = window.requestAnimationFrame(() =>
-      window.requestAnimationFrame(() => setArmed(true)),
-    );
-    return () => window.cancelAnimationFrame(id);
-  }, [eligible, webglOk]);
-
-  const show = eligible && webglOk && inView && armed;
 
   return (
     <div ref={ref} className="absolute inset-0">
