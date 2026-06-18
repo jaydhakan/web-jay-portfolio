@@ -773,6 +773,13 @@ export const techStack: Record<string, TechItem[]> = {
 
 export const timeline: TimelineEntry[] = [
   {
+    // TODO(JAY): placeholder origin point — adjust the year/story or delete.
+    period: "2018",
+    title: "First lines of Python",
+    description:
+      "Fell for automation early: small scripts that did my busywork for me. The high-loss start of the curve.",
+  },
+  {
     period: "2019-2023",
     title: "B.Tech in AI, Marwadi University",
     description:
@@ -783,6 +790,13 @@ export const timeline: TimelineEntry[] = [
     title: "Python Developer, BotPro Solutions",
     description:
       "Led a 4-person platform squad. Cut a 17-hour legacy job to 80 minutes, halved SaaS costs, and shipped the 1-click chatbot creator.",
+  },
+  {
+    // TODO(JAY): placeholder milestone — confirm or replace.
+    period: "2023",
+    title: "First AI agents in production",
+    description:
+      "Past one-off scripts into systems: autonomous agents that scrape, reason, and write, running live.",
   },
   {
     period: "2024",

@@ -132,7 +132,7 @@ export default function AboutPage() {
             as="h2"
             className="mt-3 font-display text-4xl font-bold tracking-tight text-ink"
           >
-            The Short Version
+            How I Got Here
           </RevealText>
           <Geoline entries={timeline} />
         </section>
