@@ -179,14 +179,25 @@ field behind a header), each governed, **one rich instance per route**. *Risk: l
 - [x] Reconcile the stale README "Lighthouse ≥95 hard gate" line (now: A11y=100 + CLS=0 hard, perf
   measured-not-capped) + the stale "one hero shader" line (now the page-wide `LatentField`).
 
-### Side animations / micro-delights *(small, on-concept, optional — pick as we go)*
-- **Geoline** (E3) — the headline one, above.
-- **Connective edges:** thin lines that *draw* between sections as you scroll (the network wiring
-  itself) — pairs with the latent-space language.
-- **Cursor perturbs the field:** the custom cursor seeds a small ripple into `LatentField` ("you can
-  touch it") — reinforces the thesis cheaply.
-- **"Compute-up" counters:** stat numbers tick up with a brief monospace scramble.
-- **Token-index section labels:** section eyebrows decode from glyphs on enter (reuse `ScrambleHeading`).
+### Side animations / micro-delights *(small, on-concept)*
+- [x] **Geoline** (E3) — done, then enriched to an annotated loss-chart (grid + axes + year ticks +
+  glowing area-fill + neon DrawSVG line + comet-trail marker). The headline side-piece.
+- [x] **Cursor perturbs the field** — done: `LatentField` repels particles around the pointer.
+- [x] **"Compute-up" counters** — already shipped (`components/motion/Counter.tsx`, on home stats +
+  case-study results).
+
+> **PARKED — owner-gated (decided 2026-06-18).** Phase 2 (E1–E5) is built; the site is already heavily
+> animated. The owner will review on the real site first and **we add the items below ONLY if it doesn't
+> feel "crazy" enough.** Do not build these pre-emptively.
+- [ ] **Connective edges:** thin lines that *draw* between sections as you scroll (the network wiring
+  itself) — pairs with the latent-space language. *(~45 min.)*
+- [ ] **Token-index section labels:** section eyebrows decode from glyphs on enter (reuse
+  `ScrambleHeading`/ScrambleText). *(~20 min. Caveat: the h1s on /work/about/services already scramble,
+  so the page tops would then have two decode effects — tune so it doesn't over-fire.)*
+- [ ] **Turn the field's "wow" up:** brighter particle cores / scoped Bloom on cluster centers, more
+  particles. *(Centralized in `LatentFieldCanvas.tsx`; costs some perf — measure after.)*
+- [ ] **More geoline content / curve shape:** extra placeholder milestones or a richer trajectory if a
+  longer journey reads better.
 
 ---
 
@@ -238,6 +249,16 @@ the palette/feel.
 ---
 
 ## 10. Changelog
+- 2026-06-18 — **Polish pass + parked backlog.** Review pass: added the missing **contrast guard**
+  (a `bg-base/25` scrim over the live `LatentField` so additive glow keeps body copy AAA-readable) and
+  dropped /services' ambient echo to `count=6000`; confirmed one-canvas-per-route + that the retired
+  loss-landscape/Bloom is tree-shaken from all route bundles. **Geoline 2.0:** rebuilt into an annotated
+  loss-chart (grid + LOSS/TIME axes + year ticks + gradient area-fill + neon DrawSVG line + comet-trail
+  marker); added 2 placeholder milestones (→ 7-point curve, flagged TODO(JAY)); heading → "How I Got
+  Here". Cross-page audit: every content route already carries the latent-space language and is heavily
+  animated — /work/[slug] correctly keeps its `FlowImage` cover as its one canvas (no field). The
+  remaining micro-delights (connective edges, decode eyebrows, brighter field, more geoline content) are
+  **parked, owner-gated** (§5) — build only if the real site doesn't feel "crazy" enough.
 - 2026-06-18 — **Phase 2 build COMPLETE (E2, E4, E5).** *E2 (Work):* added a **"constellation"**
   layout (many tight near-point clusters spread wide = "your outputs as points in latent space") and
   mounted the page-wide `LatentField` (clusterCount = projects.length) behind the whole /work route;
