@@ -251,6 +251,14 @@ html {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Geoline (E3): the "current" of dashes flowing down the serpentine road. Applied
+   via the motion-safe: variant in Geoline.tsx, so reduced-motion auto-disables it
+   (no entry needed in the reduce{animation:none} allowlist). */
+@keyframes geo-flow {
+  /* multiple of the 2+4 dash period (6) → seamless loop */
+  to { stroke-dashoffset: -180; }
+}
+
 .anim-char {
   display: inline-block;
   will-change: transform;
