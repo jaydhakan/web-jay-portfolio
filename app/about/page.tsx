@@ -17,7 +17,7 @@ import { Teleprompter } from "@/components/motion/Teleprompter";
 import { ClipReveal } from "@/components/motion/ClipReveal";
 import { LineDraw } from "@/components/motion/LineDraw";
 import { LatentField } from "@/components/three/LatentField";
-import { ExperienceTimeline } from "@/components/sections/ExperienceTimeline";
+import { Geoline } from "@/components/about/Geoline";
 import { SkillBag } from "@/components/about/SkillBag";
 import { TrainingRun } from "@/components/about/TrainingRun";
 import { CTABanner } from "@/components/sections/CTABanner";
@@ -134,7 +134,7 @@ export default function AboutPage() {
           >
             The Short Version
           </RevealText>
-          <ExperienceTimeline entries={timeline} />
+          <Geoline entries={timeline} />
         </section>
 
         {/* How I Work — staggered left-wipe reveal + hover treatment */}

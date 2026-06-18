@@ -225,7 +225,7 @@ clustering reference) · Cuberto `cuberto.com`.
 |-------|----------------------------------------------------------------------|----------------------|
 | E1    | `LatentField` core + Home page-wide flow→converge backdrop           | `[x]` shipped → review |
 | E2    | Work: page-wide field → project constellation                       | `[ ]`                |
-| E3    | About: one page-wide field (absorbs portrait+molecules) + **geoline** | `[ ]`                |
+| E3    | About: one page-wide field (absorbs portrait+molecules) + **geoline** | `[x]` shipped → review |
 | E4    | Cohere the rest (contact/services echoes)                            | `[ ]`                |
 | E5    | Housekeeping & lean-up                                               | `[~]`                |
 | —     | Content / placeholders                                               | `[!]` blocked on Jay |
@@ -237,6 +237,22 @@ the palette/feel.
 ---
 
 ## 10. Changelog
+- 2026-06-18 — **E3 shipped (About), two commits.** *E3a:* generalized the rig with a cluster
+  `layout` ("scatter" = Home unchanged; **"radial"** = About: a dense core + ring of satellites =
+  "you, embedded, skill domains around you"); mounted the **page-wide `LatentField` (radial)** behind
+  the whole /about route; **retired the two extra /about canvases** to hold the one-canvas rule —
+  `TrainingRun`'s pinned WebGL camera-flight is gone (rewritten as a static transparent narrative
+  section, epochs in translucent cards the field glows through; its molecule look is now the field's
+  behavior), and the headshot tile renders the still `next/image` (the cloud-forms-the-face gag moves
+  into the page-wide field, ready to sample the real photo when it lands). `TrainingRunCanvas` /
+  `ParticlePortrait` kept in the repo. *E3b:* the **geoline** — `components/about/Geoline.tsx`
+  replaces `ExperienceTimeline`: a curved SVG loss-trajectory (Catmull-Rom through evenly-spaced
+  waypoints, descends + arcs — NOT a straight line) that **DrawSVG-scrubs** as you scroll, a cyan glow
+  **marker glides** along the real curve (`getPointAtLength`), and each entry is a **waypoint node that
+  pops + reveals its card** at its fraction of the draw (cards lift on hover). Particle-family accent +
+  glow. **No MotionPath** (deliberate — used native `getPointAtLength` instead; MotionPath isn't in the
+  lazy chunk). Fallback: mobile = clean vertical list, RM/no-JS = full static curve + visible entries
+  (R7). Build/lint/tsc green. *Pending owner real-site review.*
 - 2026-06-18 — **E1 shipped (Home).** Built the shared rig: `components/three/LatentField.tsx`
   (page-wide `fixed -z-10` governed mount gate + `.hero-fallback` static poster) +
   `LatentFieldCanvas.tsx` (R3F leaf). One WebGL2 point cloud morphs **curl-noise flow → latent
