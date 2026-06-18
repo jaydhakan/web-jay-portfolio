@@ -1,7 +1,6 @@
 import { hero, siteConfig } from "@/data/content";
 import { Button } from "@/components/ui/Button";
 import { MagneticButton } from "@/components/ui/MagneticButton";
-import { HeroBackground } from "@/components/sections/HeroBackground";
 import { HeroHeadlineKinetic } from "@/components/sections/HeroHeadlineKinetic";
 
 /**
@@ -13,9 +12,9 @@ import { HeroHeadlineKinetic } from "@/components/sections/HeroHeadlineKinetic";
 export function Hero() {
   return (
     <section className="relative isolate flex min-h-[100dvh] items-center overflow-hidden">
-      <div aria-hidden className="hero-fallback absolute inset-0 -z-20" />
-      <HeroBackground />
-
+      {/* Backdrop is the page-wide LatentField (mounted in app/page.tsx) showing
+          through this transparent section — the loss-landscape hero is retired on
+          home (HeroBackground / HeroShader kept in the repo for reuse). */}
       <div className="mx-auto w-full max-w-7xl px-6 pt-16">
         <div className="hero-parallax max-w-3xl">
           <p

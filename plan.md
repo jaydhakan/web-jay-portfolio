@@ -17,8 +17,10 @@ recruiter and hostile to A11y/SEO/mobile), the owner locked this:
 > meaning** — chaos → structure — which *is* the "site compiles itself / the model learns" thesis,
 > made literal for an AI/ML engineer.
 
-- **Architecture: A1** — a persistent, page-wide governed WebGL layer that **morphs by scroll**
-  (not a hero trapped in one viewport).
+- **Architecture: A1, on EVERY route (home, about, work).** A persistent, **page-wide** governed
+  WebGL layer that **morphs by scroll** — fixed behind the *whole* page, top-to-bottom, **not** a
+  hero trapped in one viewport. Each route runs exactly ONE such field (so the cardinal one-canvas
+  rule holds); the per-page "scene" below is just *where/what* that page-wide field converges into.
 - **Style: latent-space embedding cloud ⇄ curl-noise flow field.** These are **one engine** with two
   force modes; the morph between them is the signature. (B1 "flow" = the unlearned state; the cloud
   "clusters" = the learned state.)
@@ -55,13 +57,20 @@ everywhere (additive-glow particles, indigo→violet→cyan, soft round sprites)
 | **About** | the cloud **forms your face** (you, as data), and skill domains read as clusters around it                          | "you, embedded in the system"                                                 | reuses/absorbs `ParticlePortrait` as a `LatentField` face target |
 | **Work**  | the field **settles into per-project clusters** you hover/click to open                                             | "your outputs, as points in latent space"                                     | `LatentField` + the existing `FlowImage` covers as node previews |
 
+Every one of these is a **page-wide** field (fixed behind the whole route, top-to-bottom) — the
+"behavior" column is what the *single* per-page field does as you scroll it, not a hero-only effect.
 Plus the **geoline** on /about (§5, E3) and the already-in-family `/contact` particle finale +
 `/services` node motifs, so the entire site reads as one language.
 
-> **Home hero call (explicit):** the page-wide `LatentField` becomes the home backdrop top-to-bottom,
-> **replacing** the scoped P2 loss-landscape shader as the home hero. The loss-landscape code stays in
-> the repo (reusable elsewhere / as inspiration for the static poster); it is just no longer the home
-> backdrop. One canvas, page-wide — the cardinal "never a 2nd live `<Canvas>`" rule still holds.
+> **What gets replaced/absorbed (explicit, so one canvas per route holds):**
+> - **Home:** the page-wide `LatentField` **replaces** the scoped P2 loss-landscape shader as the
+>   home backdrop (loss-landscape code stays in the repo for reuse / poster inspiration).
+> - **About:** the page-wide field **absorbs** the existing /about set-pieces into ONE field — the
+>   `TrainingRun` "flight through molecules" canvas is retired (its molecule look becomes the
+>   page-wide field's behavior) and `ParticlePortrait` becomes a *convergence target* within the same
+>   field (the cloud forms the face where the portrait sits). No two live canvases on /about.
+> - **Work:** the page-wide field sits behind the whole index and converges into the project clusters
+>   at the grid; the `FlowImage` covers stay as the per-node hover preview.
 
 ---
 
@@ -119,9 +128,10 @@ soft round sprite, additive blend for glow, color ramped indigo→violet→cyan 
 
 **Governance & fallback:** `useGovernedCanvas` (one canvas, in-view mount, `DPR_CAP`, `createFpsGuard`
 → drop particle count + demand frameloop on strain), arm-after-paint. RM / mobile / no-WebGL render a
-static iridescent poster (reuse `hero-fallback` / `lib/blur.ts`). Home's page-wide instance is `fixed`
-behind the page (`-z`), with a contrast guard (dim alpha behind text columns, like the hero's
-`leftGuard`) so copy stays AAA-readable over every state.
+static iridescent poster (reuse `hero-fallback` / `lib/blur.ts`). On EVERY route the instance is
+`fixed` page-wide behind the content (`-z`), `progress` driven by that route's whole-page scroll, with
+a contrast guard (dim alpha behind text columns, like the hero's `leftGuard`) so copy stays
+AAA-readable over every state.
 
 ---
 
@@ -135,12 +145,17 @@ code). **Exit gate:** desktop morph works end-to-end; static poster on mobile/RM
 covered; A11y 100; no leaks. *Risk: med (scroll→progress driver + contrast over every state).*
 
 ### E2 — Work as a latent-space project constellation
-Reuse `LatentField` with `targets` = per-project clusters; projects become hover/click nodes (flowmap
-cover as the preview on hover/focus). The existing filter + row list stay as the **a11y / mobile /
-no-JS fallback** (real links). *Risk: med. Depends on E1's rig.*
+Mount the **page-wide** `LatentField` behind the *whole* /work route (same A1 fixed backdrop as Home),
+with `targets` = per-project clusters; as you scroll, the field converges so projects become hover/click
+nodes (flowmap cover as the preview on hover/focus). The existing filter + row list stay as the **a11y /
+mobile / no-JS fallback** (real links). *Risk: med. Depends on E1's rig.*
 
-### E3 — About: unify the portrait + the **geoline** trajectory timeline
-1. **Portrait:** migrate `ParticlePortrait` onto `LatentField` (face target) so /about shares the rig.
+### E3 — About: one page-wide field (absorbs the portrait + molecules) + the **geoline** timeline
+1. **Page-wide field:** mount the A1 `LatentField` behind the *whole* /about route. It absorbs the two
+   existing /about canvases into ONE: the `TrainingRun` molecule-flight is retired (its look becomes the
+   page-wide field's behavior) and `ParticlePortrait` becomes a **convergence target** within this same
+   field (the cloud forms the face where the portrait sits, then reorganizes into skill clusters as you
+   scroll). One canvas on /about.
 2. **Geoline (the signature side-piece):** replace the short vertical `ExperienceTimeline` spine with a
    **curved, interactive trajectory** running **left→right** across the section — a wide SVG path that
    gently descends/curves like a loss/optimization curve (NOT a straight line). **DrawSVG-scrubbed** so
@@ -208,9 +223,9 @@ clustering reference) · Cuberto `cuberto.com`.
 
 | Phase | Title                                                                | Status               |
 |-------|----------------------------------------------------------------------|----------------------|
-| E1    | `LatentField` core + Home page-wide flow→converge backdrop           | `[ ]`                |
-| E2    | Work latent-space project constellation                              | `[ ]`                |
-| E3    | About: portrait on the rig + curved interactive **geoline** timeline | `[ ]`                |
+| E1    | `LatentField` core + Home page-wide flow→converge backdrop           | `[x]` shipped → review |
+| E2    | Work: page-wide field → project constellation                       | `[ ]`                |
+| E3    | About: one page-wide field (absorbs portrait+molecules) + **geoline** | `[ ]`                |
 | E4    | Cohere the rest (contact/services echoes)                            | `[ ]`                |
 | E5    | Housekeeping & lean-up                                               | `[~]`                |
 | —     | Content / placeholders                                               | `[!]` blocked on Jay |
@@ -222,6 +237,19 @@ the palette/feel.
 ---
 
 ## 10. Changelog
+- 2026-06-18 — **E1 shipped (Home).** Built the shared rig: `components/three/LatentField.tsx`
+  (page-wide `fixed -z-10` governed mount gate + `.hero-fallback` static poster) +
+  `LatentFieldCanvas.tsx` (R3F leaf). One WebGL2 point cloud morphs **curl-noise flow → latent
+  clusters** entirely in the vertex shader (uniform-driven, no CPU particle loop), driven by the
+  velocity-bus page `progress` (settles ~85% down so the footer is calm); cursor perturbs it via a
+  window listener (canvas is `pointer-events-none`). Glow is additive soft-halo sprites — **no
+  post-process Bloom** (kept the canvas transparent so the iridescent poster shows through, and cut
+  the continuous full-page cost; the FPS guard sheds point size on strain). Wired into `app/page.tsx`;
+  **retired the loss-landscape hero backdrop on home** (removed `HeroBackground` + the hero's local
+  `.hero-fallback` from `Hero.tsx`; `HeroBackground`/`HeroShader` kept in the repo). `OpeningChoreo`
+  now reveals the page-wide poster (its `.hero-fallback` query resolves to the field's poster).
+  Build/lint/tsc green; mobile/RM/no-WebGL = static poster. *Pending owner real-site review before E2/E3
+  reuse the rig.*
 - 2026-06-18 — **Phase 2 LOCKED: "Latent Space".** Resolved the options pass to one decision: a single
   governed particle system that **morphs between a curl-noise flow field (B1) and a latent-space
   embedding cloud**, page-wide (A1), spread as **one family / a different scene per page** across home
@@ -231,3 +259,9 @@ the palette/feel.
   left→right trajectory. Rewrote `plan.md` from an option menu into this locked implementation plan
   (shared `LatentField` rig in §4; phases E1–E5 in §5). Home's page-wide field will replace the scoped
   loss-landscape hero (code kept). No feature code written yet — E1 is next.
+- 2026-06-18 — **Clarified per owner: WHOLE-PAGE on EVERY route, not hero-only.** The field is A1
+  page-wide (fixed, top-to-bottom) on home, about, AND work — each route's per-page "scene" is just
+  where its single page-wide field converges. Consequence locked: /about's two existing canvases fold
+  into the one page-wide field (`TrainingRun` molecule-flight retired into the field's behavior;
+  `ParticlePortrait` becomes a convergence target), and /work's page-wide field sits behind the whole
+  index with `FlowImage` covers as per-node previews. Still one live canvas per route.
