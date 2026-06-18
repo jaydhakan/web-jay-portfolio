@@ -180,8 +180,9 @@ field behind a header), each governed, **one rich instance per route**. *Risk: l
   measured-not-capped) + the stale "one hero shader" line (now the page-wide `LatentField`).
 
 ### Side animations / micro-delights *(small, on-concept)*
-- [x] **Geoline** (E3) — done, then enriched to an annotated loss-chart (grid + axes + year ticks +
-  glowing area-fill + neon DrawSVG line + comet-trail marker). The headline side-piece.
+- [x] **Geoline** (E3) — done; reworked into a **serpentine "road"** that winds L→R→L while descending
+  as you scroll (the loss-chart version was the wrong mental model — replaced). Comet rides the draw's
+  leading edge; node→card leader lines; one `<ol>` + R7 fallback. The headline side-piece.
 - [x] **Cursor perturbs the field** — done: `LatentField` repels particles around the pointer.
 - [x] **"Compute-up" counters** — already shipped (`components/motion/Counter.tsx`, on home stats +
   case-study results).
@@ -249,6 +250,18 @@ the palette/feel.
 ---
 
 ## 10. Changelog
+- 2026-06-18 — **Geoline reworked into a serpentine "road" (owner-driven).** The annotated loss-chart
+  was the wrong mental model; owner wanted a winding ROAD that goes L→R→L while DESCENDING as you scroll
+  down. Rebuilt `Geoline.tsx`: vertical serpentine SVG (alternating left/right lanes, 60% swing,
+  Catmull-Rom bezier; fixed viewBox + md-only aspect-ratio → CLS-free card mapping), natural-scroll
+  DrawSVG draw with a comet riding the draw's leading edge (banks into turns), node→card leader lines,
+  cards reveal on the outer bend. Chosen via a 4-direction design-panel workflow, then a 4-lens
+  adversarial review (2 lenses hit the org monthly spend cap; correctness/a11y covered manually). Review
+  fixes applied: comet/draw clock unified (comet on the timeline, not self.progress); heavier line +
+  leader lines so it reads as a road not a card list; punchier swing; livelier flow-dash; **all
+  feGaussianBlur removed** (head + glow re-rasterized per scroll frame) → wide-stroke/fake-halo glow;
+  **backdrop-blur dropped** on the 7 cards → bg-base/80 (perf + readability). Still one `<ol>` / SVG
+  aria-hidden / R7 fallback / DrawSVG lazy-gated / no MotionPath / no 2nd canvas.
 - 2026-06-18 — **Polish pass + parked backlog.** Review pass: added the missing **contrast guard**
   (a `bg-base/25` scrim over the live `LatentField` so additive glow keeps body copy AAA-readable) and
   dropped /services' ambient echo to `count=6000`; confirmed one-canvas-per-route + that the retired
