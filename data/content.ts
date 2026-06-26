@@ -147,6 +147,34 @@ export const hero = {
     "I'm Jay Dhakan, a Python & AI/ML engineer. I ship LLM chatbots, multi-agent automation, and data pipelines that handle 15M+ queries a day in production.",
   ctaPrimary: { label: "See My Work", href: "/work" },
   ctaSecondary: { label: "Let's Talk", href: "/contact" },
+  // Credibility proof near the fold (P1). Static, exact-formatted figures (the
+  // animated count-up moment lives in ImpactStats; the hero strip is calm proof).
+  proof: [
+    { value: "09+", label: "Production systems shipped" },
+    { value: "15M+", label: "Queries handled per day" },
+    { value: "99.9%", label: "Uptime in production" },
+    { value: "70M+", label: "Records harvested" },
+  ],
+  // Right-side "live system" console (P1). A self-contained CSS/SVG automation
+  // pipeline + status readout — relevant proof of "products that ship", not
+  // decorative filler. Icon names resolve to lucide components in HeroVisual.
+  visual: {
+    file: "deploy.pipeline",
+    stages: [
+      { label: "Ingest", icon: "Database" },
+      { label: "Reason", icon: "BrainCircuit" },
+      { label: "Build", icon: "Boxes" },
+      { label: "Ship", icon: "Rocket" },
+    ],
+    logs: [
+      "agents reasoning · tools wired",
+      "tests green · build passed",
+      "deployed to prod · 99.9% up",
+    ],
+    status: { label: "operational", metric: "175+ QPS" },
+    chipTop: { metric: "99.9%", label: "uptime" },
+    chipBottom: { metric: "15M+", label: "queries / day" },
+  },
   // NOTE: brief specced "SaaS Platforms · Mobile Apps · E-Commerce ..." —
   // replaced with resume-true service categories. TODO(JAY): confirm.
   marquee: [

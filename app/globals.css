@@ -126,6 +126,19 @@ html {
   @keyframes bento-type   { 0%, 70%, 100% { transform: translateY(0); opacity: 0.3; } 35% { transform: translateY(-5px); opacity: 1; } }
   @keyframes bento-stream { 0% { transform: translateX(-130%); } 100% { transform: translateX(560%); } }
 
+  /* Hero "live system" console (P1). All applied via the motion-safe: variant in
+     HeroVisual.tsx, so reduced motion auto-shows the static console (no allowlist
+     entry needed). Compositor/paint-cheap: opacity + transform + dashoffset only.
+       - hero-caret: terminal cursor blink on the last log line.
+       - hero-float-a/b: gentle ambient drift on the two floating stat chips. */
+  --animate-hero-caret:   hero-caret 1.05s steps(1) infinite;
+  --animate-hero-float-a: hero-float-a 7s ease-in-out infinite;
+  --animate-hero-float-b: hero-float-b 9s ease-in-out infinite;
+
+  @keyframes hero-caret   { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+  @keyframes hero-float-a { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, -8px, 0); } }
+  @keyframes hero-float-b { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, 7px, 0); } }
+
   /* Contact submit success (P8): the check pops in. Reduced motion shows it static
      (applied motion-safe in the markup). */
   @keyframes success-pop {
@@ -196,6 +209,29 @@ html {
    .anim-rise so the two never double up (the elements stay visible if JS dies). */
 [data-preloader="pending"] .anim-rise {
   animation: none !important;
+}
+
+/* ---------------------------------------------------------------------------
+   Shared premium surface system (P3). ONE card language site-wide: a dark
+   translucent gradient surface, a hairline ring, a soft top-lip highlight, and a
+   restrained contact shadow. NO backdrop-blur (these sit on scrolling content
+   over the live WebGL field — blur there is the documented perf no-no), so the
+   surface stays near-opaque over the field and the body copy stays readable.
+   Hover/active accents are layered on per-component with Tailwind utilities. */
+@layer components {
+  .surface-card {
+    position: relative;
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    background: linear-gradient(
+      180deg,
+      oklch(22.5% 0.016 278 / 0.72),
+      oklch(14.5% 0.012 278 / 0.85)
+    );
+    box-shadow:
+      0 18px 44px -28px rgba(0, 0, 0, 0.85),
+      inset 0 1px 0 rgba(235, 236, 250, 0.08);
+  }
 }
 
 @layer base {

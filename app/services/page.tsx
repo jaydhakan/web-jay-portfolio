@@ -44,7 +44,7 @@ export default function ServicesPage() {
           governed canvas, poster on mobile/RM. (/contact keeps its particle finale
           instead — never a 2nd live canvas on a route.) Lighter count: ambient echo
           mostly behind the opaque cards, so it needn't run the full particle budget. */}
-      <LatentField count={6000} />
+      <LatentField count={3500} />
 
       <div className="mx-auto max-w-7xl px-6">
         <header className="max-w-3xl">

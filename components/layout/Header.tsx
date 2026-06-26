@@ -147,11 +147,11 @@ export function Header() {
                 href={link.href}
                 aria-current={isActive(link.href) ? "page" : undefined}
                 className={cn(
-                  "group inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200",
+                  "group inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition-[color,background-color] duration-200",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base",
                   isActive(link.href)
                     ? "text-accent"
-                    : "text-ink-dim hover:text-ink",
+                    : "text-ink-dim hover:bg-white/[0.04] hover:text-ink",
                 )}
               >
                 <SlideText>{link.label}</SlideText>

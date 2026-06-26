@@ -94,12 +94,14 @@ const vertexShader = /* glsl */ `
 
   void main() {
     // FLOW: advected curl drift around the scattered home (bounded time -> no
-    // precision blowup); a faster scroll kicks the turbulence up.
-    float t = mod(uTime, 200.0) * 0.05;
+    // precision blowup); a faster scroll kicks the turbulence up. Calmed pass
+    // (premium): time scale + curl magnitude + velocity coupling all dialed down
+    // ~35-40% so the field drifts slowly and cinematically instead of churning.
+    float t = mod(uTime, 200.0) * 0.032;
     vec2 q = aHome.xy * 0.075 + vec2(t, t * 0.7);
     vec3 flow = aHome;
-    flow.xy += curl(q) * (1.5 + uVelocity * 0.5);
-    flow.z += sin(uTime * 0.5 + aSeed * 6.2831) * 0.6;
+    flow.xy += curl(q) * (1.05 + uVelocity * 0.32);
+    flow.z += sin(uTime * 0.32 + aSeed * 6.2831) * 0.5;
 
     // CLUSTERED: settle onto the target with a faint breathing so it stays alive.
     vec3 clustered = aTarget;
@@ -143,7 +145,9 @@ const fragmentShader = /* glsl */ `
     vec3 col = mix(vColor, uHot, vGlow * 0.85);
     // Gentle depth fade so far particles recede into the base (keeps text legible).
     float fade = clamp(1.0 - (vDepth - 11.0) / 36.0, 0.22, 1.0);
-    gl_FragColor = vec4(col * (1.0 + glow * 0.6), (glow + halo) * fade);
+    // Calmed pass: overall alpha dialed back ~20% so the field reads as a quiet,
+    // dim cinematic backdrop rather than a bright particle storm behind the copy.
+    gl_FragColor = vec4(col * (1.0 + glow * 0.55), (glow + halo) * fade * 0.8);
   }
 `;
 
@@ -343,7 +347,7 @@ function FieldPoints({
     // Morph reaches "settled" a touch before the very bottom so the footer is calm.
     const targetProgress = Math.min(driver.current.progress / 0.85, 1);
     eased.current.progress += (targetProgress - eased.current.progress) * k;
-    const targetVel = THREE.MathUtils.clamp(Math.abs(driver.current.velocity) * 0.05, 0, 3);
+    const targetVel = THREE.MathUtils.clamp(Math.abs(driver.current.velocity) * 0.04, 0, 2);
     eased.current.velocity += (targetVel - eased.current.velocity) * (1 - Math.exp(-6 * delta));
 
     // Project the cursor onto the z=0 plane for world-space repulsion.
@@ -354,7 +358,7 @@ function FieldPoints({
     mat.uniforms.uProgress.value = eased.current.progress;
     mat.uniforms.uVelocity.value = eased.current.velocity;
     mat.uniforms.uMouse.value.copy(mouseWorld.current);
-    mat.uniforms.uSize.value = strained ? 26 : 40;
+    mat.uniforms.uSize.value = strained ? 22 : 34;
     mat.uniforms.uPixelRatio.value = Math.min(state.viewport.dpr, 2);
   });
 
@@ -375,7 +379,10 @@ export default function LatentFieldCanvas({
   const [tier] = useState<"high" | "low">(() =>
     typeof window !== "undefined" && window.innerWidth >= 1280 ? "high" : "low",
   );
-  const resolvedCount = count ?? (tier === "high" ? 14000 : 8000);
+  // Calmed pass (premium): density cut ~50% (14000->7000 / 8000->4200) for a
+  // sparser, less-noisy cinematic field. Pairs with the slower flow + dimmer
+  // alpha above; net effect is "calm deep space", not a busy particle storm.
+  const resolvedCount = count ?? (tier === "high" ? 7000 : 4200);
 
   return (
     <Canvas

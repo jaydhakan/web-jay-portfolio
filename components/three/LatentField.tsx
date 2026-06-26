@@ -52,6 +52,14 @@ export function LatentField({
           <div className="absolute inset-0 bg-base/25" />
         </>
       )}
+      {/* Cinematic vignette + depth — ALWAYS painted (over the poster AND the live
+          field), so the backdrop reads as layered deep space seated behind the
+          content rather than a flat sheet of stars. Darkens the edges + the very
+          top (under the header) and bottom (toward the footer) so text-heavy bands
+          stay calm and readable. Static CSS gradients only — zero paint/JS cost. */}
+      <div
+        className="absolute inset-0 [background:radial-gradient(135%_115%_at_50%_36%,transparent_50%,oklch(14.5%_0.012_278/0.55)_100%),linear-gradient(to_bottom,oklch(14.5%_0.012_278/0.45)_0%,transparent_14%,transparent_82%,oklch(14.5%_0.012_278/0.5)_100%)]"
+      />
     </div>
   );
 }
