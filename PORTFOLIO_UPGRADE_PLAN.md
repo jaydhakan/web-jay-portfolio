@@ -181,3 +181,123 @@ one WebGL canvas per route · motion uses transform/opacity/clip-path/filter/uni
 
 > This plan is guidance, not law. Improve the implementation where a better design or
 > technical choice presents itself, and record notable deviations in the summary.
+
+---
+
+# PHASE 4 — TIMELINE REBUILD: "Synapse" (the living dendrite)
+
+> Added 2026-06-27. The /about journey and /work list both still read flat. The user
+> wants a BOLD serpentine that swings full-left to full-right down the page as you
+> scroll, with tasteful gamification, on BOTH pages. This is a from-scratch rebuild of
+> the timeline, chosen via a 5-concept design exploration + judge panel (see below).
+
+## Decision (why this concept)
+
+Five serpentine concepts were generated and judged on a "wow + fidelity to vision"
+lens. **"Synapse — the living dendrite" won (9/10).** It is the most faithful
+translation of the user's actual reference image (an organic winding line with
+iridescent blobs clustered at the wide bends) into the site's native cosmic identity:
+a synaptic vine swinging full edge to full edge, with glowing synaptic blooms at each
+bend, that you watch WAKE UP synapse-by-synapse as a charge races down the wire. It is
+uniquely on-brand for an AI/ML engineer whose entire site is a particle latent field.
+Runner-up ideas were grafted in (below). Rejected: the "hand-drawn graphite wobble"
+sketch (fights the premium/never-messy mandate) and a skeuomorphic XP/stamp HUD
+(reads game-y/cheap).
+
+Grafts folded into Synapse:
+- **Constellation stitch** (from the cosmic-route concept): a faint straight chord
+  ignites between each pair of consecutive fired synapses, so by the bottom of the
+  scroll you have visibly DRAWN A SHAPE out of the milestones. The single best
+  gamification payoff in the set; rendered as a distinct faint thin layer so it never
+  reads as a path-drawing bug.
+- **Banking orb** (from the expedition concept): the charge-orb leans into each turn
+  (heading from a 2nd getPointAtLength sample + atan2) with a short cyan comet tail.
+- **Ambient live counter** (de-risked, from the signal concept): one small mono chip
+  "NODES LIVE 4 / 7" (/about) / "SYSTEMS LIVE 4 / 9" (/work) + a thin progress bar,
+  driven by ONE CSS var + integer-only textContent writes from the single scrubbed
+  onUpdate. NOT a packets/latency dashboard.
+
+## Geometry (parameterized on n; CLS=0, zero JS measurement)
+
+Reuse the proven trick: fixed SVG `viewBox "0 0 100 VBH"` inside a container with
+`aspect-ratio: 100/VBH` (md+ only). A path point (x,y) maps to container percent
+(x%, y/VBH*100%) with no measurement. Cards get `top:%` inline + a left/right lane
+class; they ship visible.
+
+- Constants: `CX=50`, `AMP≈32` (x swings ~18..82 — bold, with a card-safe gutter),
+  `PAD=28`, `SEG≈40` (tall pitch so wide bends read calm). `VBH = PAD*2 + (n-1)*SEG`.
+- Counts are REAL: **/about n=7, /work n=9** (every concept wrongly assumed 8 — fixed).
+- Waypoints: `x_i = CX + AMP*cos(i*PI)` -> pure FULL alternation 82,18,82,18,... (no node
+  sits center, unlike sin(i*PI/2) which center-crosses every odd node and reads as a
+  timid weave). `y_i = PAD + i*SEG`, STRICTLY MONOTONIC — the load-bearing invariant
+  that keeps the orb's arc-length->node bisection provably valid on a non-monotonic-x
+  path. n=7 -> 6 lateral traversals; n=9 -> 8. Both exceed the "4-5 swings" ask.
+- Path: cubic spline through the waypoints with HORIZONTAL-DOMINANT control handles
+  (inverse of the rejected meridian's vertical handles) so the line bows boldly to each
+  wall like a road, not a zigzag. Optional tiny seeded (NOT Math.random) per-node
+  variation for organic life — kept minimal so it stays intentional.
+
+## Choreography (ONE scrubbed ScrollTrigger; no per-frame React; glow = stacked strokes)
+
+Armed only inside `gsap.matchMedia("(min-width:768px) and (prefers-reduced-motion: no-preference)")`
+after `useExtraPlugins()` (DrawSVG) is ready. `getTotalLength()` cached once;
+`nodeFrac[i]` via 18-step bisection on monotonic y.
+1. **Draw** the vine: halo (wide, low-opacity) + core stroke `drawSVG 0->100%` together.
+2. **Orb** on the same 0->1 clock: per frame ~2 `getPointAtLength` (position + heading
+   sample) + 1 `setAttribute(transform translate/rotate)`; short cyan comet tail.
+3. **Synapse fire** at each `nodeFrac[i]`: hollow indigo bead -> cyan core, one-shot
+   radar ping (single tween, NEVER a looping CSS keyframe over the WebGL field),
+   synaptic bloom brighten, dendritic stem draws to the card.
+4. **Constellation chord** to the previous node draws in.
+5. **Card reveal** at the same beat (autoAlpha + y/x slide-in from the bend side).
+6. **HUD + active glow** in one `eventCallback("onUpdate")`: write `--draw`/`--live`
+   CSS vars + integer-only counter textContent; toggle `.is-active` (CSS owns the glow
+   cross-fade — box-shadow is NEVER tweened on scroll).
+Backward scroll runs the whole timeline in reverse for free.
+
+## Architecture (one engine, two data adapters — the real fix)
+
+- **NEW `components/timeline/SerpentineTimeline.tsx`** (client): owns geometry, the SVG
+  (vine base/glow/core/idle-current/gradient, synapses, blooms, constellation chords,
+  stems, orb+tail), the one scrubbed timeline + nodeFrac, the HUD counter, the
+  accessible `<ol>` wrapper + mobile left-rail, matchMedia/RM/CLS. Content-agnostic.
+  Props: `count`, `renderCard(i, side, isActive)`, `hudLabel`, `hudUnit`,
+  `dimmed?(i)`. The `<li>` CONTENT comes from `renderCard`.
+- **`components/about/Geoline.tsx`** -> thin wrapper: maps 7 `TimelineEntry` + the KIND
+  icon/tag map -> `renderCard` returns the glass journey card. No filter.
+- **`components/work/WorkGeoline.tsx`** -> thin wrapper: holds filter state, maps 9
+  `Project` -> `renderCard` returns the clickable `ProjectCard`; passes
+  `dimmed=(i)=>!matches`; renders filter pills above. **Drops the sticky ProjectPreview**
+  (a deliberate call: it competed with a full-width bold swing and was redundant with
+  the rich card + the case-study page; removing it unifies /work and /about into ONE
+  bold engine). `components/work/ProjectPreview.tsx` is DELETED.
+- `ProjectCard.tsx` adapted for in-band placement (cover thumb only in the mobile
+  rail-list). Home `WorkReel` is untouched (it is the signature, not a timeline).
+
+## Responsive / RM / a11y / perf
+
+- **Mobile/tablet <md:** the wide swing is impossible at 390px -> SVG is `hidden md:block`;
+  fall back to the proven clean stacked `<ol>` with a left indigo->violet->cyan gradient
+  rail + one bead per card. /work inlines a cover thumb; no horizontal overflow.
+- **Reduced motion / no-JS:** the vine ships FULLY DRAWN and lit (synapses in their
+  gradient position-color so the indigo->now narrative survives), cards visible (CSS
+  placement, never gsap.set), orb/ping/comet `motion-reduce:hidden`, idle current
+  `motion-safe:` only. A finished, beautiful static star-chart.
+- **a11y=100:** one real `<ol>` (announced text /about; links /work); entire SVG +
+  HUD aria-hidden; filter pills `role=group` + `aria-pressed`, spotlight is opacity
+  only (dimmed cards stay focusable); DOM order = reading order regardless of L/R lane.
+- **CLS=0 / Perf>=95:** aspect-ratio reserves height pre-paint; one ScrollTrigger;
+  per-frame = a few getPointAtLength + setAttribute + CSS-var writes; ZERO blur on any
+  scroll-animated layer (all glow = stacked SVG strokes + pre-rendered radial blooms);
+  no second canvas.
+
+## Acceptance checklist (Phase 4)
+
+- [ ] Bold serpentine swings full-left to full-right on BOTH /about and /work (md+).
+- [ ] Charge-orb travels on scroll, banking into turns, igniting each synapse on arrival.
+- [ ] Constellation chords stitch between fired synapses; "NODES/SYSTEMS LIVE n/N" ticks.
+- [ ] One shared engine; /about and /work differ only in data + card render-prop + filter.
+- [ ] Geometry correct for n=7 and n=9; no card collisions; no horizontal overflow.
+- [ ] Mobile = clean left-rail list; RM/no-JS = fully-lit static vine; a11y intact.
+- [ ] CLS=0, no per-frame React in the scroll loop, no blur over WebGL, no looping ping.
+- [ ] Lint + typecheck + build pass; verified via screenshots (desktop/tablet/mobile, motion+RM).

@@ -10,12 +10,12 @@ const PLACEHOLDER_BG =
   "radial-gradient(ellipse 80% 90% at 70% 20%, oklch(63% 0.21 272 / 0.16), transparent 65%)";
 
 /**
- * A shipped-product card on the Work geoline (P2). Reads as a real system, not a
- * text row: index, category, year, title, one-line outcome, the headline result
- * metric, the stack, and an action arrow. The whole card is the link. Built on
- * the shared `.surface-card` language; hover + scroll-active layer on an accent
- * ring + lift + arrow nudge (transform/opacity/color only — no box-shadow tween
- * on scroll). The cover thumb shows below lg (where the sticky preview is hidden).
+ * A shipped-product card budding off the Work serpentine ("Synapse" engine). Reads as
+ * a real system, not a text row: index, category, year, title, one-line outcome, the
+ * headline result metric, the stack, and an action arrow. The whole card is the link.
+ * `active` is driven by the scroll orb (the synapse this card hangs off has fired);
+ * `dimmed` is the category-filter spotlight. The cover thumb shows only below md, where
+ * the swing collapses to the rail-list (md+ keeps cards compact so they never collide).
  */
 export function ProjectCard({
   project,
@@ -23,29 +23,20 @@ export function ProjectCard({
   hasCover,
   active,
   dimmed,
-  onActivate,
-  onDeactivate,
 }: {
   project: Project;
   index: number;
   hasCover: boolean;
   active: boolean;
   dimmed: boolean;
-  onActivate: () => void;
-  onDeactivate: () => void;
 }) {
   return (
     <Link
       href={`/work/${project.slug}`}
       data-cursor="view"
-      onMouseEnter={onActivate}
-      onFocus={onActivate}
-      onMouseLeave={onDeactivate}
-      onBlur={onDeactivate}
       className={cn(
         "surface-card group block overflow-hidden p-5 transition-[transform,border-color,opacity] duration-300 ease-out sm:p-6",
         "hover:-translate-y-0.5 hover:border-accent/35 focus-visible:border-accent/35",
-        // The accent glow + top accent line live in ::before / a child (opacity-tweened, never box-shadow).
         active && "border-accent/45",
         dimmed && "opacity-40",
       )}
@@ -62,14 +53,14 @@ export function ProjectCard({
       />
 
       <div className="relative flex flex-col gap-5">
-        {/* Mobile / tablet cover (lg+ uses the sticky preview panel). */}
-        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-elevated ring-1 ring-line lg:hidden">
+        {/* Cover thumb — only below md (the rail-list); md+ keeps cards compact. */}
+        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-elevated ring-1 ring-line md:hidden">
           {hasCover ? (
             <Image
               src={project.coverImage}
               alt=""
               fill
-              sizes="(min-width: 1024px) 1px, 100vw"
+              sizes="(min-width: 768px) 1px, 100vw"
               className="object-cover"
               {...blurProps(project.coverImage)}
             />
@@ -79,7 +70,7 @@ export function ProjectCard({
         </div>
 
         <div>
-          {/* Header: index · category .................. year */}
+          {/* Header: index . category .................. year */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <span
@@ -90,17 +81,15 @@ export function ProjectCard({
               >
                 {String(index + 1).padStart(2, "0")}
               </span>
-              <Tag className="border border-line bg-transparent text-ink-dim">
-                {project.category}
-              </Tag>
+              <Tag className="border border-line bg-transparent text-ink-dim">{project.category}</Tag>
             </div>
             <span className="font-mono text-xs tabular-nums text-ink-dim">{project.year}</span>
           </div>
 
-          <h3 className="mt-4 font-display text-2xl font-semibold leading-tight tracking-tight text-ink transition-colors duration-300 group-hover:text-accent">
+          <h3 className="mt-4 font-display text-xl font-semibold leading-tight tracking-tight text-ink transition-colors duration-300 group-hover:text-accent sm:text-2xl">
             {project.title}
           </h3>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-dim">{project.description}</p>
+          <p className="mt-2 text-sm leading-relaxed text-ink-dim">{project.description}</p>
 
           <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-ok">
             <TrendingUp aria-hidden className="size-4" />
