@@ -92,6 +92,12 @@ export type TimelineEntry = {
   period: string;
   title: string;
   description: string;
+  /** Capability/concept tags that drive the Constellation Spine: each becomes a
+   *  satellite star in the milestone's gutter, and a tag shared by two milestones
+   *  draws a bridge arc between them (the knowledge graph that lights up on scroll).
+   *  Also rendered as connection chips on the card (the accessible/mobile fallback).
+   *  Keep labels short and reuse them verbatim across entries so bridges form. */
+  connections?: string[];
 };
 
 // ──────────────────────────────────────────────────────────────── Identity ──
@@ -806,18 +812,21 @@ export const timeline: TimelineEntry[] = [
     title: "First lines of Python",
     description:
       "Fell for automation early: small scripts that did my busywork for me. The high-loss start of the curve.",
+    connections: ["Python", "Automation"],
   },
   {
     period: "2019-2023",
     title: "B.Tech in AI, Marwadi University",
     description:
       "Bachelor of Technology specialized in Artificial Intelligence. CGPA 8.02.",
+    connections: ["Machine Learning", "Python"],
   },
   {
     period: "2021-2024", // TODO(JAY): Resume_2 says 2023-present instead
     title: "Python Developer, BotPro Solutions",
     description:
       "Led a 4-person platform squad. Cut a 17-hour legacy job to 80 minutes, halved SaaS costs, and shipped the 1-click chatbot creator.",
+    connections: ["Python", "Automation", "Platforms"],
   },
   {
     // TODO(JAY): placeholder milestone — confirm or replace.
@@ -825,24 +834,28 @@ export const timeline: TimelineEntry[] = [
     title: "First AI agents in production",
     description:
       "Past one-off scripts into systems: autonomous agents that scrape, reason, and write, running live.",
+    connections: ["AI Agents", "Automation"],
   },
   {
     period: "2024",
     title: "Mr Perfectionist Award",
     description:
       "Youngest winner of the 2024 award for quality and on-time delivery.",
+    connections: ["Platforms", "Delivery"],
   },
   {
     period: "2024-2025",
     title: "Python & AI/ML Engineer, VRSEN",
     description:
       "Built AI agents for research, content, code, and deployment. Shipped the Prompt-to-Site Studio and healthcare automation for CinqCare.",
+    connections: ["AI Agents", "Machine Learning", "Full-Stack"],
   },
   {
     period: "2025-Now",
     title: "Independent. Building for clients worldwide.", // TODO(JAY): confirm current status
     description:
       "Taking on AI, data, and full-stack projects directly: no middlemen, no handoffs.",
+    connections: ["AI Agents", "Full-Stack", "Data"],
   },
 ];
 

@@ -1,84 +1,44 @@
 "use client";
 
 import { useMemo, useRef, useState, type ReactNode } from "react";
-import { gsap, useGSAP, useExtraPlugins } from "@/lib/gsap";
+import { gsap, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
+import { useGovernedCanvas } from "@/lib/webgl-governance";
+import { LivingFiber } from "./LivingFiber";
+import {
+  VBW,
+  vbhFor,
+  LANE,
+  type Connection,
+  waypoints,
+  serpentinePath,
+  sideFor,
+  sampleCenterline,
+  buildConstellation,
+} from "./geometry";
 
 /**
- * SerpentineTimeline (Phase 4, "Synapse") — the ONE timeline engine, shared by the
- * /about journey and the /work shipped-systems list. A bold neural dendrite swings
- * FULL-LEFT to FULL-RIGHT down the page (the deliberate opposite of the rejected
- * vertical meridian), with an iridescent synaptic bloom clustered at every wide bend.
- * As you scroll, a white-hot charge ORB races down the wire (banking into each turn,
- * trailing a short cyan comet streak); each SYNAPSE charges then FIRES (hollow indigo
- * bead -> cyan core + one-shot radar ping + bloom brighten) the instant the charge
- * arrives, a dendritic STEM draws out to its card, and the card reveals on the SAME
- * arc-length clock. Fired synapses stay lit behind the orb, so at any scroll position
- * you see a half-awakened network with a bright frontier: you are watching it wake up.
+ * SerpentineTimeline (Phase 6, "Living Fiber") — the ONE timeline engine, shared by the
+ * /about journey and the /work shipped-systems list.
  *
- * The component is CONTENT-AGNOSTIC: it owns geometry, the SVG, the single scrubbed
- * timeline, the live counter, the accessible <ol> wrapper and the mobile rail; the
- * <li> CONTENT comes from the `renderCard` render-prop, so /about (text milestones)
- * and /work (clickable project cards + filter spotlight) differ ONLY in data mapping.
+ * On a capable desktop it mounts a max-fidelity WebGL set-piece (LivingFiberCanvas): a
+ * volumetric channel of light — white-hot core + indigo→violet→cyan aura, energy
+ * filaments, ~1.8k streaming particles, organic dendrites, bloom nodes igniting under a
+ * charge orb, and the knowledge-graph stars + bridges lighting across milestones. ONE
+ * scrubbed ScrollTrigger writes a shared `progressRef` that the canvas reads each frame,
+ * so the fiber wakes up in lockstep with the DOM cards.
  *
- * Hard gates (DESIGN.md): CLS=0 via the proven fixed-viewBox + container aspect-ratio
- * trick (zero JS measurement); exactly ONE scrubbed ScrollTrigger; glow = stacked
- * low-opacity SVG strokes + pre-rendered radial blooms (NEVER blur over the live
- * page-wide LatentField WebGL); scroll motion = transform / opacity / drawSVG /
- * SVG-attr / one CSS var only (no box-shadow or layout tween on scroll); no per-frame
- * React (active index updates only when the integer changes). Reduced-motion / no-JS
- * ship a complete, fully-lit static dendrite; below md the swing collapses to a clean
- * left-rail stacked list.
+ * Everything accessible stays in the DOM: a real <ol> of cards (revealed on the same
+ * scroll clock), capability chips (the readable form of the graph), the live HUD counter,
+ * and the mobile left-rail list. A fully-lit STATIC SVG poster is always rendered as the
+ * no-WebGL / reduced-motion / no-JS / pre-arm fallback (it fades out once the canvas is
+ * live so the two never fight). Reduced motion / mobile never mount WebGL.
+ *
+ * Hard gates (DESIGN.md): CLS=0 via fixed-viewBox + container aspect-ratio (the canvas
+ * shares the exact same box); ONE scrubbed ScrollTrigger; the canvas is governed
+ * (dpr-capped, FPS-guarded, in-view/armed, desktop-motion only) and transparent (additive
+ * glow, no opaque post-process buffer) so it composites over the page's LatentField.
  */
-
-// ── Geometry ─────────────────────────────────────────────────────────────────
-const VBW = 100;
-const CX = 50; // chart centre lane
-const AMP = 32; // swing amplitude -> nodes at x = 18 (full left) / 82 (full right)
-const PAD = 28; // top/bottom clearance
-const SEG = 34; // vertical pitch per synapse
-const K = 0.5; // bezier vertical-handle factor -> smooth bold sine wave, monotonic y
-
-// Card lane edges (container %). Card sits on the OPPOSITE side of its wall-node, in
-// the calm central band; a dotted tether leads from the bend in to the card edge.
-const LANE = {
-  left: { className: "md:left-[6%] md:right-[48%]", edge: 52 }, // card LEFT, right edge ~52%
-  right: { className: "md:left-[48%] md:right-[6%]", edge: 48 }, // card RIGHT, left edge ~48%
-} as const;
-
-type Pt = { x: number; y: number };
-
-/** Pure, SSR-stable waypoints: x = CX + AMP*cos(i*PI) -> 82,18,82,18,... (full
- *  alternation, no node ever sits centre). y strictly monotonic (load-bearing). */
-function waypoints(n: number): Pt[] {
-  return Array.from({ length: n }, (_, i) => ({
-    x: CX + AMP * Math.cos(i * Math.PI),
-    y: PAD + i * SEG,
-  }));
-}
-
-/** Cubic spline through the waypoints with vertical-dominant handles: the curve
- *  leaves/enters each node vertically and bows boldly to the opposite wall — a smooth
- *  serpentine ROAD, not zig-zag teeth. Control y stay between segment endpoints, so
- *  y(t) is strictly monotonic and the orb's arc-length->node bisection is provably safe
- *  even though x reverses at every bend. */
-function serpentinePath(p: Pt[]): string {
-  if (p.length === 0) return "";
-  if (p.length === 1) return `M ${p[0].x.toFixed(2)} ${p[0].y.toFixed(2)}`;
-  let d = `M ${p[0].x.toFixed(2)} ${p[0].y.toFixed(2)}`;
-  for (let i = 0; i < p.length - 1; i++) {
-    const a = p[i];
-    const b = p[i + 1];
-    const dy = b.y - a.y;
-    d += ` C ${a.x.toFixed(2)} ${(a.y + dy * K).toFixed(2)} ${b.x.toFixed(2)} ${(b.y - dy * K).toFixed(2)} ${b.x.toFixed(2)} ${b.y.toFixed(2)}`;
-  }
-  return d;
-}
-
-/** even i -> node at full RIGHT -> card on the LEFT; odd i -> node LEFT -> card RIGHT. */
-function sideFor(i: number): "left" | "right" {
-  return i % 2 === 0 ? "left" : "right";
-}
 
 export type RenderCard = (
   i: number,
@@ -90,170 +50,83 @@ export function SerpentineTimeline({
   count,
   renderCard,
   hudLabel,
+  constellation,
   dimmed,
   className,
 }: {
-  /** Number of milestones/systems (drives waypoints, VBH, aspect-ratio). */
   count: number;
-  /** Supplies the <li> body for milestone i (engine owns placement + reveal + active). */
   renderCard: RenderCard;
-  /** Live-counter label, e.g. "NODES LIVE" (/about) or "SYSTEMS LIVE" (/work). */
   hudLabel: string;
-  /** Optional filter spotlight: return true to dim milestone i (no reflow). */
+  /** Knowledge-graph layer: constellation[i] = the tags milestone i activates. */
+  constellation?: Connection[][];
+  /** Optional filter spotlight: return true to dim milestone i (poster only, no reflow). */
   dimmed?: (i: number) => boolean;
   className?: string;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const haloRef = useRef<SVGPathElement>(null);
-  const coreRef = useRef<SVGPathElement>(null);
-  const orbRef = useRef<SVGGElement>(null);
-  const nodeRefs = useRef<(SVGGElement | null)[]>([]);
-  const stemRefs = useRef<(SVGPathElement | null)[]>([]);
+  const stageRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLLIElement | null)[]>([]);
   const barRef = useRef<HTMLSpanElement>(null);
   const countRef = useRef<HTMLSpanElement>(null);
-  const ready = useExtraPlugins(); // DrawSVG lives in the lazy chunk
+  const progressRef = useRef(0);
 
-  const [active, setActive] = useState(-1); // no card singled out in the static/RM state
+  const [active, setActive] = useState(-1);
   const lastCount = useRef(0);
 
   const n = count;
-  const VBH = PAD * 2 + Math.max(0, n - 1) * SEG;
+  const VBH = vbhFor(n);
   const pts = useMemo(() => waypoints(n), [n]);
   const d = useMemo(() => serpentinePath(pts), [pts]);
-  const start = pts[0] ?? { x: CX + AMP, y: PAD };
+  const centerline = useMemo(() => sampleCenterline(pts), [pts]);
+  const cnst = useMemo(() => buildConstellation(pts, constellation), [pts, constellation]);
 
+  // Governed mount gate for the WebGL fiber (desktop + motion + WebGL + in-view + armed).
+  const { ref: gateRef, show } = useGovernedCanvas<HTMLDivElement>({
+    ref: stageRef,
+    profile: "desktop-motion",
+    arm: true,
+  });
+
+  // ONE scrubbed timeline: reveals the DOM cards, drives the HUD counter, and writes the
+  // shared progress the WebGL fiber reads. (The fiber owns all the heavy visual motion;
+  // when WebGL is off, the static SVG poster below carries the look.)
   useGSAP(
     () => {
-      if (!ready) return; // re-runs when the DrawSVG chunk resolves
       const mm = gsap.matchMedia();
       mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
-        const core = coreRef.current;
-        const halo = haloRef.current;
-        const orb = orbRef.current;
-        if (!core || !halo) return;
-
-        const total = core.getTotalLength(); // cached ONCE, never per frame
-        const nodes = nodeRefs.current.filter(Boolean) as SVGGElement[];
-        const stems = stemRefs.current.filter(Boolean) as SVGPathElement[];
         const cards = cardRefs.current.filter(Boolean) as HTMLElement[];
+        const nodeFrac = centerline.nodeFrac;
 
-        // Arc-length fraction where the path reaches each node's y (bisection — safe
-        // because y is strictly monotonic). This single array is BOTH where the orb is
-        // AND when each synapse fires + card reveals: one clock for everything.
-        const nodeFrac = pts.map((p) => {
-          let lo = 0;
-          let hi = total;
-          for (let k = 0; k < 18; k++) {
-            const mid = (lo + hi) / 2;
-            if (core.getPointAtLength(mid).y < p.y) lo = mid;
-            else hi = mid;
-          }
-          return lo / total;
-        });
-
-        // Idle starting state (markup ships the LIT/arrived state for RM/no-JS, so we
-        // reset to dormant here, only under the matched query).
-        gsap.set([halo, core], { drawSVG: "0%" });
-        nodes.forEach((node) => {
-          gsap.set(node.querySelector(".syn-core"), {
-            attr: { fill: "var(--color-base)", stroke: "var(--color-accent)" },
-          });
-          gsap.set(node.querySelector(".syn-bloom"), { opacity: 0.12, scale: 1, transformOrigin: "center" });
-          gsap.set(node.querySelector(".syn-halo"), { opacity: 0, scale: 1, transformOrigin: "center" });
-          gsap.set(node.querySelector(".syn-ping"), { opacity: 0, scale: 1, transformOrigin: "center" });
-        });
-        gsap.set(stems, { drawSVG: "0%", opacity: 0 });
         gsap.set(cards, { autoAlpha: 0 });
-        if (orb) gsap.set(orb, { opacity: 0 });
         if (barRef.current) gsap.set(barRef.current, { scaleX: 0, transformOrigin: "left center" });
-        // Counter ships its final "n / n" for RM/no-JS; reset it to dormant here.
         lastCount.current = 0;
         if (countRef.current) countRef.current.textContent = "00";
+        progressRef.current = 0;
 
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: rootRef.current,
             start: "top 74%",
             end: "bottom 58%",
-            scrub: 1, // ~1s catch-up -> the orb glides instead of snapping 1:1
+            scrub: 1,
             invalidateOnRefresh: true,
           },
         });
+        tl.to({}, { duration: 1, ease: "none" }, 0); // master 0->1 clock
 
-        // 1) Draw the wire — wide soft halo + sharp core together (no lag).
-        tl.fromTo([halo, core], { drawSVG: "0%" }, { drawSVG: "100%", duration: 1, ease: "none" }, 0);
-
-        // 2) Orb on the SAME 0->1 clock: 2 getPointAtLength (position + heading) + 1
-        //    setAttribute/frame. It banks into turns so the comet streak trails along
-        //    the local tangent even though x is non-monotonic.
-        if (orb) {
-          const head = { len: 0 };
-          tl.set(orb, { opacity: 1 }, 0);
-          tl.to(
-            head,
-            {
-              len: total,
-              duration: 1,
-              ease: "none",
-              onUpdate: () => {
-                const a = core.getPointAtLength(head.len);
-                const b = core.getPointAtLength(Math.min(total, head.len + 1));
-                const deg = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
-                orb.setAttribute("transform", `translate(${a.x} ${a.y}) rotate(${deg})`);
-              },
-            },
-            0,
-          );
-        }
-
-        // 3) Per synapse — ignite as the charge arrives (the bead is already plotted, it
-        //    LIGHTS; never a pop from nothing). One-shot ping (single tween, never a
-        //    looping keyframe over the WebGL field).
-        nodes.forEach((node, i) => {
-          const at = nodeFrac[i];
-          tl.to(
-            node.querySelector(".syn-core"),
-            { attr: { fill: "var(--color-accent-cyan)", stroke: "var(--color-accent-cyan)" }, duration: 0.05, ease: "none" },
-            at,
-          );
-          tl.to(node.querySelector(".syn-bloom"), { opacity: 0.42, scale: 1.5, duration: 0.12, ease: "back.out(2)" }, at);
-          tl.fromTo(
-            node.querySelector(".syn-halo"),
-            { opacity: 0.32, scale: 1 },
-            { opacity: 0, scale: 1.9, duration: 0.12, ease: "back.out(2)" },
-            at,
-          );
-          tl.fromTo(
-            node.querySelector(".syn-ping"),
-            { opacity: 0.7, scale: 1 },
-            { opacity: 0, scale: 3.2, duration: 0.2, ease: "power2.out" },
-            at,
-          );
-        });
-
-        // 4) Dendritic stem draws out to the card on arrival.
-        stems.forEach((s, i) =>
-          tl.fromTo(s, { drawSVG: "0%", opacity: 0 }, { drawSVG: "100%", opacity: 0.55, duration: 0.1, ease: "power2.out" }, nodeFrac[i]),
-        );
-
-        // 5) Card reveal — yPercent:-50 preserves the CSS -translate-y-1/2 centering; the
-        //    card also slides in from its bend side. Enter = expo.out, no scale.
         cards.forEach((card, i) => {
           const fromX = sideFor(i) === "left" ? -16 : 16;
           tl.fromTo(
             card,
             { autoAlpha: 0, yPercent: -50, y: 18, x: fromX },
             { autoAlpha: 1, yPercent: -50, y: 0, x: 0, duration: 0.16, ease: "expo.out" },
-            nodeFrac[i],
+            nodeFrac[i] ?? 0,
           );
         });
 
-        // 6) HUD + active glow, all in ONE onUpdate. The progress bar reads a per-frame
-        //    scaleX (compositor-only); the integer counter + active index update ONLY
-        //    when the count changes (no per-frame React, no per-frame textContent).
         tl.eventCallback("onUpdate", () => {
           const p = tl.progress();
+          progressRef.current = p;
           if (barRef.current) barRef.current.style.transform = `scaleX(${p.toFixed(3)})`;
           let lit = 0;
           for (let i = 0; i < nodeFrac.length; i++) if (p >= nodeFrac[i] - 0.004) lit++;
@@ -265,13 +138,12 @@ export function SerpentineTimeline({
         });
       });
     },
-    { scope: rootRef, dependencies: [ready, n] },
+    { scope: rootRef, dependencies: [n] },
   );
 
   return (
     <div ref={rootRef} className={cn("relative", className)}>
-      {/* Live counter (gamified, aria-hidden ambient flavour). Sticks under the navbar
-          as you scroll the tall timeline. Ships its final state for RM/no-JS. */}
+      {/* Live counter (gamified, aria-hidden ambient flavour). Ships its final state. */}
       <div
         aria-hidden
         className="pointer-events-none sticky top-20 z-20 mb-6 hidden justify-end md:flex"
@@ -291,20 +163,24 @@ export function SerpentineTimeline({
         </div>
       </div>
 
-      {/* Aspect-locked stage: aspect-ratio only md+ (reserves the route height, CLS=0);
-          on mobile it sizes to the stacked list. */}
+      {/* Aspect-locked stage (CLS=0). The SVG poster, the WebGL canvas and the <ol> all
+          share this exact box; on mobile it sizes to the stacked list. */}
       <div
+        ref={gateRef}
         className="relative mx-auto w-full max-w-[1040px] md:[aspect-ratio:var(--syn-aspect)]"
         style={{ ["--syn-aspect" as string]: `${VBW} / ${VBH}` }}
       >
-        {/* The dendrite — desktop only, decorative (aria-hidden). Ships FULLY DRAWN so
-            no-JS / RM render a static lit network. Glow = stacked low-opacity strokes
-            + pre-rendered radial blooms, NEVER blur (composites over the live WebGL). */}
+        {/* STATIC, fully-lit SVG poster — the SSR / reduced-motion / no-JS / no-WebGL /
+            pre-arm fallback. Decorative (aria-hidden). Fades out once the live canvas is
+            up so the two never composite over each other. */}
         <svg
           viewBox={`0 0 ${VBW} ${VBH}`}
           preserveAspectRatio="xMidYMid meet"
           aria-hidden
-          className="absolute inset-0 hidden size-full overflow-visible md:block"
+          className={cn(
+            "absolute inset-0 hidden size-full overflow-visible transition-opacity duration-700 md:block",
+            show && "opacity-0",
+          )}
           fill="none"
         >
           <defs>
@@ -320,26 +196,65 @@ export function SerpentineTimeline({
             </radialGradient>
           </defs>
 
-          {/* Synaptic blooms behind the wire — the iridescent "blobs" at each bend. */}
+          {/* Synaptic blooms behind the wire. */}
           {pts.map((p, i) => (
             <g
               key={`bloom-${i}`}
               transform={`translate(${p.x} ${p.y})`}
               className={cn("transition-opacity duration-300", dimmed?.(i) && "opacity-30")}
             >
-              <circle className="syn-bloom" r={8.5} fill="url(#syn-bloom)" opacity={0.42} />
+              <circle r={8.5} fill="url(#syn-bloom)" opacity={0.4} />
             </g>
           ))}
 
-          {/* Base rail (always full) — "the route exists" whisper. */}
+          {/* Knowledge-graph bridges + spurs + stars (static lit). */}
+          {cnst.bridges.map((b) => (
+            <path
+              key={b.key}
+              d={b.d}
+              stroke="url(#syn-stroke)"
+              strokeWidth={0.4}
+              strokeLinecap="round"
+              fill="none"
+              opacity={0.22}
+              className={cn("transition-opacity duration-300", dimmed?.(b.at) && "opacity-10")}
+            />
+          ))}
+          {cnst.spurs.map((sp, idx) => (
+            <path
+              key={`spur-${idx}`}
+              d={sp.d}
+              stroke="url(#syn-stroke)"
+              strokeWidth={0.45}
+              strokeLinecap="round"
+              fill="none"
+              opacity={0.5}
+              className={cn("transition-opacity duration-300", dimmed?.(sp.milestone) && "opacity-15")}
+            />
+          ))}
+          {cnst.stars.map((s) => (
+            <g
+              key={s.key}
+              transform={`translate(${s.x} ${s.y})`}
+              className={cn("transition-opacity duration-300", dimmed?.(s.milestone) && "opacity-25")}
+            >
+              <circle r={3.2} fill="url(#syn-bloom)" opacity={0.5} />
+              <circle r={1.05} fill="var(--color-accent-cyan)" opacity={0.25} />
+              <circle
+                r={0.5}
+                fill="var(--color-accent-cyan)"
+                className="motion-safe:[animation:star-twinkle_3.2s_ease-in-out_infinite]"
+                style={{ animationDelay: `${(0.2 + (s.k % 5) * 0.5).toFixed(2)}s` }}
+              />
+            </g>
+          ))}
+
+          {/* The wire — base rail + coloured glow bed + soft halo + sharp core. */}
           <path d={d} stroke="var(--color-line)" strokeWidth={0.55} strokeLinecap="round" />
-          {/* Coloured glow bed (always full) — a faint bed for the draw to light into. */}
-          <path d={d} stroke="url(#syn-stroke)" strokeWidth={2.4} strokeLinecap="round" opacity={0.1} />
-          {/* Wide soft halo + thin sharp core (DrawSVG-scrubbed together). */}
-          <path ref={haloRef} d={d} stroke="url(#syn-stroke)" strokeWidth={5} strokeLinecap="round" opacity={0.12} />
-          <path ref={coreRef} d={d} stroke="url(#syn-stroke)" strokeWidth={1.15} strokeLinecap="round" />
-          {/* Always-on dendritic "current" — never DrawSVG'd; motion-safe so reduced
-              motion freezes it to static dashes. "2 4" matches the geo-flow keyframe. */}
+          <path d={d} stroke="url(#syn-stroke)" strokeWidth={2.4} strokeLinecap="round" opacity={0.12} />
+          <path d={d} stroke="url(#syn-stroke)" strokeWidth={5} strokeLinecap="round" opacity={0.12} />
+          <path d={d} stroke="url(#syn-stroke)" strokeWidth={1.15} strokeLinecap="round" />
+          {/* Always-on dendritic "current" (motion-safe; reduced-motion freezes it). */}
           <path
             d={d}
             stroke="url(#syn-stroke)"
@@ -350,17 +265,13 @@ export function SerpentineTimeline({
             className="motion-safe:[animation:geo-flow_5s_linear_infinite]"
           />
 
-          {/* Dendritic stems: dotted leader from each synapse to its card edge. Ship
-              visible (full draw); GSAP sets the hidden start only under the matched query. */}
+          {/* Card stems. */}
           {pts.map((p, i) => {
             const side = sideFor(i);
             const targetX = LANE[side].edge;
             return (
               <path
                 key={`stem-${i}`}
-                ref={(el) => {
-                  stemRefs.current[i] = el;
-                }}
                 d={`M ${p.x} ${p.y} H ${targetX}`}
                 stroke="url(#syn-stroke)"
                 strokeWidth={0.5}
@@ -372,50 +283,39 @@ export function SerpentineTimeline({
             );
           })}
 
-          {/* Synapses on the wire: idle hollow indigo bead -> ignites to cyan + halo +
-              one-shot ping. Ship LIT (markup); GSAP resets to dormant under the query. */}
+          {/* Synapses (lit beads). */}
           {pts.map((p, i) => (
             <g
               key={`node-${i}`}
-              ref={(el) => {
-                nodeRefs.current[i] = el;
-              }}
               transform={`translate(${p.x} ${p.y})`}
               className={cn("transition-opacity duration-300", dimmed?.(i) && "opacity-40")}
             >
-              <circle className="syn-halo" r={2.6} fill="var(--color-accent-cyan)" opacity={0} />
-              <circle className="syn-ping" r={2.6} fill="none" stroke="var(--color-accent-cyan)" strokeWidth={0.4} opacity={0} />
               <circle r={2.6} fill="none" stroke="var(--color-accent)" strokeWidth={0.35} opacity={0.3} />
-              <circle
-                className="syn-core"
-                r={1.15}
-                fill="var(--color-accent-cyan)"
-                stroke="var(--color-accent-cyan)"
-                strokeWidth={0.5}
-              />
+              <circle r={1.15} fill="var(--color-accent-cyan)" stroke="var(--color-accent-cyan)" strokeWidth={0.5} />
             </g>
           ))}
-
-          {/* The charge ORB — white-hot cyan light source riding the drawn leading edge,
-              banking into turns with a backward comet streak. RM never renders it. */}
-          <g ref={orbRef} transform={`translate(${start.x} ${start.y})`} className="motion-reduce:hidden">
-            {/* streak points backward (-x) within the group, so the rotate trails it. */}
-            <ellipse cx={-3.4} cy={0} rx={3.6} ry={0.7} fill="var(--color-accent-cyan)" opacity={0.18} />
-            <ellipse cx={-1.8} cy={0} rx={2.2} ry={0.9} fill="var(--color-accent-cyan)" opacity={0.3} />
-            <circle r={2.8} fill="var(--color-accent-cyan)" opacity={0.14} />
-            <circle r={1.5} fill="var(--color-accent-cyan)" opacity={0.5} />
-            <circle r={0.85} fill="var(--color-accent-cyan)" />
-            <circle r={0.36} fill="#ffffff" opacity={0.95} />
-          </g>
         </svg>
 
-        {/* The accessible content: ONE real <ol>. Stacked flow with a LEFT gradient rail
-            by default (mobile / RM / no-JS); md+ places each card on the OUTER side of
-            its synapse (CSS top:%, no JS measurement, CLS=0). */}
+        {/* The live WebGL fiber — desktop / motion / WebGL / in-view / armed only. */}
+        {show && (
+          <LivingFiber
+            vbw={VBW}
+            vbh={VBH}
+            centerline={centerline}
+            waypoints={pts}
+            nodeFrac={centerline.nodeFrac}
+            stars={cnst.stars}
+            spurs={cnst.spurs}
+            bridges={cnst.bridges}
+            progressRef={progressRef}
+          />
+        )}
+
+        {/* The accessible content: ONE real <ol>. Mobile = left-rail stacked list; md+
+            places each card on the OUTER side of its synapse (CSS top:%, CLS=0). */}
         <ol
           className={cn(
             "relative space-y-5 pl-7 md:absolute md:inset-0 md:space-y-0 md:pl-0",
-            // Mobile-only left rail (indigo -> violet -> cyan), the "line on the left".
             "before:absolute before:bottom-2 before:left-2 before:top-2 before:w-px md:before:hidden",
             "before:bg-gradient-to-b before:from-accent/45 before:via-accent-violet/35 before:to-accent-cyan/45",
           )}
@@ -434,7 +334,6 @@ export function SerpentineTimeline({
                   LANE[side].className,
                 )}
               >
-                {/* Mobile synapse bead on the left rail (desktop uses the SVG synapse). */}
                 <span
                   aria-hidden
                   className="absolute left-[-1.35rem] top-6 size-2 rounded-full bg-accent-cyan ring-2 ring-accent-cyan/30 md:hidden"

@@ -295,6 +295,16 @@ html {
   to { stroke-dashoffset: -180; }
 }
 
+/* Constellation Spine: the idle "breathing" twinkle on a lit satellite star. Applied
+   via the motion-safe: variant in SerpentineTimeline.tsx, so reduced-motion auto-
+   disables it (no allowlist entry needed, same convention as geo-flow above). The
+   star's reveal opacity is GSAP-owned on the wrapping <g>; this only modulates the
+   inner dot, so the two compose without fighting. */
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
 .anim-char {
   display: inline-block;
   will-change: transform;

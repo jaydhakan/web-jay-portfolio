@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   Terminal,
   GraduationCap,
@@ -13,6 +14,9 @@ import {
 import type { TimelineEntry } from "@/data/content";
 import { cn } from "@/lib/utils";
 import { SerpentineTimeline } from "@/components/timeline/SerpentineTimeline";
+
+/** label -> stable id, so the same capability bridges across milestones. */
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 /**
  * The /about journey ("How I Got Here") — now a thin data adapter over the shared
@@ -38,10 +42,17 @@ const KIND: Kind[] = [
 ];
 
 export function Geoline({ entries }: { entries: TimelineEntry[] }) {
+  // Memoized so its identity is stable (it feeds the engine's geometry + timeline).
+  const constellation = useMemo(
+    () => entries.map((e) => (e.connections ?? []).map((c) => ({ id: slug(c), label: c }))),
+    [entries],
+  );
+
   return (
     <SerpentineTimeline
       count={entries.length}
       hudLabel="Milestones lit"
+      constellation={constellation}
       renderCard={(i, _side, isActive) => {
         const entry = entries[i];
         const { Icon, tag } = KIND[i] ?? KIND[KIND.length - 1];
@@ -89,6 +100,31 @@ export function Geoline({ entries }: { entries: TimelineEntry[] }) {
               {entry.title}
             </h3>
             <p className="text-[13.5px] leading-[1.6] text-ink-dim">{entry.description}</p>
+
+            {/* Connection chips — the readable form of this milestone's constellation
+                stars (the truth for screen-readers / mobile, where the SVG graph is
+                dropped). Shared labels are the threads that bridge milestones. */}
+            {entry.connections?.length ? (
+              <ul className="mt-3.5 flex flex-wrap gap-1.5" aria-label="Connected capabilities">
+                {entry.connections.map((c) => (
+                  <li
+                    key={c}
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-full border border-line px-2 py-[3px]",
+                      "bg-[oklch(94.5%_0.012_280/0.03)] font-mono text-[10px] tracking-[0.04em] text-ink-dim",
+                      "transition-colors duration-300",
+                      isActive && "border-accent/25 text-ink",
+                    )}
+                  >
+                    <span
+                      aria-hidden
+                      className="size-1 rounded-full bg-accent-cyan/70"
+                    />
+                    {c}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </article>
         );
       }}

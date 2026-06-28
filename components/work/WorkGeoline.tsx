@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Project, ProjectCategory } from "@/data/content";
 import { cn } from "@/lib/utils";
 import { ProjectCard } from "@/components/work/ProjectCard";
 import { SerpentineTimeline } from "@/components/timeline/SerpentineTimeline";
 
 type Filter = "All" | ProjectCategory;
+
+/** label -> stable id, so a stack shared across systems bridges them in the graph. */
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 type WorkGeolineProps = {
   projects: Project[];
@@ -28,6 +31,15 @@ type WorkGeolineProps = {
 export function WorkGeoline({ projects, covers, filters }: WorkGeolineProps) {
   const [filter, setFilter] = useState<Filter>("All");
   const matches = (p: Project) => filter === "All" || p.category === filter;
+
+  // Each system's stack becomes its constellation stars; a stack used by more than one
+  // system bridges them — the shared-backbone graph (Python, AsyncIO, REST…) lights up
+  // as you scroll. Capped to 3 per system so the gutter never crowds. Memoized for a
+  // stable identity (it feeds the engine geometry + timeline).
+  const constellation = useMemo(
+    () => projects.map((p) => p.tech.slice(0, 3).map((t) => ({ id: slug(t), label: t }))),
+    [projects],
+  );
 
   return (
     <div className="relative">
@@ -58,6 +70,7 @@ export function WorkGeoline({ projects, covers, filters }: WorkGeolineProps) {
         <SerpentineTimeline
           count={projects.length}
           hudLabel="Systems lit"
+          constellation={constellation}
           dimmed={(i) => !matches(projects[i])}
           renderCard={(i, _side, isActive) => {
             const project = projects[i];
