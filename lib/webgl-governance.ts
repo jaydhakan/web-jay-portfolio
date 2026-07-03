@@ -25,9 +25,11 @@ export function useInViewport(
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
-      rootMargin,
-    });
+    const io = new IntersectionObserver(
+      // Coalesced callbacks deliver oldest-first; the LAST record is current state.
+      (entries) => setInView(entries[entries.length - 1].isIntersecting),
+      { rootMargin },
+    );
     io.observe(el);
     return () => io.disconnect();
   }, [ref, rootMargin]);

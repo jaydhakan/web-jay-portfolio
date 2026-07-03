@@ -54,6 +54,13 @@ export type LivingFiberProps = {
   spurs: SpurPlot[];
   bridges: BridgePlot[];
   progressRef: React.RefObject<number>;
+  /** false = keep the context alive but stop the frameloop (off-view pause).
+   *  Pausing instead of unmounting avoids WebGL context churn / Context Lost
+   *  when the stage scrolls out and back. */
+  running?: boolean;
+  /** Fires once after the first real frames render — the parent keeps the static
+   *  poster visible until then, so the async chunk load never leaves a dark gap. */
+  onLive?: () => void;
 };
 
 // ── geometry helpers ──────────────────────────────────────────────────────────
@@ -268,9 +275,10 @@ const ADDITIVE = {
 } as const;
 
 // ── scene ────────────────────────────────────────────────────────────────────
-function Scene({ vbw, vbh, centerline, waypoints, nodeFrac, stars, spurs, bridges, progressRef }: LivingFiberProps) {
+function Scene({ vbw, vbh, centerline, waypoints, nodeFrac, stars, spurs, bridges, progressRef, onLive }: LivingFiberProps) {
   const gl = useThree((s) => s.gl);
   const px = useMemo(() => gl.getPixelRatio(), [gl]);
+  const liveTicks = useRef(0);
 
   const colA = useMemo(() => new THREE.Color(COL_A), []);
   const colB = useMemo(() => new THREE.Color(COL_B), []);
@@ -567,6 +575,13 @@ function Scene({ vbw, vbh, centerline, waypoints, nodeFrac, stars, spurs, bridge
   useFrame((state, delta) => {
     guardRef.current?.(delta);
 
+    // Live handoff: after a couple of real frames the fiber is on screen, so the
+    // parent can fade its static poster (never before — async chunk = dark gap).
+    if (liveTicks.current < 3) {
+      liveTicks.current += 1;
+      if (liveTicks.current === 2) onLive?.();
+    }
+
     const cam = state.camera as THREE.OrthographicCamera;
     const key = `${state.size.width}x${state.size.height}`;
     if (sizeKey.current !== key) {
@@ -612,7 +627,7 @@ function Scene({ vbw, vbh, centerline, waypoints, nodeFrac, stars, spurs, bridge
 }
 
 export default function LivingFiberCanvas(props: LivingFiberProps) {
-  const { vbw, vbh } = props;
+  const { vbw, vbh, running } = props;
   return (
     <Canvas
       className="size-full"
@@ -620,7 +635,7 @@ export default function LivingFiberCanvas(props: LivingFiberProps) {
       dpr={DPR_CAP}
       gl={{ alpha: true, antialias: true, premultipliedAlpha: false, powerPreference: "high-performance" }}
       camera={{ manual: true }}
-      frameloop="always"
+      frameloop={running === false ? "never" : "always"}
       aria-hidden
       onCreated={({ camera }) => {
         const cam = camera as THREE.OrthographicCamera;

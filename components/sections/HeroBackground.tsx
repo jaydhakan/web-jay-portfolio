@@ -52,11 +52,18 @@ export function HeroBackground() {
 
   const showShader = !reduceMotion && webglOk && inView && armed;
 
+  // Sticky mount + frameloop pause: crossing the hero boundary used to unmount /
+  // remount the whole R3F context (shader recompile hitch on every return to top).
+  // Mount once, then pause the loop while scrolled past — same GPU idle, no churn.
+  // Guarded render-time latch (the docs-blessed "adjust state during render" idiom).
+  const [everShown, setEverShown] = useState(false);
+  if (showShader && !everShown) setEverShown(true);
+
   return (
     <div ref={ref} aria-hidden className="absolute inset-0 -z-10">
-      {showShader && (
+      {(everShown || showShader) && (
         <div className="size-full animate-[rise-in_1.2s_ease-out_both]">
-          <HeroShader />
+          <HeroShader running={inView} />
         </div>
       )}
     </div>

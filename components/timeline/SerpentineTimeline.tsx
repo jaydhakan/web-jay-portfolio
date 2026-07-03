@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 import { useGovernedCanvas } from "@/lib/webgl-governance";
@@ -81,11 +81,35 @@ export function SerpentineTimeline({
   const cnst = useMemo(() => buildConstellation(pts, constellation), [pts, constellation]);
 
   // Governed mount gate for the WebGL fiber (desktop + motion + WebGL + in-view + armed).
-  const { ref: gateRef, show } = useGovernedCanvas<HTMLDivElement>({
+  // 600px rootMargin mounts it well BEFORE the stage is on screen (the chunk + context
+  // are warm by the time the user arrives).
+  const { ref: gateRef, show, inView, eligible, webglOk } = useGovernedCanvas<HTMLDivElement>({
     ref: stageRef,
     profile: "desktop-motion",
+    rootMargin: "600px 0px",
     arm: true,
   });
+
+  // Sticky mount: once the canvas has existed, keep it (pause via `running` instead of
+  // unmounting — re-creating a WebGL context on every scroll-past caused Context Lost).
+  // Guarded render-time latch (the docs-blessed "adjust state during render" idiom).
+  const [everShown, setEverShown] = useState(false);
+  if (show && !everShown) setEverShown(true);
+
+  // The canvas chunk is ASYNC (code-split). `live` flips only after it renders real
+  // frames — the static poster stays visible until that exact moment, so there is
+  // never a dark gap between "gate open" and "fiber actually glowing".
+  const [live, setLive] = useState(false);
+
+  // Warm the heavy chunk as soon as the device qualifies (instead of when the user
+  // reaches the stage): in dev this also frontloads the on-demand compile.
+  useEffect(() => {
+    if (!(eligible && webglOk)) return;
+    const t = window.setTimeout(() => {
+      void import("./LivingFiberCanvas");
+    }, 250);
+    return () => window.clearTimeout(t);
+  }, [eligible, webglOk]);
 
   // ONE scrubbed timeline: reveals the DOM cards, drives the HUD counter, and writes the
   // shared progress the WebGL fiber reads. (The fiber owns all the heavy visual motion;
@@ -179,7 +203,7 @@ export function SerpentineTimeline({
           aria-hidden
           className={cn(
             "absolute inset-0 hidden size-full overflow-visible transition-opacity duration-700 md:block",
-            show && "opacity-0",
+            live && "opacity-0",
           )}
           fill="none"
         >
@@ -296,8 +320,9 @@ export function SerpentineTimeline({
           ))}
         </svg>
 
-        {/* The live WebGL fiber — desktop / motion / WebGL / in-view / armed only. */}
-        {show && (
+        {/* The live WebGL fiber — desktop / motion / WebGL / armed only. Mounts when
+            first near view, then STAYS mounted (frameloop pauses off-view instead). */}
+        {(everShown || show) && (
           <LivingFiber
             vbw={VBW}
             vbh={VBH}
@@ -308,6 +333,8 @@ export function SerpentineTimeline({
             spurs={cnst.spurs}
             bridges={cnst.bridges}
             progressRef={progressRef}
+            running={inView}
+            onLive={() => setLive(true)}
           />
         )}
 

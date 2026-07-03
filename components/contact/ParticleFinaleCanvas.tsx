@@ -105,7 +105,18 @@ const fragmentShader = /* glsl */ `
   }
 `;
 
-function FinalePoints({ text, density, onStrain }: { text: string; density: number; onStrain: () => void }) {
+function FinalePoints({
+  text,
+  density,
+  onStrain,
+  onLive,
+}: {
+  text: string;
+  density: number;
+  onStrain: () => void;
+  onLive?: () => void;
+}) {
+  const liveFired = useRef(false);
   const { size, camera, pointer } = useThree();
   const rt = useRef<{ form: number; points: THREE.Points | null }>({ form: 0, points: null });
   const mouseWorld = useRef(new THREE.Vector3(999, 999, 0));
@@ -180,6 +191,13 @@ function FinalePoints({ text, density, onStrain }: { text: string; density: numb
     guard(delta);
     const pts = rt.current.points;
     if (!pts) return;
+    // Particles are actually drawing from this frame on — let the parent swap the
+    // authoritative wordmark to its ghost state only now (never on the mount gate:
+    // the async chunk would leave a near-invisible heading in the gap).
+    if (!liveFired.current) {
+      liveFired.current = true;
+      onLive?.();
+    }
     const mat = pts.material as THREE.ShaderMaterial;
     // form-in over the first ~1.5s on-screen
     rt.current.form += (1 - rt.current.form) * (1 - Math.exp(-2.2 * delta));
@@ -197,7 +215,17 @@ function FinalePoints({ text, density, onStrain }: { text: string; density: numb
   return <primitive object={built.pts} />;
 }
 
-export default function ParticleFinaleCanvas({ text }: { text: string }) {
+export default function ParticleFinaleCanvas({
+  text,
+  running,
+  onLive,
+}: {
+  text: string;
+  /** false = pause the frameloop (kept mounted; avoids WebGL context churn). */
+  running?: boolean;
+  /** Fires once when particles first draw (parent's cue to ghost the DOM wordmark). */
+  onLive?: () => void;
+}) {
   // Lighter sampling on small screens (fewer particles); coarse density = more px gap.
   const [density] = useState(() => (typeof window !== "undefined" && window.innerWidth < 1024 ? 5 : 3));
   const [strained, setStrained] = useState(false);
@@ -208,10 +236,15 @@ export default function ParticleFinaleCanvas({ text }: { text: string }) {
       dpr={DPR_CAP}
       gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
       camera={{ fov: 50, near: 0.1, far: 50, position: [0, 0, 9] }}
-      frameloop={strained ? "demand" : "always"}
+      frameloop={running === false ? "never" : strained ? "demand" : "always"}
       aria-hidden
     >
-      <FinalePoints text={text} density={strained ? density + 2 : density} onStrain={() => setStrained(true)} />
+      <FinalePoints
+        text={text}
+        density={strained ? density + 2 : density}
+        onStrain={() => setStrained(true)}
+        onLive={onLive}
+      />
     </Canvas>
   );
 }

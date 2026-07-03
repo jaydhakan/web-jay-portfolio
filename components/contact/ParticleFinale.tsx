@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import dynamic from "next/dynamic";
 import { useGovernedCanvas } from "@/lib/webgl-governance";
 
@@ -15,10 +16,21 @@ const ParticleFinaleCanvas = dynamic(() => import("./ParticleFinaleCanvas"), { s
  */
 export function ParticleFinale({ text, tagline }: { text: string; tagline: string }) {
   // Scroll-driven set-piece (no cursor dependency) -> "desktop-motion".
-  const { ref, show } = useGovernedCanvas<HTMLElement>({
+  const { ref, show, inView } = useGovernedCanvas<HTMLElement>({
     profile: "desktop-motion",
     rootMargin: "200px 0px",
   });
+
+  // Sticky mount + frameloop pause off-view: the finale sits beside the footer, so
+  // the gate flaps as visitors bounce around the page end — re-creating the WebGL
+  // context on every flap risks Context Lost. Mount once, pause when away.
+  // Guarded render-time latch (the docs-blessed "adjust state during render" idiom).
+  const [everShown, setEverShown] = useState(false);
+  if (show && !everShown) setEverShown(true);
+
+  // The wordmark ghosts ONLY once particles actually draw (the canvas chunk is
+  // async — ghosting on the mount gate leaves a near-invisible heading in the gap).
+  const [live, setLive] = useState(false);
 
   return (
     <section
@@ -26,9 +38,9 @@ export function ParticleFinale({ text, tagline }: { text: string; tagline: strin
       className="relative mt-24 flex min-h-[60vh] items-center justify-center overflow-hidden rounded-3xl border border-line bg-base py-20"
     >
       {/* Particle canvas (desktop + motion + WebGL). */}
-      {show && (
+      {(everShown || show) && (
         <div aria-hidden className="absolute inset-0 animate-[rise-in_1s_ease-out_both]">
-          <ParticleFinaleCanvas text={text} />
+          <ParticleFinaleCanvas text={text} running={inView} onLive={() => setLive(true)} />
         </div>
       )}
 
@@ -42,7 +54,7 @@ export function ParticleFinale({ text, tagline }: { text: string; tagline: strin
             // Faint ghost under the particles (the target the cloud settles into);
             // full strength otherwise. Never fully hidden -> a visible wordmark
             // always renders even if the GPU path is unavailable.
-            (show ? "opacity-[0.08]" : "opacity-100")
+            (live ? "opacity-[0.08]" : "opacity-100")
           }
         >
           {text}

@@ -235,7 +235,13 @@ function HeroScene({
   );
 }
 
-export default function HeroShader() {
+export default function HeroShader({
+  running,
+}: {
+  /** false = pause the frameloop (kept mounted; avoids context re-init when the
+   *  hero scrolls back into view). */
+  running?: boolean;
+}) {
   // Tier once at mount: desktop fine-pointer gets full res + bloom; mobile/coarse
   // gets a lighter terrain and no post-processing (matches the cursor/preloader
   // desktop-gating — the audit profile (coarse pointer) measures the cheap path).
@@ -261,7 +267,7 @@ export default function HeroShader() {
         powerPreference: tier === "high" ? "high-performance" : "low-power",
       }}
       camera={{ fov: 46, near: 0.1, far: 140, position: [0, 10.5, 24] }}
-      frameloop="always"
+      frameloop={running === false ? "never" : "always"}
       aria-hidden
     >
       <color attach="background" args={[BASE_HEX]} />
