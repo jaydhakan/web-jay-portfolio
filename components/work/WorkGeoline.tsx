@@ -5,6 +5,7 @@ import type { Project, ProjectCategory } from "@/data/content";
 import { cn } from "@/lib/utils";
 import { ProjectCard } from "@/components/work/ProjectCard";
 import { SerpentineTimeline } from "@/components/timeline/SerpentineTimeline";
+import { scoreForCount } from "@/components/timeline/argmax";
 
 type Filter = "All" | ProjectCategory;
 
@@ -41,6 +42,13 @@ export function WorkGeoline({ projects, covers, filters }: WorkGeolineProps) {
     [projects],
   );
 
+  // Featured systems are the heavy beats of the /work bolt (bigger fans, harder kinks,
+  // brighter collapses); the rest get deterministic varied weights from the score.
+  const beats = useMemo(
+    () => scoreForCount(projects.length, projects.map((p) => (p.featured ? 0.9 : undefined))),
+    [projects],
+  );
+
   return (
     <div className="relative">
       {/* Filter pills — spotlight a category (dim others), no reflow. */}
@@ -70,6 +78,7 @@ export function WorkGeoline({ projects, covers, filters }: WorkGeolineProps) {
         <SerpentineTimeline
           count={projects.length}
           hudLabel="Systems lit"
+          beats={beats}
           constellation={constellation}
           dimmed={(i) => !matches(projects[i])}
           renderCard={(i, _side, isActive) => {

@@ -14,6 +14,7 @@ import {
 import type { TimelineEntry } from "@/data/content";
 import { cn } from "@/lib/utils";
 import { SerpentineTimeline } from "@/components/timeline/SerpentineTimeline";
+import { ABOUT_SCORE } from "@/components/timeline/argmax";
 
 /** label -> stable id, so the same capability bridges across milestones. */
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -52,17 +53,23 @@ export function Geoline({ entries }: { entries: TimelineEntry[] }) {
     <SerpentineTimeline
       count={entries.length}
       hudLabel="Milestones lit"
+      beats={ABOUT_SCORE}
       constellation={constellation}
       renderCard={(i, _side, isActive) => {
         const entry = entries[i];
         const { Icon, tag } = KIND[i] ?? KIND[KIND.length - 1];
+        // Narrative weight -> visual weight: heavy beats (the hairpin, the agents drop,
+        // the open fork) get more presence; calm beats stay quiet. No one-size cards.
+        const w = ABOUT_SCORE[i]?.weight ?? 0.5;
         return (
           <article
             className={cn(
-              "group relative isolate w-full overflow-hidden rounded-[18px] p-[22px]",
-              // Glass surface (translucent tint + cheap blur md+ only; mobile near-solid).
+              "group relative isolate w-full overflow-hidden rounded-[18px]",
+              w >= 0.8 ? "p-[24px]" : w >= 0.5 ? "p-[22px]" : "p-[18px]",
+              // Near-opaque surface — NO backdrop-filter: the card floats over the live
+              // WebGL canvas and blur-over-canvas is a hard-gate violation (DESIGN.md).
               "border border-line bg-base/85",
-              "md:bg-[linear-gradient(180deg,oklch(22.5%_0.016_278/0.72),oklch(14.5%_0.012_278/0.66))] md:[backdrop-filter:blur(10px)_saturate(125%)]",
+              "md:bg-[linear-gradient(180deg,oklch(22.5%_0.016_278/0.92),oklch(14.5%_0.012_278/0.88))]",
               "shadow-[0_18px_40px_-24px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(235,236,250,0.10)]",
               "transition-[box-shadow,background-color,border-color] duration-[450ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
               // 1px gradient ring (the "glowing edge") via mask-composite.
@@ -77,10 +84,13 @@ export function Geoline({ entries }: { entries: TimelineEntry[] }) {
                 "border-transparent bg-[linear-gradient(180deg,oklch(22.5%_0.016_278/0.80),oklch(14.5%_0.012_278/0.72))] shadow-[0_0_0_1px_oklch(66%_0.19_285/0.20),0_22px_60px_-30px_rgba(0,0,0,0.9),0_0_44px_-16px_oklch(63%_0.21_272/0.45),inset_0_1px_0_rgba(235,236,250,0.14)] after:opacity-100 after:[background:linear-gradient(150deg,oklch(66%_0.19_285/0.85),oklch(86%_0.115_207/0.40)_45%,oklch(63%_0.21_272/0.15)_80%)]",
             )}
           >
-            {/* Gradient accent leading edge. */}
+            {/* Gradient accent leading edge — length scales with narrative weight. */}
             <span
               aria-hidden
-              className="pointer-events-none absolute left-[24px] top-0 h-[2px] w-[44px] rounded-[2px] bg-[linear-gradient(90deg,var(--color-accent),var(--color-accent-cyan))] opacity-90 shadow-[0_0_12px_-2px_var(--color-accent)]"
+              className={cn(
+                "pointer-events-none absolute left-[24px] top-0 h-[2px] rounded-[2px] bg-[linear-gradient(90deg,var(--color-accent),var(--color-accent-cyan))] opacity-90 shadow-[0_0_12px_-2px_var(--color-accent)]",
+                w >= 0.8 ? "w-[64px]" : w >= 0.5 ? "w-[44px]" : "w-[30px]",
+              )}
             />
 
             {/* Header row: ICON . TAG ......... PERIOD */}
@@ -96,7 +106,12 @@ export function Geoline({ entries }: { entries: TimelineEntry[] }) {
               </span>
             </div>
 
-            <h3 className="mb-2 font-display text-lg font-semibold leading-[1.25] tracking-[-0.01em] text-ink">
+            <h3
+              className={cn(
+                "mb-2 font-display font-semibold leading-[1.25] tracking-[-0.01em] text-ink",
+                w >= 0.8 ? "text-xl" : w >= 0.5 ? "text-lg" : "text-base",
+              )}
+            >
               {entry.title}
             </h3>
             <p className="text-[13.5px] leading-[1.6] text-ink-dim">{entry.description}</p>
