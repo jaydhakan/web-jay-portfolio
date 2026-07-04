@@ -73,6 +73,9 @@ export function WorkGeoline({ projects, covers, filters }: WorkGeolineProps) {
         })}
       </div>
 
+      {/* Card titles are h3 (shared with other h2-sectioned contexts); this sr-only
+          h2 keeps /work's outline sequential under the page h1 (a11y heading-order). */}
+      <h2 className="sr-only">Shipped systems</h2>
       <div className="mt-12">
         <SerpentineTimeline
           count={projects.length}
@@ -89,6 +92,7 @@ export function WorkGeoline({ projects, covers, filters }: WorkGeolineProps) {
                 hasCover={covers[project.slug] ?? false}
                 active={isActive}
                 dimmed={!matches(project)}
+                priority={i === 0}
               />
             );
           }}

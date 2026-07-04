@@ -128,7 +128,7 @@ export function SkillBag({ toolkit }: { toolkit: ToolkitGroup[] }) {
           {/* Hint, desktop + motion only (CSS-gated; appears once the bag is interactive). */}
           <span
             aria-hidden
-            className="pointer-events-none absolute bottom-4 right-6 hidden font-mono text-[10px] uppercase tracking-[0.2em] text-ink-dim/40 transition-opacity duration-300 group-hover:text-ink-dim/70 motion-safe:md:block"
+            className="pointer-events-none absolute bottom-4 right-6 hidden font-mono text-[10px] uppercase tracking-[0.2em] text-ink-dim/80 transition-colors duration-300 group-hover:text-ink-dim motion-safe:md:block"
           >
             drag me
           </span>

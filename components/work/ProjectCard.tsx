@@ -23,12 +23,15 @@ export function ProjectCard({
   hasCover,
   active,
   dimmed,
+  priority = false,
 }: {
   project: Project;
   index: number;
   hasCover: boolean;
   active: boolean;
   dimmed: boolean;
+  /** First card's cover is the mobile LCP element — preload it (next/image lazy-loads by default). */
+  priority?: boolean;
 }) {
   return (
     <Link
@@ -62,6 +65,7 @@ export function ProjectCard({
               fill
               sizes="(min-width: 768px) 1px, 100vw"
               className="object-cover"
+              priority={priority}
               {...blurProps(project.coverImage)}
             />
           ) : (
