@@ -287,22 +287,27 @@ html {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Geoline (E3): the "current" of dashes flowing down the serpentine road. Applied
-   via the motion-safe: variant in Geoline.tsx, so reduced-motion auto-disables it
-   (no entry needed in the reduce{animation:none} allowlist). */
-@keyframes geo-flow {
-  /* multiple of the 2+4 dash period (6) → seamless loop */
-  to { stroke-dashoffset: -180; }
+/* Constellation Spine node markers. Default = LIT (the final / no-JS / reduced-motion
+   state): a filled iridescent dot with a soft glow. Under desktop motion the engine
+   adds `.is-pending` at runtime for the hollow-ring "not yet reached" start, and removes
+   it as the scroll head-dot ignites each node. Colour/glow is the only iridescent spend
+   here besides the 2px rail, so the duotone budget stays well under 5% of the viewport. */
+.spine-node {
+  transform: translate(-50%, -50%) scale(1);
+  background:
+    radial-gradient(closest-side, var(--color-accent-cyan), var(--color-accent-violet) 70%);
+  box-shadow:
+    0 0 8px -1px var(--color-accent-cyan),
+    0 0 16px -2px oklch(66% 0.19 285 / 0.55);
+  transition:
+    background 450ms var(--ease-out-expo),
+    box-shadow 450ms var(--ease-out-expo),
+    transform 450ms var(--ease-out-expo);
 }
-
-/* Constellation Spine: the idle "breathing" twinkle on a lit satellite star. Applied
-   via the motion-safe: variant in SerpentineTimeline.tsx, so reduced-motion auto-
-   disables it (no allowlist entry needed, same convention as geo-flow above). The
-   star's reveal opacity is GSAP-owned on the wrapping <g>; this only modulates the
-   inner dot, so the two compose without fighting. */
-@keyframes star-twinkle {
-  0%, 100% { opacity: 0.55; }
-  50%      { opacity: 1; }
+.spine-node.is-pending {
+  background: var(--base);
+  box-shadow: inset 0 0 0 1.5px oklch(72% 0.028 278 / 0.5);
+  transform: translate(-50%, -50%) scale(0.6);
 }
 
 .anim-char {

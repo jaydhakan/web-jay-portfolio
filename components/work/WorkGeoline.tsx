@@ -9,9 +9,6 @@ import { scoreForCount } from "@/components/timeline/argmax";
 
 type Filter = "All" | ProjectCategory;
 
-/** label -> stable id, so a stack shared across systems bridges them in the graph. */
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-
 type WorkGeolineProps = {
   projects: Project[];
   /** slug -> cover file exists (computed server-side). */
@@ -21,28 +18,19 @@ type WorkGeolineProps = {
 
 /**
  * The /work timeline — a thin data adapter over the shared <SerpentineTimeline>
- * ARGMAX engine (the SAME engine the /about journey uses). Each shipped system is a
- * decision node on the bolt; featured systems are the heavy beats. This wrapper owns
- * ONLY: the category-filter pills, the filter's ATTENTION MASKING (dim non-matching
- * nodes + collapse their fans to scars, in the poster AND the WebGL layer — never a
- * reflow, so the drawn bolt and CLS stay intact), and the clickable ProjectCard
- * render-prop; the rich card + the /work/[slug] case study carry the detail.
+ * "Constellation Spine" engine (the SAME engine the /about journey uses). Each shipped
+ * system is a node on the rail; featured systems are the heavy beats (louder cards +
+ * nodes). This wrapper owns ONLY: the category-filter pills, the filter's ATTENTION
+ * MASKING (dim non-matching nodes/cards — never a reflow, so CLS stays 0), and the
+ * clickable ProjectCard render-prop; the rich card + the /work/[slug] case study carry
+ * the detail.
  */
 export function WorkGeoline({ projects, covers, filters }: WorkGeolineProps) {
   const [filter, setFilter] = useState<Filter>("All");
   const matches = (p: Project) => filter === "All" || p.category === filter;
 
-  // Each system's stack becomes its constellation stars; a stack used by more than one
-  // system bridges them — the shared-backbone graph (Python, AsyncIO, REST…) lights up
-  // as you scroll. Capped to 3 per system so the gutter never crowds. Memoized for a
-  // stable identity (it feeds the engine geometry + timeline).
-  const constellation = useMemo(
-    () => projects.map((p) => p.tech.slice(0, 3).map((t) => ({ id: slug(t), label: t }))),
-    [projects],
-  );
-
-  // Featured systems are the heavy beats of the /work bolt (bigger fans, harder kinks,
-  // brighter collapses); the rest get deterministic varied weights from the score.
+  // Featured systems are the heavy beats of the /work spine (bigger cards, brighter
+  // nodes); the rest get deterministic varied weights from the score.
   const beats = useMemo(
     () => scoreForCount(projects.length, projects.map((p) => (p.featured ? 0.9 : undefined))),
     [projects],
@@ -81,7 +69,6 @@ export function WorkGeoline({ projects, covers, filters }: WorkGeolineProps) {
           count={projects.length}
           hudLabel="Systems lit"
           beats={beats}
-          constellation={constellation}
           dimmed={(i) => !matches(projects[i])}
           renderCard={(i, _side, isActive) => {
             const project = projects[i];

@@ -16,7 +16,6 @@ import { ScrambleHeading } from "@/components/motion/ScrambleHeading";
 import { Teleprompter } from "@/components/motion/Teleprompter";
 import { ClipReveal } from "@/components/motion/ClipReveal";
 import { LineDraw } from "@/components/motion/LineDraw";
-import { LatentField } from "@/components/three/LatentField";
 import { Geoline } from "@/components/about/Geoline";
 import { SkillBag } from "@/components/about/SkillBag";
 import { TrainingRun } from "@/components/about/TrainingRun";
@@ -46,11 +45,6 @@ export default function AboutPage() {
 
   return (
     <main id="main-content" tabIndex={-1} className="pt-32">
-      {/* Page-wide latent field, radial scene: "you, embedded — skill domains as
-          clusters around you" (E3). One governed canvas behind the whole route;
-          poster on mobile/RM. Absorbs the retired /about set-pieces. */}
-      <LatentField layout="radial" />
-
       <div className="mx-auto max-w-7xl px-6">
         <header className="max-w-3xl">
           <SectionLabel>{sections.aboutPage.eyebrow}</SectionLabel>
@@ -61,10 +55,7 @@ export default function AboutPage() {
           />
         </header>
 
-        {/* Identity row — the headshot tile. The "you, as data" particle gag now
-            lives in the page-wide LatentField (E3: the cloud is meant to form the
-            face here once a real photo lands), so this tile is just the still
-            poster / SSR / a11y image — no second canvas on /about. */}
+        {/* Identity row — the headshot tile. */}
         <div className="mt-14 flex flex-col gap-8 sm:flex-row sm:items-center">
           <div className="group relative aspect-square w-40 shrink-0 overflow-hidden rounded-2xl ring-1 ring-line transition duration-300 ease-out hover:ring-accent/40 sm:w-48">
             <span
@@ -73,7 +64,6 @@ export default function AboutPage() {
             />
             {hasPhoto ? (
               // TODO(JAY): drop a real 400x400+ photo at public/images/profile/jay.jpg.
-              // Then the page-wide field can sample it as the convergence face target.
               <Image
                 src={profile.photo}
                 alt={`Portrait of ${profile.name}`}

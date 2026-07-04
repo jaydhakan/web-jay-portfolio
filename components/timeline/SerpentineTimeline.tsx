@@ -1,42 +1,32 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { gsap, useGSAP } from "@/lib/gsap";
+import { useRef, useState, type ReactNode } from "react";
+import { gsap, useGSAP, ScrollTrigger } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
-import { useGovernedCanvas } from "@/lib/webgl-governance";
-import { ArgmaxFiber } from "./ArgmaxFiber";
-import { VBW, LANE, type Connection, buildConstellation } from "./geometry";
-import {
-  type Beat,
-  buildArgmax,
-  scoreForCount,
-  channelPolygon,
-  ghostPolygon,
-  polylineD,
-} from "./argmax";
+import { type Beat, scoreForCount } from "./argmax";
 
 /**
- * SerpentineTimeline ("ARGMAX — The Paths Not Taken") — the ONE timeline engine,
- * shared by the /about journey and the /work shipped-systems list. (Design history:
- * TIMELINE_REDESIGN.md / TIMELINE_IMPLEMENTATION.md, kept in git history.)
+ * SerpentineTimeline — "The Constellation Spine". The ONE timeline engine, shared by the
+ * /about journey and the /work shipped-systems list.
  *
- * The path is the main character: an inference trajectory drawn as a slow lightning
- * bolt. Deliberate kinks at decision points, ghost futures fanning at each one, a
- * collapse when the story arrives (argmax — one branch survives), permanent scars where
- * the others died, a channel that gains caliber as the story grows, and an OPEN DELTA at
- * the end — the one fork never collapsed ("currently sampling"). Narrative lives in the
- * geometry itself via the authored Beat score (weight / run / kink / ghosts / caliber),
- * so rhythm is uneven and every milestone has its own visual weight.
+ * A single straight vertical rail runs down a left gutter; each milestone is a node ON
+ * that rail with its card flowing beside it in normal document order (newest reads
+ * top-down). As you scroll, the rail DRAWS from the top in the iridescent duotone and a
+ * single head-dot rides its leading edge, igniting each node as it passes — the one
+ * signature motion. Everything else is quiet, crisp vector: no WebGL, no starfield, no
+ * decorative fans/scars/constellation. (This replaced a WebGL "lightning bolt" set-piece
+ * that read as illegible cards floating in a starfield — see git history + plan.md.)
  *
- * Everything accessible stays in the DOM: a real <ol> of cards (revealed on the same
- * scroll clock), capability chips, the live HUD counter, and the mobile left-rail list.
- * The static SVG poster is the FULLY-DECODED artwork (channel + scars + open delta) —
- * the finished piece for no-WebGL / reduced-motion / no-JS / pre-arm, fading out only
- * when the live canvas takes over.
+ * Contract, unchanged for the adapters (Geoline / WorkGeoline):
+ *   count, renderCard(i, side, isActive), hudLabel, beats?, dimmed?, className
+ * `beats[i].weight` is still the per-milestone size/emphasis knob the cards read.
  *
- * Hard gates (DESIGN.md): CLS=0 via fixed-viewBox + container aspect-ratio; ONE scrubbed
- * ScrollTrigger (ease "none" inside the scrub); governed canvas (dpr-capped, FPS-guarded,
- * desktop-motion only); no backdrop-blur anywhere over the WebGL stage.
+ * Hard gates (DESIGN.md): CLS=0 (pure document flow — rail/markers/head are all
+ * absolutely positioned and never affect layout); exactly ONE scrubbed ScrollTrigger
+ * (rail draw + head + node ignition + HUD), with card entrances on separate once:true
+ * batch triggers; reduced-motion / mobile / no-JS render the FINAL state (rail fully
+ * drawn, every node lit, every card visible) — start states are set at runtime, never in
+ * CSS, so there is never a blank section.
  */
 
 export type RenderCard = (
@@ -45,166 +35,147 @@ export type RenderCard = (
   isActive: boolean,
 ) => ReactNode;
 
+// Rail geometry (px). The node column is fixed-width so the rail x stays put across
+// breakpoints; the card takes the rest. RAIL_X is the rail's centre inside the <ol>;
+// MARKER_TOP is the node's y within each card (aligned near the card header).
+const NODE_COL = 52;
+const RAIL_X = 25;
+const MARKER_TOP = 32;
+
 export function SerpentineTimeline({
   count,
   renderCard,
   hudLabel,
   beats: beatsProp,
-  caption = "currently sampling",
-  constellation,
   dimmed,
   className,
 }: {
   count: number;
   renderCard: RenderCard;
   hudLabel: string;
-  /** The narrative score — one Beat per milestone. Defaults to a deterministic
-   *  procedural score; /about passes the authored ABOUT_SCORE. */
+  /** The narrative score — one Beat per milestone (defaults to a procedural score). */
   beats?: Beat[];
-  /** Mono caption under the open delta (null hides it). */
-  caption?: string | null;
-  /** Knowledge-graph layer: constellation[i] = the tags milestone i activates. */
-  constellation?: Connection[][];
-  /** Optional filter spotlight: return true to dim milestone i (no reflow). */
+  /** Optional filter spotlight (the /work pills): return true to dim milestone i. */
   dimmed?: (i: number) => boolean;
   className?: string;
 }) {
+  const n = count;
+  const beats = beatsProp && beatsProp.length === n ? beatsProp : scoreForCount(n);
+
   const rootRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<(HTMLLIElement | null)[]>([]);
-  const barRef = useRef<HTMLSpanElement>(null);
+  const listRef = useRef<HTMLOListElement>(null);
+  const railLitRef = useRef<SVGLineElement>(null);
+  const headRef = useRef<HTMLSpanElement>(null);
+  const markerRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
   const countRef = useRef<HTMLSpanElement>(null);
-  const progressRef = useRef(0);
+  const barRef = useRef<HTMLSpanElement>(null);
 
   const [active, setActive] = useState(-1);
-  const lastCount = useRef(0);
+  const lastLit = useRef(-1);
 
-  const n = count;
-  const beats = useMemo(
-    () => (beatsProp && beatsProp.length === n ? beatsProp : scoreForCount(n)),
-    [beatsProp, n],
-  );
-  const build = useMemo(() => buildArgmax(beats), [beats]);
-  const { line, width, nodes, sides, scars, delta, vbh: VBH } = build;
-  const cnst = useMemo(() => buildConstellation(nodes, constellation), [nodes, constellation]);
-
-  // Attention mask for the WebGL layer (the /work filter): 1 = masked. The poster gets
-  // the same treatment via CSS classes below; the canvas eases between states itself.
-  const mask = useMemo(() => nodes.map((_, i) => (dimmed?.(i) ? 1 : 0)), [dimmed, nodes]);
-
-  // Poster path strings (pure derivations of the build — memoized once per score).
-  const poster = useMemo(
-    () => ({
-      aura: channelPolygon(line, width, 2.6),
-      mid: channelPolygon(line, width, 1.55),
-      core: channelPolygon(line, width, 1),
-      hot: polylineD(line.pts.filter((_, k) => k % 3 === 0)),
-      scars: scars.map((g) => ({ d: ghostPolygon(g), node: g.node })),
-      delta: delta.ghosts.map((g) => ghostPolygon(g)),
-    }),
-    [line, width, scars, delta],
-  );
-
-  // Governed mount gate for the WebGL set-piece (desktop + motion + WebGL + in-view +
-  // armed). 600px rootMargin warms the chunk + context before the stage arrives.
-  const { ref: gateRef, show, inView, eligible, webglOk } = useGovernedCanvas<HTMLDivElement>({
-    ref: stageRef,
-    profile: "desktop-motion",
-    rootMargin: "600px 0px",
-    arm: true,
-  });
-
-  // Sticky mount: once the canvas has existed, keep it (pause via `running` instead of
-  // unmounting — re-creating a WebGL context on every scroll-past caused Context Lost).
-  const [everShown, setEverShown] = useState(false);
-  if (show && !everShown) setEverShown(true);
-
-  // `live` flips only after the async canvas chunk renders real frames — the poster
-  // stays visible until that exact moment (never a dark gap).
-  const [live, setLive] = useState(false);
-
-  // Warm the heavy chunk as soon as the device qualifies.
-  useEffect(() => {
-    if (!(eligible && webglOk)) return;
-    const t = window.setTimeout(() => {
-      void import("./ArgmaxCanvas");
-    }, 250);
-    return () => window.clearTimeout(t);
-  }, [eligible, webglOk]);
-
-  // ONE scrubbed timeline: reveals the DOM cards, drives the HUD counter, and writes
-  // the shared progress the WebGL canvas reads. Ease is "none" — inside a scrub, drama
-  // belongs to the geometry (warp lives in the canvas), not to easing curves.
   useGSAP(
     () => {
+      const list = listRef.current;
+      const lit = railLitRef.current;
+      const head = headRef.current;
+      if (!list || !lit || !head) return;
+
       const mm = gsap.matchMedia();
       mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
-        const cards = cardRefs.current.filter(Boolean) as HTMLElement[];
-        const nodeFrac = line.nodeFrac;
+        const cards = itemRefs.current.map((li) => li?.querySelector("[data-card]")).filter(Boolean) as HTMLElement[];
+        const markers = markerRefs.current.filter(Boolean) as HTMLElement[];
 
-        gsap.set(cards, { autoAlpha: 0 });
-        if (barRef.current) gsap.set(barRef.current, { scaleX: 0, transformOrigin: "left center" });
-        lastCount.current = 0;
+        // Runtime start states (never CSS — no-JS/RM keeps the final drawn state:
+        // rail fully drawn, every node lit, cards visible). Nodes default LIT, so
+        // motion adds `is-pending` (the hollow-ring start) and ignition removes it.
+        lit.style.strokeDashoffset = "1";
+        gsap.set(head, { autoAlpha: 0, xPercent: -50, yPercent: -50, y: 0 });
+        markers.forEach((m) => m.classList.add("is-pending"));
+        gsap.set(cards, { autoAlpha: 0, y: 16 });
         if (countRef.current) countRef.current.textContent = "00";
-        progressRef.current = 0;
+        if (barRef.current) barRef.current.style.transform = "scaleX(0)";
+        lastLit.current = -1;
 
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: rootRef.current,
-            start: "top 74%",
-            end: "bottom 58%",
-            scrub: 1,
-            invalidateOnRefresh: true,
+        // Node offsets: the marker's y within the rail's height, so a node ignites
+        // exactly as the head-dot reaches it. Recomputed on refresh (resize/font swap).
+        let offsets: number[] = [];
+        const measure = () => {
+          const H = list.clientHeight || 1;
+          offsets = itemRefs.current.map((li) => (li ? (li.offsetTop + MARKER_TOP) / H : 0));
+        };
+        measure();
+
+        const railHeight = () => list.clientHeight || 0;
+
+        // THE one scrubbed ScrollTrigger: rail draw + head-dot + node ignition + HUD.
+        const st = ScrollTrigger.create({
+          trigger: list,
+          start: "top 62%",
+          end: "bottom 62%",
+          scrub: 0.4,
+          invalidateOnRefresh: true,
+          onRefresh: measure,
+          onUpdate: (self) => {
+            const p = self.progress;
+            lit.style.strokeDashoffset = String(1 - p);
+            gsap.set(head, {
+              autoAlpha: p > 0.001 && p < 0.999 ? 1 : 0,
+              xPercent: -50,
+              yPercent: -50,
+              y: p * railHeight(),
+            });
+            let count = 0;
+            for (let i = 0; i < offsets.length; i++) {
+              const on = p >= offsets[i] - 0.001;
+              if (on) count++;
+              const m = markerRefs.current[i];
+              if (m) m.classList.toggle("is-pending", !on);
+            }
+            if (barRef.current) barRef.current.style.transform = `scaleX(${p.toFixed(3)})`;
+            if (count !== lastLit.current) {
+              lastLit.current = count;
+              if (countRef.current) countRef.current.textContent = String(count).padStart(2, "0");
+              setActive(count - 1);
+            }
           },
         });
-        tl.to({}, { duration: 1, ease: "none" }, 0); // master 0->1 clock
 
-        cards.forEach((card, i) => {
-          const fromX = sides[i] === "left" ? -14 : 14;
-          const at = nodeFrac[i] ?? 0;
-          // Opacity is a binary latch, never a mid-ramp value: the a11y contrast pass
-          // samples whatever scroll progress the load lands on, and a card caught at
-          // ~0.4 opacity fails every chip inside it. Hidden (autoAlpha 0) is exempt;
-          // visible must be fully readable. The card materializes AT its decision
-          // node — the fan collapses, the card exists — while the slide stays scrubbed.
-          tl.set(card, { autoAlpha: 1 }, at);
-          tl.fromTo(
-            card,
-            { yPercent: -50, y: 14, x: fromX },
-            { yPercent: -50, y: 0, x: 0, duration: 0.13, ease: "none" },
-            at,
-          );
+        // Card entrances — separate, once (never replay on re-scroll: NN/g).
+        const batch = ScrollTrigger.batch(cards, {
+          start: "top 88%",
+          once: true,
+          onEnter: (els) =>
+            gsap.to(els, {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.7,
+              ease: "expo.out",
+              stagger: 0.09,
+              overwrite: true,
+            }),
         });
 
-        tl.eventCallback("onUpdate", () => {
-          const p = tl.progress();
-          progressRef.current = p;
-          if (barRef.current) barRef.current.style.transform = `scaleX(${p.toFixed(3)})`;
-          let lit = 0;
-          for (let i = 0; i < nodeFrac.length; i++) if (p >= nodeFrac[i] - 0.004) lit++;
-          if (lit !== lastCount.current) {
-            lastCount.current = lit;
-            if (countRef.current) countRef.current.textContent = String(lit).padStart(2, "0");
-            setActive(Math.max(0, lit - 1));
-          }
-        });
+        return () => {
+          st.kill();
+          batch.forEach((b) => b.kill());
+        };
       });
     },
-    { scope: rootRef, dependencies: [n, line] },
+    { scope: rootRef, dependencies: [n] },
   );
-
-  const last = nodes[nodes.length - 1];
 
   return (
     <div ref={rootRef} className={cn("relative", className)}>
-      {/* Live counter (aria-hidden ambient flavour). Solid surface — no backdrop-blur
-          over the WebGL stage (hard gate). */}
+      {/* Live counter — aria-hidden ambient flavour, solid surface (no blur). */}
       <div
         aria-hidden
-        className="pointer-events-none sticky top-20 z-20 mb-6 hidden justify-end md:flex"
+        className="pointer-events-none sticky top-20 z-20 mb-8 hidden justify-end md:flex"
       >
         <div className="flex items-center gap-3 rounded-full border border-line bg-base/90 px-4 py-2">
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-dim">{hudLabel}</span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-dim">
+            {hudLabel}
+          </span>
           <span className="font-mono text-xs tabular-nums text-accent-cyan">
             <span ref={countRef}>{String(n).padStart(2, "0")}</span>
             <span className="text-ink-dim"> / {String(n).padStart(2, "0")}</span>
@@ -218,253 +189,88 @@ export function SerpentineTimeline({
         </div>
       </div>
 
-      {/* Aspect-locked stage (CLS=0). Poster, canvas and <ol> share this exact box. */}
-      <div
-        ref={gateRef}
-        className="relative mx-auto w-full max-w-[1040px] md:[aspect-ratio:var(--syn-aspect)]"
-        style={{ ["--syn-aspect" as string]: `${VBW} / ${VBH}` }}
-      >
-        {/* STATIC SVG poster — the timeline's PERMANENT base layer, not a placeholder.
-            The structural elements (stems, beads, blooms, constellation) never fade:
-            they are what makes this read as a connected timeline in EVERY state (SSR /
-            reduced-motion / no-JS / no-WebGL / context-lost / live). Only the channel
-            artwork dims when the canvas is live — the WebGL layer redraws it with the
-            decode narrative, and the dimmed poster underneath keeps the FULL route
-            faintly legible ahead of the head (the latent path, not yet traversed). */}
-        <svg
-          viewBox={`0 0 ${VBW} ${VBH}`}
-          preserveAspectRatio="xMidYMid meet"
+      <ol ref={listRef} className="relative flex flex-col gap-11 sm:gap-14">
+        {/* THE RAIL — full height of the list, in the node gutter. Absolute: never
+            affects layout (CLS=0). Base line is always visible (unlit-ahead); the lit
+            gradient line draws top-down on scroll; a head-dot rides its tip. */}
+        <div
           aria-hidden
-          className="absolute inset-0 hidden size-full overflow-visible md:block"
-          fill="none"
+          className="pointer-events-none absolute inset-y-0 z-0"
+          style={{ left: RAIL_X - 1, width: 2 }}
         >
-          <defs>
-            <linearGradient
-              id="argx-stroke"
-              x1="0"
+          <svg className="absolute inset-0 size-full" viewBox="0 0 2 100" preserveAspectRatio="none" fill="none">
+            <defs>
+              <linearGradient id="spine-grad" x1="0" y1="0" x2="0" y2="100" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="var(--color-accent)" />
+                <stop offset="52%" stopColor="var(--color-accent-violet)" />
+                <stop offset="100%" stopColor="var(--color-accent-cyan)" />
+              </linearGradient>
+            </defs>
+            {/* faint always-on rail (the path ahead of the head) */}
+            <line
+              x1="1"
               y1="0"
-              x2="0"
-              y2={VBH}
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop offset="0%" stopColor="var(--color-accent)" />
-              <stop offset="52%" stopColor="var(--color-accent-violet)" />
-              <stop offset="100%" stopColor="var(--color-accent-cyan)" />
-            </linearGradient>
-            <radialGradient id="argx-bloom" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="var(--color-accent-cyan)" stopOpacity="0.9" />
-              <stop offset="45%" stopColor="var(--color-accent-violet)" stopOpacity="0.5" />
-              <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-
-          {/* Collapse blooms behind the channel — sized by narrative weight. */}
-          {nodes.map((p, i) => (
-            <g
-              key={`bloom-${i}`}
-              transform={`translate(${p.x} ${p.y})`}
-              className={cn("transition-opacity duration-300", dimmed?.(i) && "opacity-30")}
-            >
-              <circle r={5.5 + 7.5 * beats[i].weight} fill="url(#argx-bloom)" opacity={0.3 + 0.22 * beats[i].weight} />
-            </g>
-          ))}
-
-          {/* Knowledge-graph bridges + spurs + stars — quieter than before: the bolt is
-              the hero, the graph is annotation. */}
-          {cnst.bridges.map((b) => (
-            <path
-              key={b.key}
-              d={b.d}
-              stroke="url(#argx-stroke)"
-              strokeWidth={0.35}
-              strokeLinecap="round"
-              fill="none"
-              opacity={0.15}
-              className={cn("transition-opacity duration-300", dimmed?.(b.at) && "opacity-[0.06]")}
+              x2="1"
+              y2="100"
+              stroke="var(--color-ink)"
+              strokeOpacity="0.1"
+              strokeWidth="2"
+              vectorEffect="non-scaling-stroke"
             />
-          ))}
-          {cnst.spurs.map((sp, idx) => (
-            <path
-              key={`spur-${idx}`}
-              d={sp.d}
-              stroke="url(#argx-stroke)"
-              strokeWidth={0.4}
-              strokeLinecap="round"
-              fill="none"
-              opacity={0.32}
-              className={cn("transition-opacity duration-300", dimmed?.(sp.milestone) && "opacity-10")}
+            {/* lit rail — drawn via dashoffset (default 0 = fully drawn for no-JS/RM) */}
+            <line
+              ref={railLitRef}
+              x1="1"
+              y1="0"
+              x2="1"
+              y2="100"
+              stroke="url(#spine-grad)"
+              strokeWidth="2"
+              vectorEffect="non-scaling-stroke"
+              pathLength={1}
+              strokeDasharray={1}
+              strokeDashoffset={0}
             />
-          ))}
-          {cnst.stars.map((s) => (
-            <g
-              key={s.key}
-              transform={`translate(${s.x} ${s.y})`}
-              className={cn("transition-opacity duration-300", dimmed?.(s.milestone) && "opacity-20")}
-            >
-              <circle r={2.6} fill="url(#argx-bloom)" opacity={0.4} />
-              <circle r={0.9} fill="var(--color-accent-cyan)" opacity={0.22} />
-              <circle
-                r={0.45}
-                fill="var(--color-accent-cyan)"
-                className="motion-safe:[animation:star-twinkle_3.2s_ease-in-out_infinite]"
-                style={{ animationDelay: `${(0.2 + (s.k % 5) * 0.5).toFixed(2)}s` }}
-              />
-            </g>
-          ))}
-
-          {/* Channel artwork group — the one part the live canvas genuinely replaces
-              (it redraws channel + scars + delta with the decode narrative). Dims to a
-              faint under-layer when live, NEVER to zero: the handoff must read as the
-              same timeline gaining life, not one artwork swapped for a dimmer one. */}
-          <g className={cn("transition-opacity duration-700", live && "opacity-50")}>
-          {/* SCARS — the paths not taken. Permanent, faint, tapered from full channel
-              width at the root: the memory of every fork already decided. */}
-          {poster.scars.map((s, idx) => (
-            <path
-              key={`scar-${idx}`}
-              d={s.d}
-              fill="url(#argx-stroke)"
-              opacity={0.3}
-              className={cn("transition-opacity duration-300", dimmed?.(s.node) && "opacity-[0.08]")}
-            />
-          ))}
-
-          {/* THE CHANNEL — the one branch that survived, gaining caliber beat by beat.
-              Aura -> mid -> core polygons + a white-hot centerline. */}
-          <path d={poster.aura} fill="url(#argx-stroke)" opacity={0.09} />
-          <path d={poster.mid} fill="url(#argx-stroke)" opacity={0.16} />
-          <path d={poster.core} fill="url(#argx-stroke)" opacity={0.85} />
-          <path d={poster.hot} stroke="#eef1ff" strokeWidth={0.3} strokeLinecap="round" opacity={0.55} />
-
-          {/* THE OPEN DELTA — the final fork, never collapsed: live ghosts + quantized
-              "still sampling" ticks fading forward. */}
-          {poster.delta.map((d, idx) => (
-            <path
-              key={`delta-${idx}`}
-              d={d}
-              fill="url(#argx-stroke)"
-              opacity={0.5}
-              className={cn(
-                "transition-opacity duration-300",
-                dimmed?.(n - 1) && "opacity-20",
-              )}
-            />
-          ))}
-          </g>
-          {delta.ticks.map((t, idx) => (
-            <circle
-              key={`tick-${idx}`}
-              cx={t.p.x}
-              cy={t.p.y}
-              r={Math.max(0.22, 0.55 - t.k * 0.06)}
-              fill="var(--color-accent-cyan)"
-              opacity={Math.max(0.1, 0.6 - t.k * 0.09)}
-            />
-          ))}
-
-          {/* Card stems — the surviving lateral branch (decision record). */}
-          {nodes.map((p, i) => {
-            const targetX = LANE[sides[i]].edge;
-            return (
-              <path
-                key={`stem-${i}`}
-                d={`M ${p.x} ${p.y} H ${targetX}`}
-                stroke="url(#argx-stroke)"
-                strokeWidth={0.5}
-                strokeLinecap="round"
-                strokeDasharray="0.8 2.4"
-                opacity={0.55}
-                className={cn("transition-opacity duration-300", dimmed?.(i) && "opacity-20")}
-              />
-            );
-          })}
-
-          {/* Decision beads — sized by narrative weight (not one-size-fits-all). */}
-          {nodes.map((p, i) => (
-            <g
-              key={`node-${i}`}
-              transform={`translate(${p.x} ${p.y})`}
-              className={cn("transition-opacity duration-300", dimmed?.(i) && "opacity-40")}
-            >
-              <circle
-                r={1.7 + 1.9 * beats[i].weight}
-                fill="none"
-                stroke="var(--color-accent)"
-                strokeWidth={0.35}
-                opacity={0.3}
-              />
-              <circle r={0.75 + 1.05 * beats[i].weight} fill="var(--color-accent-cyan)" />
-            </g>
-          ))}
-        </svg>
-
-        {/* The live WebGL set-piece — desktop / motion / WebGL / armed only. Mounts when
-            first near view, then STAYS mounted (frameloop pauses off-view instead). */}
-        {(everShown || show) && (
-          <ArgmaxFiber
-            vbw={VBW}
-            vbh={VBH}
-            build={build}
-            beats={beats}
-            stars={cnst.stars}
-            spurs={cnst.spurs}
-            bridges={cnst.bridges}
-            progressRef={progressRef}
-            mask={mask}
-            running={inView}
-            onLive={() => setLive(true)}
-            onContextLost={() => setLive(false)}
-            onContextRestored={() => setLive(true)}
+          </svg>
+          {/* head-dot — hidden until motion arms it; GSAP owns its transform */}
+          <span
+            ref={headRef}
+            className="invisible absolute left-1/2 top-0 size-2.5 rounded-full bg-accent-cyan shadow-[0_0_10px_2px_var(--color-accent-cyan),0_0_20px_6px_oklch(66%_0.19_285/0.5)]"
           />
-        )}
+        </div>
 
-        {/* Delta caption — DOM (crisp type), persists over poster AND live canvas. */}
-        {caption && last ? (
-          <div
-            aria-hidden
-            className="pointer-events-none absolute hidden -translate-x-1/2 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-dim/80 md:block"
-            style={{
-              left: `${(last.x / VBW) * 100}%`,
-              top: `${((last.y + 20) / VBH) * 100}%`,
-            }}
-          >
-            {caption}
-          </div>
-        ) : null}
-
-        {/* The accessible content: ONE real <ol>. Mobile = left-rail stacked list; md+
-            places each card on the OUTER side of its decision node (CSS top:%, CLS=0). */}
-        <ol
-          className={cn(
-            "relative space-y-5 pl-7 md:absolute md:inset-0 md:space-y-0 md:pl-0",
-            "before:absolute before:bottom-2 before:left-2 before:top-2 before:w-px md:before:hidden",
-            "before:bg-gradient-to-b before:from-accent/45 before:via-accent-violet/35 before:to-accent-cyan/45",
-          )}
-        >
-          {nodes.map((p, i) => {
-            const side = sides[i];
-            return (
-              <li
-                key={i}
-                ref={(el) => {
-                  cardRefs.current[i] = el;
-                }}
-                style={{ top: `${(p.y / VBH) * 100}%` }}
-                className={cn(
-                  "relative md:absolute md:max-w-[46%] md:-translate-y-1/2",
-                  LANE[side].className,
-                )}
-              >
+        {beats.map((_, i) => {
+          const isDim = dimmed?.(i) ?? false;
+          return (
+            <li
+              key={i}
+              ref={(el) => {
+                itemRefs.current[i] = el;
+              }}
+              className={cn(
+                "relative z-10 flex items-start gap-4 sm:gap-6",
+                "transition-opacity duration-500",
+                isDim && "opacity-40",
+              )}
+            >
+              {/* node column — holds the marker centred on the rail x */}
+              <div className="relative flex-none" style={{ width: NODE_COL }} aria-hidden>
                 <span
-                  aria-hidden
-                  className="absolute left-[-1.35rem] top-6 size-2 rounded-full bg-accent-cyan ring-2 ring-accent-cyan/30 md:hidden"
+                  ref={(el) => {
+                    markerRefs.current[i] = el;
+                  }}
+                  className="spine-node absolute size-3.5 rounded-full"
+                  style={{ left: RAIL_X, top: MARKER_TOP }}
                 />
-                {renderCard(i, side, active === i)}
-              </li>
-            );
-          })}
-        </ol>
-      </div>
+              </div>
+
+              <div data-card className="min-w-0 max-w-[560px] flex-1">
+                {renderCard(i, "right", active === i)}
+              </div>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import {
   Terminal,
   GraduationCap,
@@ -16,15 +15,12 @@ import { cn } from "@/lib/utils";
 import { SerpentineTimeline } from "@/components/timeline/SerpentineTimeline";
 import { ABOUT_SCORE } from "@/components/timeline/argmax";
 
-/** label -> stable id, so the same capability bridges across milestones. */
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-
 /**
- * The /about journey ("How I Got Here") — now a thin data adapter over the shared
- * <SerpentineTimeline> "Synapse" engine. This component owns ONLY the milestone-card
- * look + the positional icon/tag map; the bold serpentine, the scroll choreography,
- * the orb, the synapse firing, the live counter, the CLS=0 placement and the a11y
- * <ol> all live in the engine (and are identical on /work).
+ * The /about journey ("How I Got Here") — a thin data adapter over the shared
+ * <SerpentineTimeline> "Constellation Spine" engine. This component owns ONLY the
+ * milestone-card look + the positional icon/tag map; the rail, node ignition, scroll
+ * choreography, live counter, CLS=0 placement and the a11y <ol> all live in the engine
+ * (and are identical on /work).
  */
 
 // Positional icon/tag map, keyed to the data/content.ts `timeline` order (the data
@@ -42,18 +38,11 @@ const KIND: Kind[] = [
 ];
 
 export function Geoline({ entries }: { entries: TimelineEntry[] }) {
-  // Memoized so its identity is stable (it feeds the engine's geometry + timeline).
-  const constellation = useMemo(
-    () => entries.map((e) => (e.connections ?? []).map((c) => ({ id: slug(c), label: c }))),
-    [entries],
-  );
-
   return (
     <SerpentineTimeline
       count={entries.length}
       hudLabel="Milestones lit"
       beats={ABOUT_SCORE}
-      constellation={constellation}
       renderCard={(i, _side, isActive) => {
         const entry = entries[i];
         const { Icon, tag } = KIND[i] ?? KIND[KIND.length - 1];
@@ -65,10 +54,9 @@ export function Geoline({ entries }: { entries: TimelineEntry[] }) {
             className={cn(
               "group relative isolate w-full overflow-hidden rounded-[18px]",
               w >= 0.8 ? "p-[24px]" : w >= 0.5 ? "p-[22px]" : "p-[18px]",
-              // Near-opaque surface — NO backdrop-filter: the card floats over the live
-              // WebGL canvas and blur-over-canvas is a hard-gate violation (DESIGN.md).
-              "border border-line bg-base/85",
-              "md:bg-[linear-gradient(180deg,oklch(22.5%_0.016_278/0.92),oklch(14.5%_0.012_278/0.88))]",
+              // Elevated surface panel beside the spine rail (no canvas underneath now).
+              "border border-line bg-surface",
+              "md:bg-[linear-gradient(180deg,oklch(22.5%_0.016_278/0.92),oklch(16%_0.013_278/0.9))]",
               "shadow-[0_18px_40px_-24px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(235,236,250,0.10)]",
               "transition-[box-shadow,background-color,border-color] duration-[450ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
               // 1px gradient ring (the "glowing edge") via mask-composite.

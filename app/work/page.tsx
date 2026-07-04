@@ -4,7 +4,6 @@ import { publicImageExists } from "@/lib/images";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { ScrambleHeading } from "@/components/motion/ScrambleHeading";
 import { FadeUp } from "@/components/motion/FadeUp";
-import { LatentField } from "@/components/three/LatentField";
 import { WorkGeoline } from "@/components/work/WorkGeoline";
 
 export const metadata: Metadata = {
@@ -19,12 +18,6 @@ export default function WorkPage() {
 
   return (
     <main id="main-content" tabIndex={-1} className="pb-24 pt-32">
-      {/* Page-wide latent field, constellation scene: "your outputs as points in
-          latent space" — one tight cluster per project, converging as you scroll
-          (E2). The WorkGeoline below stays the interactive + a11y layer (real links);
-          poster on mobile/RM. */}
-      <LatentField layout="constellation" clusterCount={projects.length} />
-
       <div className="mx-auto max-w-7xl px-6">
         <header className="max-w-3xl">
           <div className="flex items-center gap-4">
