@@ -109,6 +109,45 @@ Legend: ⬜ todo · 🔶 in progress · ✅ done (build green)
 
 *(appended at each checkpoint — newest first)*
 
+- 2026-07-04 — **TIMELINE REDESIGN → "Constellation Spine" (retired the ARGMAX bolt).**
+  After the reliability pass below, the owner still judged the timeline "ugly / not
+  appealing / spacing + animation + speed all bad." A research workflow (wf_a351f4d7-786,
+  8 agents: 5 web-research + diagnosis + skeptic-verify + synthesis; journal.jsonl has
+  the full findings) confirmed the concept — not the tuning — was the failure: a dated
+  text list rendered as an additive-glow lightning bolt on a fixed ~2810px viewBox with
+  cards pinned by arc-length, buried under a starfield (LatentField) + constellation
+  cobweb. Verified award refs (GOV.UK MOJ timeline, Codrops GSAP timeline + SVG-draw,
+  Vercel web-interface-guidelines, Capital Group, NN/g on zigzag + scroll-reveals) all
+  say: a timeline is DOM/SVG, one straight axis, one indicator. Owner picked **Direction 2
+  (Constellation Spine, straightened)** + **remove LatentField from /about + /work**.
+  **Shipped** (tsc+lint+build green, 20 pages):
+  - `SerpentineTimeline.tsx` fully rewritten as a straight DOM/SVG spine: a 2px iridescent
+    rail in a 52px node gutter that DRAWS top-down on scroll (SVG line, pathLength=1 +
+    strokeDashoffset — no DrawSVG dep), one head-dot riding its tip, and node markers
+    (`.spine-node`) that ignite as the head passes. Cards flow in a single column beside
+    the rail (max-w-560px, even gap-11/14). ONE scrubbed ScrollTrigger (rail draw + head
+    + node ignition + HUD, scrub 0.4, ease none — no warp clock, no canvas lerp); card
+    entrances are separate once:true `ScrollTrigger.batch` reveals (expo.out, stagger
+    0.09). Node offsets measured post-layout + on refresh (resize-safe). All motion is in
+    a `(min-width:768px) and (no-preference)` matchMedia, so mobile/RM/no-JS render the
+    FINAL state (rail drawn, all nodes lit, cards visible, head hidden) — verified in SSR
+    HTML (7 markers, no is-pending) + a reduced-motion screenshot (HUD 07/07).
+  - `argmax.ts` + `geometry.ts` gutted to just what survives: the `Beat.weight` score
+    (`ABOUT_SCORE`, `scoreForCount`) and `hash01`. All bolt geometry (centerline, fans,
+    scars, delta, constellation, channelPolygon…) deleted — recover from git if needed.
+  - Deleted `ArgmaxCanvas.tsx` (~1050 lines) + `ArgmaxFiber.tsx`. Dropped the `constellation`
+    prop from both adapters; Geoline card bg simplified (bg-base/85-over-canvas → bg-surface,
+    no canvas underneath now). `LatentField` removed from /about + /work (kept on /services).
+    Dead `geo-flow` + `star-twinkle` keyframes replaced by `.spine-node` CSS in globals.css.
+  **Audit (Lighthouse 12, real Chrome), /about + /work:** A11y **100** (was 94-98 — the
+  target-size + heading-order + contrast fails are gone with the constellation/canvas),
+  **CLS 0.000** (fixes the 0.832 /work regression the prior pass introduced — now pure
+  document flow), desktop perf **99-100**, /work-mobile **56→86**. Mobile perf 86-88 is
+  the same pre-existing Lantern artifact noted below (real LCP <1s; the timeline's GSAP
+  doesn't even run at mobile widths). Verified visually on a fresh prod server (the prior
+  session's `next start` had been holding :3000 the whole time, silently serving a stale
+  build — kill stray servers before screenshotting). COMMITTED + pushed to main.
+
 - 2026-07-04 — **Post-ship audit + timeline legibility/reliability pass.** The owner
   reported the ARGMAX timeline on /work + /about reading as "not visible, not a
   timeline" and /about as intermittent ("sometimes works, sometimes not, sometimes
