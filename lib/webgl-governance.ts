@@ -52,6 +52,13 @@ export function createFpsGuard(opts: {
   let strained = false;
   return (deltaSeconds: number) => {
     const ms = deltaSeconds * 1000;
+    // A single huge frame is a stall (tab-return delivers the whole hidden
+    // duration as one delta, plus GC pauses, route transitions, ScrollTrigger
+    // refreshes) — NOT sustained frame-rate strain. Feeding it in trips strain
+    // permanently (relief threshold budget*0.7 sits below a 60Hz display's
+    // steady 16.7ms, so degradation never lifts). Ignore spikes; only sustained
+    // slowness should shed quality.
+    if (ms > 100) return;
     avg += (ms - avg) * 0.1;
     if (!strained && avg > budget) {
       strained = true;
@@ -75,7 +82,12 @@ let webglProbe: boolean | null = null;
 function probeWebgl(): boolean {
   if (webglProbe === null) {
     const canvas = document.createElement("canvas");
-    webglProbe = Boolean(canvas.getContext("webgl2") ?? canvas.getContext("webgl"));
+    const ctx = canvas.getContext("webgl2") ?? canvas.getContext("webgl");
+    webglProbe = Boolean(ctx);
+    // Release the probe's context immediately — browsers cap live contexts (~8-16)
+    // and evict the OLDEST when the cap is hit; a leaked probe slot makes the
+    // page-wide background canvas likelier to be the one evicted (goes blank).
+    ctx?.getExtension("WEBGL_lose_context")?.loseContext();
   }
   return webglProbe;
 }
