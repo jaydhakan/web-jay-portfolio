@@ -24,8 +24,7 @@ const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(
  * <SerpentineTimeline> "Synapse" engine. This component owns ONLY the milestone-card
  * look + the positional icon/tag map; the bold serpentine, the scroll choreography,
  * the orb, the synapse firing, the live counter, the CLS=0 placement and the a11y
- * <ol> all live in the engine (and are identical on /work). See PORTFOLIO_UPGRADE_PLAN
- * Phase 4 for the design rationale.
+ * <ol> all live in the engine (and are identical on /work).
  */
 
 // Positional icon/tag map, keyed to the data/content.ts `timeline` order (the data

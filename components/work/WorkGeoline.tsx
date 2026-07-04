@@ -21,13 +21,12 @@ type WorkGeolineProps = {
 
 /**
  * The /work timeline — a thin data adapter over the shared <SerpentineTimeline>
- * "Synapse" engine (the SAME engine the /about journey uses; see PORTFOLIO_UPGRADE_PLAN
- * Phase 4). Each shipped system is a synapse on the bold serpentine; the scroll orb
- * lights them one by one. This wrapper owns ONLY: the category-filter pills, the
- * filter SPOTLIGHT (dim non-matching synapses + cards, never reflow -> the drawn wire
- * and CLS stay intact), and the clickable ProjectCard render-prop. The previous sticky
- * case-study preview was dropped so the swing can go full-width and /work + /about read
- * as one engine; the rich card + the /work/[slug] case study carry that detail.
+ * ARGMAX engine (the SAME engine the /about journey uses). Each shipped system is a
+ * decision node on the bolt; featured systems are the heavy beats. This wrapper owns
+ * ONLY: the category-filter pills, the filter's ATTENTION MASKING (dim non-matching
+ * nodes + collapse their fans to scars, in the poster AND the WebGL layer — never a
+ * reflow, so the drawn bolt and CLS stay intact), and the clickable ProjectCard
+ * render-prop; the rich card + the /work/[slug] case study carry the detail.
  */
 export function WorkGeoline({ projects, covers, filters }: WorkGeolineProps) {
   const [filter, setFilter] = useState<Filter>("All");

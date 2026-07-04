@@ -11,8 +11,8 @@ import { type ArgmaxBuild, type Beat, type Ghost, widthAtFrac } from "./argmax";
 silenceThreeClockDeprecation();
 
 /**
- * ArgmaxCanvas — the "ARGMAX / Paths Not Taken" WebGL set-piece (see
- * TIMELINE_IMPLEMENTATION.md). The bolt is DECODED live: ahead of the head the future
+ * ArgmaxCanvas — the "ARGMAX / Paths Not Taken" WebGL set-piece (design history in
+ * git: TIMELINE_IMPLEMENTATION.md). The bolt is DECODED live: ahead of the head the future
  * exists only as quantized token ticks; behind it the channel is continuous light. The
  * scroll clock is WARPED — slow leaving each decision, accelerating into the next kink
  * (derivative capped ~1.6×), with fixed points at every node so head, blooms and DOM

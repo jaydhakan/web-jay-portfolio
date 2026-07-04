@@ -1,331 +1,174 @@
-# Jay Dhakan Portfolio — V3 Phase 2: "Latent Space" Elevation Plan *(LOCKED)*
+# plan.md — THE DESCENT ARENA (Home Hero Replacement)
 
-> The 13-phase V3 "Go Loud" build shipped + an R1 refactor (governed-canvas hooks). **This plan
-> is the LOCKED direction for Phase 2** — the decision-making is done; what follows is the build.
-> Done history (P1–P13 + R1) lives in git, not here. `DESIGN.md` / `PRODUCT.md` / `README.md`
-> remain for context; where they disagree, this plan wins.
-
----
-
-## 0. The locked decision
-
-After an options pass (page-wide backdrop architectures A1–A3 × styles B1–B5, plus the "navigation
-rewrite" concepts — infinite zoom / graph-as-nav — which were **rejected** for being unusable to a
-recruiter and hostile to A11y/SEO/mobile), the owner locked this:
-
-> **One latent-space particle system, three views. Particles FLOW as noise and CONVERGE into
-> meaning** — chaos → structure — which *is* the "site compiles itself / the model learns" thesis,
-> made literal for an AI/ML engineer.
-
-- **Architecture: A1, on EVERY route (home, about, work).** A persistent, **page-wide** governed
-  WebGL layer that **morphs by scroll** — fixed behind the *whole* page, top-to-bottom, **not** a
-  hero trapped in one viewport. Each route runs exactly ONE such field (so the cardinal one-canvas
-  rule holds); the per-page "scene" below is just *where/what* that page-wide field converges into.
-- **Style: latent-space embedding cloud ⇄ curl-noise flow field.** These are **one engine** with two
-  force modes; the morph between them is the signature. (B1 "flow" = the unlearned state; the cloud
-  "clusters" = the learned state.)
-- **Spread: one family, a different *scene* per page** (not identical, not three unrelated effects) —
-  so the three pages tell one story.
-- **Signature side-piece:** the /about career timeline becomes a **curved, interactive "geoline"
-  trajectory** (left→right, not a straight rule).
-- Build difficulty is **de-prioritized** (AI-assisted build). Mobile stays **functional via a static
-  poster** (one media query, free) but the desktop spectacle is pushed hard.
+> Doc hygiene (2026-07-04): the shipped history docs — the V3 "Latent Space" plan, the
+> PORTFOLIO_UPGRADE_PLAN, and the ARGMAX exploration/checkpoint pair
+> (TIMELINE_REDESIGN.md / TIMELINE_IMPLEMENTATION.md) — were removed from the working
+> tree and live in **git history** (`git log --diff-filter=D --name-only`).
+> **This file is the live plan + session checkpoint.** Each phase is independently
+> shippable; if a session dies, resume at the first phase not ✅.
 
 ---
 
-## 1. North star (unchanged) — THE SITE COMPILES ITSELF
+## Part 1 — Site animation audit (what exists, honestly)
 
-A portfolio that runs like a **live ML system you can touch.** Everything is driven from one shared
-signal (Lenis velocity/scroll via the velocity bus): DECODE on load → CONVERGE on scroll → REACT to
-the cursor → MORPH between states → CLOSE on a particle storm. The latent-space system below is the
-purest expression yet: a visitor literally watches noise resolve into structure as they read.
+| Piece | Where | Verdict |
+|---|---|---|
+| **LatentField** (page-wide curl-noise → cluster particles) | home, about, work, services | The #1 AI-portfolio cliché: ambient floating particles. Its flow→cluster morph is real engineering but **illegible** — no visitor perceives it. Zero interaction. On home it is the DE FACTO HERO (see next row), which is exactly the "content on a star background" failure the timeline critique named. |
+| **Home hero** | / | The signature loss-landscape shader was **retired** (Hero.tsx comment); what remains is copy + a static "live system" console mock + LatentField showing through. The single highest-leverage fold on the site currently has **no set-piece at all**. The console is decorative filler pretending to be proof — a *mock* of a system on a site whose thesis is "a live system you can touch." |
+| **HeroShader / HeroBackground** | nowhere (retired) | Dead code, 400+ lines incl. a bloom pipeline. But the terrain shader inside (simplex fbm + basin + iso-contours, art-directed to the site palette) is **excellent raw material**. |
+| **WorkReel** | home (via FeaturedWork) | Horizontal pinned reel — live, functional. Keep. *(Correction: first audit pass misread it as unmounted; it is imported by FeaturedWork, not a page.)* |
+| **ParticlePortrait** | nowhere | Dead code (photo-as-particles, unmounted). |
+| **ARGMAX timeline** | about, work | New (2026-07). Keep. |
+| **SkillBag** (throwable chips) | about | Real interaction, honest fallbacks. Keep. |
+| **TrainingRun** (camera flight through a node cloud) | about | "Fly through glowing neurons" — the *generic-neurons* direction the repo's own design guidance bans, and it now competes with ARGMAX on the same page. **Remove** (secondary scope, Phase 6). |
+| **ParticleFinale** ("LET'S BUILD" repel field) | contact | Interactive, on-thesis, good closer. Keep. |
+| FlowImage covers, Process tree, Marquee, kinetic type | various | Solid supporting cast. Keep. |
 
-**The only filter for any effect:** does it make "a live ML system you can perturb" more visceral,
-attractive, or fun? If it could sit on any template, make it more on-concept or bigger.
+**The call: remove LatentField-as-home-backdrop + the HeroVisual console + all dead hero
+code, and give the home fold a real set-piece.** One route (home) changes canvas; about /
+work / services keep LatentField for now (their set-pieces are the timeline + finale).
 
----
+## Part 2 — Research (why this direction)
 
-## 2. The concept, made concrete — one system, three views
+- Awwwards 2025–26 pattern: the winners are **interactive systems, not ambient shaders** —
+  Bruno Simon's drivable-car portfolio (Site of the Month, Jan 2026), Messenger's live
+  WebGL planet (Developer Site of the Year 2025), Active Theory / Lusion's simulation-
+  grade work. Meanwhile "premium immersion is restrained — it suggests, reveals, and lets
+  visitors conclude quality on their own" (Metabole 2026 breakdown).
+- Interactive **gradient-descent visualizers exist only as educational tools** (lilipads'
+  gradient_descent_viz, uclaacm's visualiser, 8gwifi, descent-visualisers.netlify.app) —
+  raw Three.js graph aesthetics, zero art direction. **Nobody has shipped one at
+  cinematic, award quality as a portfolio hero.** That's the open gap, and for an
+  engineer whose site metaphor is literally optimization, it's *his* gap to take.
+- Site lore alignment: the timeline exploration's runner-up concept ("The Descent",
+  TIMELINE_REDESIGN.md concept 1, doc now in git history) was scored 8.3 and praised as "the strongest site
+  unification play." The hero is where that concept belongs — /about tells the story as
+  ARGMAX (inference), / shows the craft as DESCENT (optimization). Two views, one thesis.
 
-The whole site is **one neural/latent system**; each page is a different stage of it. Same visual DNA
-everywhere (additive-glow particles, indigo→violet→cyan, soft round sprites), different *behavior* and
-*target shape* per page:
+Sources: [awwwards WebGL collections](https://www.awwwards.com/websites/webgl/),
+[Metabole — Immersive Website Examples 2026](https://metabole.studio/en/blog/immersive-website-examples),
+[MDX — Best 3D Websites 2026](https://mdx.so/blog/best-3d-websites-2026-examples),
+[lilipads/gradient_descent_viz](https://github.com/lilipads/gradient_descent_viz),
+[uclaacm gradient-descent-visualiser](https://uclaacm.github.io/gradient-descent-visualiser/).
 
-| Page      | Particle behavior                                                                                                   | What it means                                                                 | Reuses                                                           |
-|-----------|---------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|------------------------------------------------------------------|
-| **Home**  | starts as a **flowing field** at the hero → **converges into clusters** as you scroll to the footer (page-wide, A1) | "raw data → the model finds structure" — the whole-page convergence narrative | new `LatentField` (§4), built on the P9/P11 particle code        |
-| **About** | the cloud **forms your face** (you, as data), and skill domains read as clusters around it                          | "you, embedded in the system"                                                 | reuses/absorbs `ParticlePortrait` as a `LatentField` face target |
-| **Work**  | the field **settles into per-project clusters** you hover/click to open                                             | "your outputs, as points in latent space"                                     | `LatentField` + the existing `FlowImage` covers as node previews |
+## Part 3 — The concept: **THE DESCENT ARENA**
 
-Every one of these is a **page-wide** field (fixed behind the whole route, top-to-bottom) — the
-"behavior" column is what the *single* per-page field does as you scroll it, not a hero-only effect.
-Plus the **geoline** on /about (§5, E3) and the already-in-family `/contact` particle finale +
-`/services` node motifs, so the entire site reads as one language.
+> The home fold becomes a live, playable gradient-descent arena. An iridescent loss
+> landscape breathes in the dark. A population of optimizer probes is *always* descending
+> it, leaving comet trails of light that trace the topology. Your cursor deforms the
+> objective — probes swerve around the hill you just made. **Click anywhere: you drop a
+> probe and watch your own descent** find its way into the glowing basin — which sits
+> under the CTA. Every optimization on this site converges to "start a project."
 
-> **What gets replaced/absorbed (explicit, so one canvas per route holds):**
-> - **Home:** the page-wide `LatentField` **replaces** the scoped P2 loss-landscape shader as the
->   home backdrop (loss-landscape code stays in the repo for reuse / poster inspiration).
-> - **About:** the page-wide field **absorbs** the existing /about set-pieces into ONE field — the
->   `TrainingRun` "flight through molecules" canvas is retired (its molecule look becomes the
->   page-wide field's behavior) and `ParticlePortrait` becomes a *convergence target* within the same
->   field (the cloud forms the face where the portrait sits). No two live canvases on /about.
-> - **Work:** the page-wide field sits behind the whole index and converges into the project clusters
->   at the grid; the `FlowImage` covers stay as the per-node hover preview.
+- **Visual language**: the retired HeroShader terrain, upgraded — fbm hills sinking into
+  one broad basin, crisp iso-contours crowding the steep walls, indigo→violet→cyan
+  emissive lines under bloom, distance fog, left-column darkness guard (headline stays
+  AAA). It already speaks the site's dialect; it was retired for being *passive*, not
+  for being wrong. The arena makes it a system.
+- **Probes**: ~14 GPU-sprited optimizer heads with momentum descent computed on the CPU
+  against the *same* height function the vertex shader displaces with (JS mirror of the
+  simplex/fbm — deterministic parity). Trails = additive point ribbons (ring buffers),
+  decaying like long-exposure light. On reaching the basin: a small flare (one-time,
+  asymmetric), then respawn at the rim. The field is never still, never looping.
+- **Cursor = perturbation**: pointer position raises a gaussian bump in the height
+  function (uniform in shader + same term on CPU). Probes physically deflect. You are
+  changing the objective and watching the optimizers cope — the thesis, playable.
+- **Click = spawn**: window-level click (ignoring interactive elements) raycasts to the
+  plane and drops a probe with a bright birth flare. Cheap, delightful, demoable.
+- **Scroll**: past the fold the fixed page-wide canvas pulls the camera up toward a
+  quiet top-down contour view and dims to ~30% — the arena becomes ambient cartography
+  behind ImpactStats/FeaturedWork/etc. (same page-wide role LatentField played). One
+  canvas per route holds.
+- **Fallbacks**: the existing `.hero-fallback` poster stays the SSR / reduced-motion /
+  mobile / no-WebGL layer (upgrade: static contour art later). Governed mount
+  (desktop-motion, DPR cap, FPS guard → drop bloom first, then probe count).
+- **Restraint rules**: probes are small; trails dim; the left text column and top band
+  stay dark (NDC gate as before); bloom threshold high. The arena *suggests* — it
+  should read as deep, quiet cartography until you play with it.
 
----
+### Kill-switches / acid tests
+1. Terrain-only build must look premium with ZERO probes (grayscale screenshot test).
+2. Probes OFF-thesis test: if trails read as "screensaver worms", shorten + dim until
+   they read as measurement, not decoration.
+3. Headline contrast: left column luminance unchanged vs current (AAA gate).
 
-## 3. Guardrails — every move obeys these (carried from the shipped build)
+## Part 4 — Phase tracker
 
-- **A11y = 100, CLS = 0, always.** DOM/text authoritative under every effect; canvases `aria-hidden`
-  + `pointer-events-none`; a real heading under every kinetic/3D word; sr-only copy behind aria-hidden
-  statements. (Footgun: SplitText has twice put a prohibited `aria-label` on a `<p>` here.) The
-  interactive bits (Work clusters, geoline waypoints) keep a **real DOM control underneath** (link /
-  button / list) — the canvas is decoration over a working, accessible page.
-- **One governed WebGL context. NEVER a 2nd live `<Canvas>`.** Everything goes through
-  **`useGovernedCanvas`** (`lib/webgl-governance.ts`): eligibility profile + WebGL probe + in-view +
-  arm-after-paint, DPR-capped, FPS-guarded. Only the on-screen surface runs.
-- **Load fast.** Heavy WebGL lazy-mounts + arms after first paint; never delay LCP past ~2.5s. The
-  first screen paints the static poster instantly; particles ignite a beat later.
-- **`prefers-reduced-motion` + mobile + no-WebGL = a premium static iridescent poster** for every
-  particle surface (designed, not blank). Mobile is functional, never broken.
-- **Animate `transform`/`opacity`/`clip-path`/`filter`/shader uniforms only.** Desktop perf measured,
-  not capped.
-- **Brand:** dark-first, electric-indigo + iridescent indigo→violet→cyan, controlled bloom;
-  first-person voice; **no em/en dashes**; all copy in `data/content.ts`; placeholders flagged.
+| Phase | Scope | Status |
+|---|---|---|
+| 1 | Dead-code purge: delete HeroShader, HeroBackground, ParticlePortrait(+Canvas); fix stale comments; build green (WorkReel kept — live via FeaturedWork) | ✅ |
+| 2 | `components/hero/DescentArena.tsx` (gate+poster+scrim, LatentField mount pattern) + `DescentArenaCanvas.tsx` (terrain, camera rig, bloom tiers); mounted on home replacing LatentField; scroll pull-up + dim | ✅ |
+| 3 | Probe sim (CPU fbm mirror + momentum descent), light trails, basin flare + rim respawn | ✅ |
+| 4 | Interaction: pointer bump (deflects probes), click-to-spawn; remove HeroVisual console from Hero; layout rebalance | ✅ |
+| 5 | Polish + audit: restraint pass, contrast guard, FPS-guard degradation ladder, reduced-motion/mobile verify, full build, screenshots | ✅ |
+| 6 | /about: remove TrainingRun → "Training Signal" strip (DOM/SVG loss sparkline reusing its captions; no canvas) | ✅ |
 
-> Cadence: one shippable phase → exit gate (build/lint/tsc green + RM/no-JS/responsive checks + no
-> leaks + A11y re-checked) → owner reviews on the real site → next.
+Legend: ⬜ todo · 🔶 in progress · ✅ done (build green)
 
----
+### Resume notes
 
-## 4. Architecture — the shared `LatentField` rig *(built once in E1, reused by all)*
+*(appended at each checkpoint — newest first)*
 
-**New:** `components/three/LatentField.tsx` (mount gate via `useGovernedCanvas`) +
-`LatentFieldCanvas.tsx` (R3F leaf, `dynamic ssr:false`). Generalizes the existing
-`ParticlePortrait` / `ParticleFinale` particle code into one reusable system.
+- 2026-07-04 — **Phase 6 ✅ — ALL PHASES COMPLETE.** Audit correction: TrainingRun's
+  WebGL flight was ALREADY retired in a prior refactor (the mounted section was DOM
+  cards; TrainingRunCanvas.tsx was dead) — so Phase 6 became: delete the dead canvas
+  (git rm), fix the cards' backdrop-blur-over-canvas violation (bg-base/55+blur →
+  bg-base/85), and add the Training Signal loss curve — deterministic SSR-stable SVG
+  (hash01 noise decaying into a needle, epoch markers per card, faint converged-target
+  rule), scroll-drawn via LineDraw (reduced-motion/no-JS = fully drawn). Verified in
+  the prerendered HTML (ts-stroke + path present). Full build green (20 pages).
+  DEFERRED (future work, needs owner decision): LatentField still backs /about, /work,
+  /services — kept deliberately (those pages' set-pieces are ARGMAX + the finale);
+  replacing or retiring it there is a separate call. NOT COMMITTED — working tree has
+  staged deletions + new files; commit when the owner has done the real-GPU feel pass.
 
-**Particle data (BufferGeometry):** per particle — `position` (live), `target` (cluster/shape goal),
-`seed` (random, for per-particle phase), `cluster` (id → color). Custom `ShaderMaterial` points:
-soft round sprite, additive blend for glow, color ramped indigo→violet→cyan by cluster/depth, real
-`gl_PointSize` (needs a real GPU to read — same documented headless caveat as P9/P11).
+- 2026-07-04 — **Phase 5 ✅.** Headless screenshot of the production build
+  (scratchpad/home-arena.png) shows the LIVE canvas rendering: contour terrain right,
+  probe sprites on the surface, left column dark/AAA, hero copy + proof strip intact.
+  Poster/reduced-motion/mobile path unchanged from the LatentField contract. What still
+  needs a HUMAN on a real GPU: motion feel (probe pace, trail length, bump strength
+  2.3, click-spawn delight), bloom intensity, and a Lighthouse run. All tunables are
+  named constants at the top of DescentArenaCanvas.tsx and in the physics block.
 
-**Per-frame force model (`useFrame`)** — the morph is the whole trick:
-- **flow force** = `curlNoise(position, time)` → a velocity field (the B1 "flow" / unlearned state).
-- **cluster force** = spring toward `target[i]` + mild jitter (the latent-space "learned" state).
-- **blend** = `lerp(flowForce, clusterForce, progress)` where `progress` ∈ 0..1 comes from scroll
-  (home: whole-page scroll; about/work: the section's in-view progress). `progress 0` = pure flow,
-  `1` = settled clusters.
-- **cursor force** = unproject the pointer to the particle plane; repel/attract within a radius
-  ("you can perturb it"). Spring back when the cursor leaves.
-- integrate + damping; writes go through a ref (immutability-lint-safe, matches `HeroShader`).
+- 2026-07-04 — **Phases 2+3+4 ✅** (canvas internals consolidated into one file since
+  they share every uniform; verified as milestones). `components/hero/DescentArena.tsx`
+  (governed gate, poster, scrim, vignette — LatentField contract) +
+  `DescentArenaCanvas.tsx`: HeroShader terrain transplanted (+ uBump pointer
+  perturbation in the height fn, GLSL + JS mirror in lockstep), camera rig hero-3/4 →
+  top-down cartography by scroll with uIntensity dim, bloom tiering + FPS-guard strain
+  drop, 14 probes × 64-slot trail rings (additive points, ring-buffer ages via uHeads),
+  head sprites with uFlare, rim respawn + click-to-spawn (window listener, interactive-
+  element guard, fold-only) + pointer bump raycast. **Physics validated numerically**
+  (scratchpad/sim-check*.mjs): naive constants gave 0 arrivals in 40s (fbm local minima
+  trap everything — 144 SGD kicks, no escapes); fixed with smoothed-loss gradient
+  (EPS 1.6), momentum-preserving friction (0.7), L2 weight-decay pull (0.032),
+  continuous SGD noise — variant D: ~69 arrivals/40s, ~6s avg journey, calm speeds.
+  All 3 shader pairs compile+link under three's GLSL300 transpile
+  (scratchpad/arena-shader-test.html → ALL_OK; note: raw ESSL1 lacks fwidth — harness
+  now mirrors three's #version 300 es prefix). HeroVisual console deleted; Hero is
+  single-column copy-left, arena owns the right. React-compiler lint required the
+  ref-laundering pattern (sim state in lazy ref, uniforms via object refs) — same as
+  ArgmaxCanvas. tsc + lint + full build green.
+- 2026-07-04 — **Phase 1 ✅.** Deleted (git rm): HeroShader.tsx, HeroBackground.tsx,
+  ParticlePortrait.tsx, ParticlePortraitCanvas.tsx. WorkReel initially deleted then
+  RESTORED — it is live via FeaturedWork on home (audit table corrected). Hero.tsx stale
+  comment fixed. tsc + lint + build green. The HeroShader terrain GLSL (simplex/fbm/
+  basin/contours) is recoverable from git history AND being transplanted into
+  DescentArenaCanvas in Phase 2.
 
-**Targets (the only per-page difference):**
-- **Home:** K procedural Gaussian cluster centroids ("learned structure", abstract).
-- **About:** sample the profile image → `target` = pixel positions, color = pixel color (reuse the
-  `ParticlePortrait` sampler; swaps to a real depth map when Jay's photo lands).
-- **Work:** one centroid per project; particles colored per project; a hovered/clicked cluster maps to
-  that project (DOM `<a>` underneath does the real navigation).
+- 2026-07-04 — **Phase 1 ✅.** Deleted (git rm): HeroShader.tsx, HeroBackground.tsx,
+  ParticlePortrait.tsx, ParticlePortraitCanvas.tsx. WorkReel initially deleted then
+  RESTORED — it is live via FeaturedWork on home (audit table corrected). Hero.tsx stale
+  comment fixed. tsc + lint + build green. The HeroShader terrain GLSL (simplex/fbm/
+  basin/contours) is recoverable from git history AND being transplanted into
+  DescentArenaCanvas in Phase 2.
 
-**Governance & fallback:** `useGovernedCanvas` (one canvas, in-view mount, `DPR_CAP`, `createFpsGuard`
-→ drop particle count + demand frameloop on strain), arm-after-paint. RM / mobile / no-WebGL render a
-static iridescent poster (reuse `hero-fallback` / `lib/blur.ts`). On EVERY route the instance is
-`fixed` page-wide behind the content (`-z`), `progress` driven by that route's whole-page scroll, with
-a contrast guard (dim alpha behind text columns, like the hero's `leftGuard`) so copy stays
-AAA-readable over every state.
+- 2026-07-04 — Plan written. Legacy plan preserved via git mv (later removed from the
+  working tree entirely — see doc-hygiene note at top). Research + audit done. Start at
+  Phase 1.
 
----
-
-## 5. The build phases *(locked, in order)*
-
-### E1 — `LatentField` core + Home page-wide flow→converge backdrop  ·  *flagship, build first*
-Build the §4 rig, then wire Home: one page-wide governed canvas, particles flowing (chaotic) at the
-hero and **converging into clusters** down the page, scroll-driven via the velocity bus. Hero H1 +
-all content stay authoritative on top. Retire the scoped loss-landscape as the home backdrop (keep the
-code). **Exit gate:** desktop morph works end-to-end; static poster on mobile/RM/no-WebGL; LCP not
-covered; A11y 100; no leaks. *Risk: med (scroll→progress driver + contrast over every state).*
-
-### E2 — Work as a latent-space project constellation
-Mount the **page-wide** `LatentField` behind the *whole* /work route (same A1 fixed backdrop as Home),
-with `targets` = per-project clusters; as you scroll, the field converges so projects become hover/click
-nodes (flowmap cover as the preview on hover/focus). The existing filter + row list stay as the **a11y /
-mobile / no-JS fallback** (real links). *Risk: med. Depends on E1's rig.*
-
-### E3 — About: one page-wide field (absorbs the portrait + molecules) + the **geoline** timeline
-1. **Page-wide field:** mount the A1 `LatentField` behind the *whole* /about route. It absorbs the two
-   existing /about canvases into ONE: the `TrainingRun` molecule-flight is retired (its look becomes the
-   page-wide field's behavior) and `ParticlePortrait` becomes a **convergence target** within this same
-   field (the cloud forms the face where the portrait sits, then reorganizes into skill clusters as you
-   scroll). One canvas on /about.
-2. **Geoline (the signature side-piece):** replace the short vertical `ExperienceTimeline` spine with a
-   **curved, interactive trajectory** running **left→right** across the section — a wide SVG path that
-   gently descends/curves like a loss/optimization curve (NOT a straight line). **DrawSVG-scrubbed** so
-   it draws as you scroll; a soft **glow pulse travels along the path** (MotionPath) and a **marker
-   glides** to the current epoch; each career entry is a **waypoint node ON the curve** that pops +
-   reveals its card as the draw reaches it and **expands on hover/focus** (interactive); period numbers
-   parallax above/below. Waypoint dots/edges use the same particle-family styling so it reads as one
-   language. **Fallback:** RM / mobile / no-JS keep the readable timeline (real DOM; mobile may fall
-   back to the vertical spine — confirm at build). *Reuse: GSAP DrawSVG + MotionPath (free, lazy).*
-   *Risk: low–med.*
-
-### E4 — Cohere the rest (echoes)
-`/contact` already closes with the particle finale and `/services` has the node/data motifs — both are
-already in-family. Add only quiet, *varied* echoes if a page still feels flat (e.g. a faint drifting
-field behind a header), each governed, **one rich instance per route**. *Risk: low. Optional / last.*
-
-### E5 — Housekeeping & lean-up
-- [x] Dead-file cleanup (done): removed `Card`/`Pin`/`Parallax`/`AnimatedText`, the pnpm lockfiles,
-  `scripts/screenshot.mjs`, the temp `udpated_plan.md`. (npm is canonical.)
-- [x] `next/image`: explicit `formats` (AVIF/WebP) + `qualities: [75]` allowlist in `next.config.mjs`.
-- [x] Reconcile the stale README "Lighthouse ≥95 hard gate" line (now: A11y=100 + CLS=0 hard, perf
-  measured-not-capped) + the stale "one hero shader" line (now the page-wide `LatentField`).
-
-### Side animations / micro-delights *(small, on-concept)*
-- [x] **Geoline** (E3) — done; reworked into a **serpentine "road"** that winds L→R→L while descending
-  as you scroll (the loss-chart version was the wrong mental model — replaced). Comet rides the draw's
-  leading edge; node→card leader lines; one `<ol>` + R7 fallback. The headline side-piece.
-- [x] **Cursor perturbs the field** — done: `LatentField` repels particles around the pointer.
-- [x] **"Compute-up" counters** — already shipped (`components/motion/Counter.tsx`, on home stats +
-  case-study results).
-
-> **PARKED — owner-gated (decided 2026-06-18).** Phase 2 (E1–E5) is built; the site is already heavily
-> animated. The owner will review on the real site first and **we add the items below ONLY if it doesn't
-> feel "crazy" enough.** Do not build these pre-emptively.
-- [ ] **Connective edges:** thin lines that *draw* between sections as you scroll (the network wiring
-  itself) — pairs with the latent-space language. *(~45 min.)*
-- [ ] **Token-index section labels:** section eyebrows decode from glyphs on enter (reuse
-  `ScrambleHeading`/ScrambleText). *(~20 min. Caveat: the h1s on /work/about/services already scramble,
-  so the page tops would then have two decode effects — tune so it doesn't over-fire.)*
-- [ ] **Turn the field's "wow" up:** brighter particle cores / scoped Bloom on cluster centers, more
-  particles. *(Centralized in `LatentFieldCanvas.tsx`; costs some perf — measure after.)*
-- [ ] **More geoline content / curve shape:** extra placeholder milestones or a richer trajectory if a
-  longer journey reads better.
-
----
-
-## 6. Content / placeholder track — BLOCKED ON JAY *(runs alongside any phase)*
-- [ ] Real project **covers** → `public/images/projects/*` (re-run `scripts/gen-placeholders.mjs` after).
-- [ ] Real **profile photo** → `public/images/profile/jay.jpg` (drives the About face target).
-- [ ] Real **testimonials** (6 placeholders) · replace the **3 placeholder projects** on /work.
-- [ ] Confirm email / LinkedIn / Upwork URLs, timeline dates, the "50+ projects" claim.
-- [ ] `RESEND_API_KEY` + verified `from:` domain; `NEXT_PUBLIC_SITE_URL`.
-
----
-
-## 7. Definition of done (every phase)
-1. On-concept (a live ML system you can perturb), unmistakably intentional.
-2. `transform`/`opacity`/`clip-path`/`filter`/uniforms only; RM + mobile poster designed in.
-3. Goes through `useGovernedCanvas`; one canvas per route; LCP never covered on first paint.
-4. DOM/text authoritative; interactive 3D has a real DOM control underneath; A11y = 100; CLS = 0.
-5. Smooth on desktop; functional + posters on mobile; no leaks (leak counter flat across nav).
-6. Copy in `content.ts`; no em/en dashes; placeholders flagged.
-
----
-
-## 8. Reference sites (the feeling + the technique)
-Lusion `lusion.co` (liquid/particle shaders) · Active Theory `activetheory.net` (cinematic scroll) ·
-Lando Norris / OFF+BRAND (2026 SOTY) · Codrops particle / "Invisible Forces" (Phantom.land face) +
-"Horizontal Parallax Gallery: DOM→WebGL" (2026-02) · three.js
-`webgpu_tsl_compute_attractors_particles` · t-SNE / UMAP embedding visualizations (the latent-space
-clustering reference) · Cuberto `cuberto.com`.
-
----
-
-## 9. Status board
-
-`[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked
-
-| Phase | Title                                                                | Status               |
-|-------|----------------------------------------------------------------------|----------------------|
-| E1    | `LatentField` core + Home page-wide flow→converge backdrop           | `[x]` shipped → review |
-| E2    | Work: page-wide field → project constellation                       | `[x]` shipped → review |
-| E3    | About: one page-wide field (absorbs portrait+molecules) + **geoline** | `[x]` shipped → review |
-| E4    | Cohere the rest (contact/services echoes)                            | `[x]` shipped → review |
-| E5    | Housekeeping & lean-up                                               | `[x]`                |
-| —     | Content / placeholders                                               | `[!]` blocked on Jay |
-
-**Build order:** **E1 (Home, flagship) → review on the real site → E3 (geoline + portrait) → E2 (Work
-constellation) → E4 → E5.** E1 first because it builds the shared rig everything else reuses and sets
-the palette/feel.
-
----
-
-## 10. Changelog
-- 2026-06-18 — **Geoline reworked into a serpentine "road" (owner-driven).** The annotated loss-chart
-  was the wrong mental model; owner wanted a winding ROAD that goes L→R→L while DESCENDING as you scroll
-  down. Rebuilt `Geoline.tsx`: vertical serpentine SVG (alternating left/right lanes, 60% swing,
-  Catmull-Rom bezier; fixed viewBox + md-only aspect-ratio → CLS-free card mapping), natural-scroll
-  DrawSVG draw with a comet riding the draw's leading edge (banks into turns), node→card leader lines,
-  cards reveal on the outer bend. Chosen via a 4-direction design-panel workflow, then a 4-lens
-  adversarial review (2 lenses hit the org monthly spend cap; correctness/a11y covered manually). Review
-  fixes applied: comet/draw clock unified (comet on the timeline, not self.progress); heavier line +
-  leader lines so it reads as a road not a card list; punchier swing; livelier flow-dash; **all
-  feGaussianBlur removed** (head + glow re-rasterized per scroll frame) → wide-stroke/fake-halo glow;
-  **backdrop-blur dropped** on the 7 cards → bg-base/80 (perf + readability). Still one `<ol>` / SVG
-  aria-hidden / R7 fallback / DrawSVG lazy-gated / no MotionPath / no 2nd canvas.
-- 2026-06-18 — **Polish pass + parked backlog.** Review pass: added the missing **contrast guard**
-  (a `bg-base/25` scrim over the live `LatentField` so additive glow keeps body copy AAA-readable) and
-  dropped /services' ambient echo to `count=6000`; confirmed one-canvas-per-route + that the retired
-  loss-landscape/Bloom is tree-shaken from all route bundles. **Geoline 2.0:** rebuilt into an annotated
-  loss-chart (grid + LOSS/TIME axes + year ticks + gradient area-fill + neon DrawSVG line + comet-trail
-  marker); added 2 placeholder milestones (→ 7-point curve, flagged TODO(JAY)); heading → "How I Got
-  Here". Cross-page audit: every content route already carries the latent-space language and is heavily
-  animated — /work/[slug] correctly keeps its `FlowImage` cover as its one canvas (no field). The
-  remaining micro-delights (connective edges, decode eyebrows, brighter field, more geoline content) are
-  **parked, owner-gated** (§5) — build only if the real site doesn't feel "crazy" enough.
-- 2026-06-18 — **Phase 2 build COMPLETE (E2, E4, E5).** *E2 (Work):* added a **"constellation"**
-  layout (many tight near-point clusters spread wide = "your outputs as points in latent space") and
-  mounted the page-wide `LatentField` (clusterCount = projects.length) behind the whole /work route;
-  `WorkList` stays the interactive + a11y layer (real links / filter / flowmap preview) — no
-  clickable-particle nav (rejected as recruiter/A11y-hostile). *E4 (cohere the rest):* mounted a quiet
-  default-scatter `LatentField` on /services (ambient behind the opaque cards) so all four content
-  routes speak one language; **/contact left as-is** (its particle finale is the in-family piece; a
-  field there would be a 2nd live canvas). *E5 (housekeeping):* `next.config.mjs` → `images.formats`
-  AVIF+WebP and `qualities:[75]`; reconciled the README (dropped the stale ≥95 hard-gate line → A11y=100
-  + CLS=0 hard, perf measured-not-capped; updated the stale "one hero shader" line to the page-wide
-  `LatentField`). **All five Phase-2 phases (E1–E5) now shipped to main; pending owner real-site
-  review. The "Latent Space" plan is fully built.** Remaining: §6 content track (BLOCKED ON JAY — real
-  photo unlocks the field's face-target on /about; real covers/testimonials/URLs).
-- 2026-06-18 — **E3 shipped (About), two commits.** *E3a:* generalized the rig with a cluster
-  `layout` ("scatter" = Home unchanged; **"radial"** = About: a dense core + ring of satellites =
-  "you, embedded, skill domains around you"); mounted the **page-wide `LatentField` (radial)** behind
-  the whole /about route; **retired the two extra /about canvases** to hold the one-canvas rule —
-  `TrainingRun`'s pinned WebGL camera-flight is gone (rewritten as a static transparent narrative
-  section, epochs in translucent cards the field glows through; its molecule look is now the field's
-  behavior), and the headshot tile renders the still `next/image` (the cloud-forms-the-face gag moves
-  into the page-wide field, ready to sample the real photo when it lands). `TrainingRunCanvas` /
-  `ParticlePortrait` kept in the repo. *E3b:* the **geoline** — `components/about/Geoline.tsx`
-  replaces `ExperienceTimeline`: a curved SVG loss-trajectory (Catmull-Rom through evenly-spaced
-  waypoints, descends + arcs — NOT a straight line) that **DrawSVG-scrubs** as you scroll, a cyan glow
-  **marker glides** along the real curve (`getPointAtLength`), and each entry is a **waypoint node that
-  pops + reveals its card** at its fraction of the draw (cards lift on hover). Particle-family accent +
-  glow. **No MotionPath** (deliberate — used native `getPointAtLength` instead; MotionPath isn't in the
-  lazy chunk). Fallback: mobile = clean vertical list, RM/no-JS = full static curve + visible entries
-  (R7). Build/lint/tsc green. *Pending owner real-site review.*
-- 2026-06-18 — **E1 shipped (Home).** Built the shared rig: `components/three/LatentField.tsx`
-  (page-wide `fixed -z-10` governed mount gate + `.hero-fallback` static poster) +
-  `LatentFieldCanvas.tsx` (R3F leaf). One WebGL2 point cloud morphs **curl-noise flow → latent
-  clusters** entirely in the vertex shader (uniform-driven, no CPU particle loop), driven by the
-  velocity-bus page `progress` (settles ~85% down so the footer is calm); cursor perturbs it via a
-  window listener (canvas is `pointer-events-none`). Glow is additive soft-halo sprites — **no
-  post-process Bloom** (kept the canvas transparent so the iridescent poster shows through, and cut
-  the continuous full-page cost; the FPS guard sheds point size on strain). Wired into `app/page.tsx`;
-  **retired the loss-landscape hero backdrop on home** (removed `HeroBackground` + the hero's local
-  `.hero-fallback` from `Hero.tsx`; `HeroBackground`/`HeroShader` kept in the repo). `OpeningChoreo`
-  now reveals the page-wide poster (its `.hero-fallback` query resolves to the field's poster).
-  Build/lint/tsc green; mobile/RM/no-WebGL = static poster. *Pending owner real-site review before E2/E3
-  reuse the rig.*
-- 2026-06-18 — **Phase 2 LOCKED: "Latent Space".** Resolved the options pass to one decision: a single
-  governed particle system that **morphs between a curl-noise flow field (B1) and a latent-space
-  embedding cloud**, page-wide (A1), spread as **one family / a different scene per page** across home
-  (flow→converge backdrop), about (you-as-face + skill clusters), and work (project clusters you
-  explore). Rejected the navigation-rewrite concepts (infinite zoom, graph-as-nav) as recruiter-/
-  A11y-/SEO-hostile. Added the **geoline**: the /about career timeline as a curved, interactive,
-  left→right trajectory. Rewrote `plan.md` from an option menu into this locked implementation plan
-  (shared `LatentField` rig in §4; phases E1–E5 in §5). Home's page-wide field will replace the scoped
-  loss-landscape hero (code kept). No feature code written yet — E1 is next.
-- 2026-06-18 — **Clarified per owner: WHOLE-PAGE on EVERY route, not hero-only.** The field is A1
-  page-wide (fixed, top-to-bottom) on home, about, AND work — each route's per-page "scene" is just
-  where its single page-wide field converges. Consequence locked: /about's two existing canvases fold
-  into the one page-wide field (`TrainingRun` molecule-flight retired into the field's behavior;
-  `ParticlePortrait` becomes a convergence target), and /work's page-wide field sits behind the whole
-  index with `FlowImage` covers as per-node previews. Still one live canvas per route.
+### Verification per checkpoint
+- `npx tsc --noEmit` + `npm run lint` every phase; `npm run build` phases 1, 2, 4, 5, 6.
+- Shader-compile harness (scratchpad/gen-shader-test.mjs pattern) for any new GLSL.
+- The governed-canvas contract (poster always painted, canvas desktop-motion only,
+  aria-hidden, pointer-events-none, one page-wide canvas per route) must not regress.

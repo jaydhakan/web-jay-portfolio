@@ -2,30 +2,25 @@ import { hero, siteConfig } from "@/data/content";
 import { Button } from "@/components/ui/Button";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { HeroHeadlineKinetic } from "@/components/sections/HeroHeadlineKinetic";
-import { HeroVisual } from "@/components/sections/HeroVisual";
 
 /**
- * Left-aligned full-viewport hero (DESIGN.md: never centered). Two-column on xl+:
- * the copy column (availability badge, two-line H1, subheading, CTA pair, and a
- * credibility proof strip) balanced by the "live system" console on the right so
- * the wide-desktop fold no longer reads as empty. Below xl it collapses to the
- * single copy column (the proof strip stays — strong mobile proof — but the heavy
- * decorative console is dropped to keep mobile fast + uncrowded).
+ * Left-aligned full-viewport hero (DESIGN.md: never centered). The copy column
+ * (availability badge, two-line H1, subheading, CTA pair, credibility proof strip)
+ * holds the LEFT; the right half of the fold belongs to THE DESCENT ARENA (the
+ * page-wide canvas behind this transparent section, see plan.md) — a live
+ * gradient-descent run the visitor can perturb and seed. The old static "console"
+ * mock was removed: a real system replaced the picture of one.
  *
  * All copy is server-rendered with CSS entrance choreography; the only client
- * islands remain the shader backdrop and the magnetic CTA wrapper. The console is
- * a server component (no canvas). Elements carry both `data-hero-rise` (the
+ * island is the magnetic CTA wrapper. Elements carry both `data-hero-rise` (the
  * desktop GSAP opening) and `.anim-rise` (the CSS entrance everywhere else).
  */
 export function Hero() {
   return (
     <section className="relative isolate flex min-h-[100dvh] items-center overflow-hidden">
-      {/* Backdrop is the page-wide LatentField (mounted in app/page.tsx) showing
-          through this transparent section — the loss-landscape hero is retired on
-          home (HeroBackground / HeroShader kept in the repo for reuse). */}
       <div className="mx-auto w-full max-w-7xl px-6 pt-16">
-        <div className="hero-parallax grid items-center gap-x-12 gap-y-14 xl:grid-cols-[minmax(0,1fr)_minmax(0,420px)]">
-          <div className="max-w-2xl xl:max-w-none">
+        <div className="hero-parallax">
+          <div className="max-w-2xl">
             <p
               data-hero-rise
               className="anim-rise flex items-center gap-2.5 text-sm font-medium text-ok"
@@ -94,15 +89,6 @@ export function Hero() {
                 </li>
               ))}
             </ul>
-          </div>
-
-          {/* Right-side "live system" console — wide-desktop only (xl+). */}
-          <div
-            data-hero-rise
-            className="anim-rise hidden justify-self-end xl:flex"
-            style={{ animationDelay: "0.5s" }}
-          >
-            <HeroVisual />
           </div>
         </div>
       </div>

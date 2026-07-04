@@ -1,6 +1,6 @@
 /**
- * ARGMAX geometry — "The Paths Not Taken" (see TIMELINE_REDESIGN.md concept 8 and
- * TIMELINE_IMPLEMENTATION.md). Pure, deterministic, SSR-stable: everything derives from
+ * ARGMAX geometry — "The Paths Not Taken" (design history: TIMELINE_REDESIGN.md /
+ * TIMELINE_IMPLEMENTATION.md in git history). Pure, deterministic, SSR-stable: everything derives from
  * the authored Beat score, so server and client agree pixel-for-pixel (CLS=0).
  *
  * The timeline is an inference trajectory rendered as a slow lightning bolt: a

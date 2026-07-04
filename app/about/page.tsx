@@ -188,7 +188,7 @@ export default function AboutPage() {
         </section>
       </div>
 
-      {/* Camera-flight "training run" (V3 P10 / S8) — full-bleed pinned flight. */}
+      {/* The Training Signal — the epochs as a converging loss curve (plan.md P6). */}
       <TrainingRun
         eyebrow={sections.trainingRun.eyebrow}
         heading={sections.trainingRun.heading}

@@ -16,9 +16,9 @@ import {
 } from "./argmax";
 
 /**
- * SerpentineTimeline (Phase 7, "ARGMAX — The Paths Not Taken") — the ONE timeline
- * engine, shared by the /about journey and the /work shipped-systems list. See
- * TIMELINE_REDESIGN.md (concept 8) and TIMELINE_IMPLEMENTATION.md.
+ * SerpentineTimeline ("ARGMAX — The Paths Not Taken") — the ONE timeline engine,
+ * shared by the /about journey and the /work shipped-systems list. (Design history:
+ * TIMELINE_REDESIGN.md / TIMELINE_IMPLEMENTATION.md, kept in git history.)
  *
  * The path is the main character: an inference trajectory drawn as a slow lightning
  * bolt. Deliberate kinks at decision points, ghost futures fanning at each one, a

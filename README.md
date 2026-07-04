@@ -11,8 +11,10 @@ bold but functional (static posters for every heavy canvas).
 - **Next.js 16** (App Router) · **React 19** · **TypeScript** · **Tailwind CSS 4**
 - **GSAP** (ScrollTrigger, SplitText, Flip, DrawSVG, ScrambleText, CustomEase) for all motion
 - **Lenis** smooth scroll, driven off the GSAP ticker
-- **three / @react-three/fiber** for the page-wide `LatentField` particle system (one
-  governed canvas per route, lazy + armed-after-paint; static poster on mobile/RM/no-WebGL)
+- **three / @react-three/fiber** for the page-wide WebGL set-pieces — the `DescentArena`
+  gradient-descent playground on home, `LatentField` elsewhere, plus the ARGMAX timeline
+  canvas (governed: lazy + armed-after-paint, DPR-capped, FPS-guarded; static poster on
+  mobile/RM/no-WebGL)
 - `react-hook-form` + `zod` (contact form) · `resend` (email) · `lucide-react` (icons)
 
 No `motion`/framer-motion — every animation is GSAP or CSS.
