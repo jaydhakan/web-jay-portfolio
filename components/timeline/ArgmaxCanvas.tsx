@@ -54,6 +54,10 @@ export type ArgmaxCanvasProps = {
   running?: boolean;
   /** Fires once after the first real frames render (poster fade handoff). */
   onLive?: () => void;
+  /** GPU context died (tab churn, driver reset): parent restores the full poster. */
+  onContextLost?: () => void;
+  /** Context came back and frames will resume: parent may re-dim the poster. */
+  onContextRestored?: () => void;
 };
 
 // ── geometry helpers (ribbon quad-strips, shared idiom) ───────────────────────
@@ -1006,7 +1010,7 @@ function Scene({ vbw, vbh, build, beats, stars, spurs, bridges, progressRef, mas
 }
 
 export default function ArgmaxCanvas(props: ArgmaxCanvasProps) {
-  const { vbw, vbh, running } = props;
+  const { vbw, vbh, running, onContextLost, onContextRestored } = props;
   return (
     <Canvas
       className="size-full"
@@ -1016,7 +1020,7 @@ export default function ArgmaxCanvas(props: ArgmaxCanvasProps) {
       camera={{ manual: true }}
       frameloop={running === false ? "never" : "always"}
       aria-hidden
-      onCreated={({ camera }) => {
+      onCreated={({ camera, gl }) => {
         const cam = camera as THREE.OrthographicCamera;
         cam.left = 0;
         cam.right = vbw;
@@ -1026,6 +1030,17 @@ export default function ArgmaxCanvas(props: ArgmaxCanvasProps) {
         cam.far = 200;
         cam.position.set(0, 0, 50);
         cam.updateProjectionMatrix();
+        // Context-loss contract: preventDefault permits restoration, and the parent
+        // flips the poster back to full strength so a dead canvas is never the only
+        // layer on screen (this HAS happened here — see SerpentineTimeline's sticky
+        // mount note). Listeners share the canvas element's lifetime.
+        gl.domElement.addEventListener("webglcontextlost", (e) => {
+          e.preventDefault();
+          onContextLost?.();
+        });
+        gl.domElement.addEventListener("webglcontextrestored", () => {
+          onContextRestored?.();
+        });
       }}
     >
       <Scene {...props} />

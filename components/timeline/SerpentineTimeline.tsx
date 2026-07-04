@@ -161,11 +161,18 @@ export function SerpentineTimeline({
 
         cards.forEach((card, i) => {
           const fromX = sides[i] === "left" ? -14 : 14;
+          const at = nodeFrac[i] ?? 0;
+          // Opacity is a binary latch, never a mid-ramp value: the a11y contrast pass
+          // samples whatever scroll progress the load lands on, and a card caught at
+          // ~0.4 opacity fails every chip inside it. Hidden (autoAlpha 0) is exempt;
+          // visible must be fully readable. The card materializes AT its decision
+          // node — the fan collapses, the card exists — while the slide stays scrubbed.
+          tl.set(card, { autoAlpha: 1 }, at);
           tl.fromTo(
             card,
-            { autoAlpha: 0, yPercent: -50, y: 14, x: fromX },
-            { autoAlpha: 1, yPercent: -50, y: 0, x: 0, duration: 0.13, ease: "none" },
-            nodeFrac[i] ?? 0,
+            { yPercent: -50, y: 14, x: fromX },
+            { yPercent: -50, y: 0, x: 0, duration: 0.13, ease: "none" },
+            at,
           );
         });
 
@@ -217,16 +224,18 @@ export function SerpentineTimeline({
         className="relative mx-auto w-full max-w-[1040px] md:[aspect-ratio:var(--syn-aspect)]"
         style={{ ["--syn-aspect" as string]: `${VBW} / ${VBH}` }}
       >
-        {/* STATIC SVG poster — the fully-decoded artwork (SSR / reduced-motion / no-JS /
-            no-WebGL / pre-arm). Decorative (aria-hidden). Fades once the canvas is live. */}
+        {/* STATIC SVG poster — the timeline's PERMANENT base layer, not a placeholder.
+            The structural elements (stems, beads, blooms, constellation) never fade:
+            they are what makes this read as a connected timeline in EVERY state (SSR /
+            reduced-motion / no-JS / no-WebGL / context-lost / live). Only the channel
+            artwork dims when the canvas is live — the WebGL layer redraws it with the
+            decode narrative, and the dimmed poster underneath keeps the FULL route
+            faintly legible ahead of the head (the latent path, not yet traversed). */}
         <svg
           viewBox={`0 0 ${VBW} ${VBH}`}
           preserveAspectRatio="xMidYMid meet"
           aria-hidden
-          className={cn(
-            "absolute inset-0 hidden size-full overflow-visible transition-opacity duration-700 md:block",
-            live && "opacity-0",
-          )}
+          className="absolute inset-0 hidden size-full overflow-visible md:block"
           fill="none"
         >
           <defs>
@@ -303,6 +312,11 @@ export function SerpentineTimeline({
             </g>
           ))}
 
+          {/* Channel artwork group — the one part the live canvas genuinely replaces
+              (it redraws channel + scars + delta with the decode narrative). Dims to a
+              faint under-layer when live, NEVER to zero: the handoff must read as the
+              same timeline gaining life, not one artwork swapped for a dimmer one. */}
+          <g className={cn("transition-opacity duration-700", live && "opacity-50")}>
           {/* SCARS — the paths not taken. Permanent, faint, tapered from full channel
               width at the root: the memory of every fork already decided. */}
           {poster.scars.map((s, idx) => (
@@ -336,6 +350,7 @@ export function SerpentineTimeline({
               )}
             />
           ))}
+          </g>
           {delta.ticks.map((t, idx) => (
             <circle
               key={`tick-${idx}`}
@@ -398,6 +413,8 @@ export function SerpentineTimeline({
             mask={mask}
             running={inView}
             onLive={() => setLive(true)}
+            onContextLost={() => setLive(false)}
+            onContextRestored={() => setLive(true)}
           />
         )}
 
