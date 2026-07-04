@@ -109,6 +109,57 @@ Legend: ⬜ todo · 🔶 in progress · ✅ done (build green)
 
 *(appended at each checkpoint — newest first)*
 
+- 2026-07-04 — **Post-ship audit + timeline legibility/reliability pass.** The owner
+  reported the ARGMAX timeline on /work + /about reading as "not visible, not a
+  timeline" and /about as intermittent ("sometimes works, sometimes not, sometimes
+  switches look"). A 5-reader codebase sweep (workflow wf_bbab8d90-285, findings in
+  its journal.jsonl) found the root causes:
+  1. **Brightness gets cubed before display.** Every ArgmaxCanvas shader writes
+     brightness into rgb AND alpha; AdditiveBlending squares alpha; premultipliedAlpha
+     false over a transparent canvas multiplies rgb×alpha AGAIN → displayed light ≈
+     bright³. Every resting value <~0.3 (future channel 0.13, ghost fans 0.06, unlit
+     nodes 0.26, ticks 0.16) renders under 3% = black. Only the head comet survives.
+  2. **The future is dark by design** + 3 lag sources (167ms ease, eased starts at 0,
+     warp gamma) keep the head above the viewport on normal scroll → the visible region
+     is "future" = near-black. That is the "empty starfield + one comet."
+  3. **Intermittency**: `live` was a one-way latch with ZERO context-loss handling;
+     when the browser evicts a context (2 long-lived contexts/page + un-released probe
+     + R3F 500ms teardown overlap on nav), the canvas blanked while the poster was held
+     at opacity-0 FOREVER. Plus the FPS guard tripped permanent degradation on a single
+     tab-return/GC frame spike (relief threshold unreachable at 60Hz).
+  **Fixes shipped** (7 files, tsc+lint+build green):
+  - SerpentineTimeline: the structural poster (spine core/aura, nodes/beads, card
+    stems, collapse blooms, constellation, scars, delta) is now PERMANENT — it no
+    longer fades to opacity-0 when the canvas goes live. Only the channel-fill group
+    dims to opacity-50, so the full route always reads as a connected timeline in EVERY
+    state (SSR / RM / no-JS / no-WebGL / context-lost / live). This is the "reliability-
+    first: poster IS the timeline, canvas is enhancement" synthesis.
+  - ArgmaxCanvas: webglcontextlost/restored listeners (preventDefault + onContextLost/
+    Restored props) wired to setLive(false)/(true) → a dead context restores the full
+    poster instead of a blank stage.
+  - webgl-governance: FPS-guard delta clamp (ignore frames >100ms — stalls, not strain);
+    probe context released via WEBGL_lose_context (frees a slot so the page-wide bg
+    canvas is less likely to be the one evicted).
+  - a11y → 100 on all pages: SkillBag "drag me" hint text-ink-dim/40→/80; /work Tag
+    chips were the contrast fail (pre-existing) — resolved via the heading-order fix +
+    verified; sr-only "Shipped systems" h2 restores /work heading order (h1→h2→h3);
+    ScrambleHeading pinned with an invisible sizer (grid overlay, CLS 0) and gated to
+    desktop fine-pointer (mobile keeps static text).
+  - ProjectCard/WorkGeoline: priority on the first cover (mobile LCP element).
+  **Audit results (Lighthouse 12, real Chrome):** A11y **100** all 6 runs; CLS **0**
+  in real browsers (verified by observed-throttling puppeteer — the one flaky
+  about-desktop 0.051 and mobile perf 86-88 are Lantern *simulation* artifacts: observed
+  mobile LCP is ~920ms = FCP, observed /about CLS is 0). Desktop perf 98-99. Reduced-
+  motion + no-JS posters render the full timeline + all cards with no canvas; keyboard
+  nav has skip-link-first + visible focus rings. **`display:optional` on Syne was tried
+  and REVERTED** — zero Lighthouse benefit (Lantern models the text LCP off the font/
+  chain regardless) and it risks the signature Syne headline falling back on desktop
+  first-paint; swap protects the signature. STILL a known gap: Lighthouse *simulated*
+  mobile perf sits ~86-88 (real observed <1s LCP) — a Lantern characteristic of a heavy
+  WebGL/GSAP client app, not a regression.
+  DEFERRED: LatentField on /about /work /services (owner call — see Task 4 rec below).
+  Committing this pass now (owner approved pushing to main).
+
 - 2026-07-04 — **Phase 6 ✅ — ALL PHASES COMPLETE.** Audit correction: TrainingRun's
   WebGL flight was ALREADY retired in a prior refactor (the mounted section was DOM
   cards; TrainingRunCanvas.tsx was dead) — so Phase 6 became: delete the dead canvas
