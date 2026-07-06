@@ -109,6 +109,28 @@ Legend: ⬜ todo · 🔶 in progress · ✅ done (build green)
 
 *(appended at each checkpoint — newest first)*
 
+- 2026-07-06 — **THE FLIGHT specified (timelineplan.md v2) — not started.** Owner asked
+  for a "crazy, wow-factor" timeline (perf explicitly deprioritized). v1 of
+  timelineplan.md (research: verified Awwwards/Codrops refs; 3 directions; the
+  PRODUCT.md anti-reference tension stated up front) was expanded via a 4-subsystem
+  parallel design workflow (wf_5c2b8f8c-526: spline/camera, beacons, composition/a11y,
+  perf/phasing — raw specs in its journal.jsonl) into an implementation-grade spec.
+  The adversarial reviewer agent hit a rate limit, so the reconciliation was done in
+  the main loop — timelineplan.md §8 records the 11 conflicts between the parallel
+  specs and the canonical calls (one SpineProgress bus; flare pure-in-arc, never
+  time-decayed; context-loss = die-forever WITHOUT preventDefault; sticky mount +
+  frameloop pause; per-particle aMeta over uniform arrays; merged tendril rows; LUT
+  camera; components/flight/ layout; adapters own the bus; puppeteer over Playwright;
+  uSize 30). Decisions resolved: C+B hybrid, progressive enhancement (Spine stays
+  authoritative; A11y 100 + CLS 0 stay hard; desktop LH relaxes to ≥85 on /about+/work
+  ONLY, via a PRODUCT.md licensed-exception paragraph, verbatim in §12.6); /work gets
+  ALL 9 stations (warp fixed-points need every card offset), featured flare loud.
+  5 build phases with a shared verification battery + grep gates (`scrub:` count == 1;
+  no lerp/exp(- on progress in components/flight/). Remaining asks (§16): green-light
+  Phase 1, confirm the /work call, content-freeze timeline[] (TODO(JAY) placeholders),
+  name the reference laptop. NOTHING BUILT — next session starts at Phase 1 only after
+  §16.1.
+
 - 2026-07-04 — **TIMELINE REDESIGN → "Constellation Spine" (retired the ARGMAX bolt).**
   After the reliability pass below, the owner still judged the timeline "ugly / not
   appealing / spacing + animation + speed all bad." A research workflow (wf_a351f4d7-786,
