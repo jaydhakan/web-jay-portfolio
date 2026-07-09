@@ -109,6 +109,33 @@ Legend: ⬜ todo · 🔶 in progress · ✅ done (build green)
 
 *(appended at each checkpoint — newest first)*
 
+- 2026-07-09 — **FLIGHT Phase 1 ✅ (skeleton + governance shell).** Owner answered
+  timelineplan.md §16: GO / all 9 /work beacons / content frozen as-is / any-laptop
+  floor (tier ladder guards). Shipped: `flight-progress.ts` (SpineProgress bus, types
+  only), 3-line SerpentineTimeline diff (offsets in measure(), p in onUpdate, litCount
+  on change) + `spine-head` class; `components/flight/flight-path.ts` (pure math:
+  serpentine knots + LEAD-IN knot fix — the spec had stationS[0]=0 ⇒ degenerate first
+  warp segment, caught in reconciliation — centripetal CatmullRom, 512-pt pos/tan LUTs,
+  monotone-Hermite dwell warp with warp(offsets[k])=stationS[k] fixed points, camera
+  rig incl. banking/FOV-breathing/finale, exact-NDC beacon anchor solver);
+  `FlightCanvas.tsx` (camera rig off the bus RAW — zero canvas-side smoothing,
+  placeholder ignition spheres at the same 0.001 epsilon as DOM markers, path ribbon,
+  contextlost→onDead without preventDefault, `__flightLoseContext` dev hook);
+  `FlightBackdrop.tsx` (poster/scrim/left-guard/vignette stack, sticky mount +
+  running=inView pause, one-way dead latch resetting the live latch);
+  `useArmedAfterIdle` in webgl-governance (/work TBT protection); `.flight-fallback`
+  poster + head-dot glow handoff CSS; adapters own the bus + data-flight-live (/work
+  also mirrors the filter into spine.dimmed). Lint required moving rebuildStage to
+  module scope (react-compiler rejects render-scoped closures mutating scene objects).
+  **Battery:** tsc/lint/build green; grep gates pass (ONE scrub in timeline+flight —
+  WorkReel/motion primitives are other sections; all lerp/exp hits spatial);
+  runtime verify (puppeteer): canvas+live on both routes, HUD-synced ignition
+  (03/06/07 about, 03/07/09 work), reduced-motion = NO canvas + static 07/07 Spine;
+  Lighthouse: about-desktop 99/100/CLS 0, work-desktop 98/100 (CLS 0.056 in 1 of 3
+  runs = the documented Lantern flake — real-browser PerformanceObserver across the
+  full idle-arm+canvas-mount window records ZERO shifts), mobile 85-88/100/0 untouched
+  (canvas never mounts <768px). Next: Phase 2 (beacon particle system).
+
 - 2026-07-06 — **THE FLIGHT specified (timelineplan.md v2) — not started.** Owner asked
   for a "crazy, wow-factor" timeline (perf explicitly deprioritized). v1 of
   timelineplan.md (research: verified Awwwards/Codrops refs; 3 directions; the

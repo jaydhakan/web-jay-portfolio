@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState } from "react";
 import {
   Terminal,
   GraduationCap,
@@ -14,6 +15,8 @@ import type { TimelineEntry } from "@/data/content";
 import { cn } from "@/lib/utils";
 import { SerpentineTimeline } from "@/components/timeline/SerpentineTimeline";
 import { ABOUT_SCORE } from "@/components/timeline/argmax";
+import { createSpineProgress, type SpineProgress } from "@/components/timeline/flight-progress";
+import { FlightBackdrop } from "@/components/flight/FlightBackdrop";
 
 /**
  * The /about journey ("How I Got Here") — a thin data adapter over the shared
@@ -38,12 +41,28 @@ const KIND: Kind[] = [
 ];
 
 export function Geoline({ entries }: { entries: TimelineEntry[] }) {
+  // The Flight's progress bus + section gate. This div is also the data-flight-live
+  // host for the head-dot glow handoff. NOTE (documented invariant): never wrap this
+  // component in FadeUp/ClipReveal — a transformed ancestor would re-parent the
+  // backdrop's fixed containing block.
+  const spine = useRef<SpineProgress>(createSpineProgress());
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [flightLive, setFlightLive] = useState(false);
+
   return (
-    <SerpentineTimeline
-      count={entries.length}
-      hudLabel="Milestones lit"
-      beats={ABOUT_SCORE}
-      renderCard={(i, _side, isActive) => {
+    <div ref={sectionRef} data-flight-live={flightLive || undefined}>
+      <FlightBackdrop
+        sectionRef={sectionRef}
+        spine={spine}
+        beats={ABOUT_SCORE}
+        onLiveChange={setFlightLive}
+      />
+      <SerpentineTimeline
+        count={entries.length}
+        hudLabel="Milestones lit"
+        beats={ABOUT_SCORE}
+        flightRef={spine}
+        renderCard={(i, _side, isActive) => {
         const entry = entries[i];
         const { Icon, tag } = KIND[i] ?? KIND[KIND.length - 1];
         // Narrative weight -> visual weight: heavy beats (the hairpin, the agents drop,
@@ -129,7 +148,8 @@ export function Geoline({ entries }: { entries: TimelineEntry[] }) {
             ) : null}
           </article>
         );
-      }}
-    />
+        }}
+      />
+    </div>
   );
 }

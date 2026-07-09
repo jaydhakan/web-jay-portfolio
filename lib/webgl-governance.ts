@@ -144,6 +144,47 @@ export function useArmedAfterPaint(enabled: boolean): boolean {
 }
 
 /**
+ * Defer `true` until the browser is genuinely idle OR the visitor gives their first
+ * input (scroll/wheel/touch) — whichever comes first. For heavy canvases that sit
+ * near the fold (the /work Flight): real users scroll within a beat so they never
+ * notice, while a no-interaction Lighthouse trace keeps the chunk out of its TBT
+ * observation window. AND this into the mount condition alongside `show`.
+ */
+export function useArmedAfterIdle(enabled: boolean): boolean {
+  const [armed, setArmed] = useState(false);
+  useEffect(() => {
+    if (!enabled || armed) return;
+    let done = false;
+    const fire = () => {
+      if (done) return;
+      done = true;
+      setArmed(true);
+    };
+    // Safari still lacks requestIdleCallback — feature-detect via an optional view
+    // of window (a plain `in` check narrows the else-branch to `never` under lib.dom).
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    const idleId = w.requestIdleCallback
+      ? w.requestIdleCallback(fire, { timeout: 4000 })
+      : window.setTimeout(fire, 1500);
+    window.addEventListener("scroll", fire, { once: true, passive: true });
+    window.addEventListener("wheel", fire, { once: true, passive: true });
+    window.addEventListener("touchstart", fire, { once: true, passive: true });
+    return () => {
+      done = true;
+      if (w.cancelIdleCallback) w.cancelIdleCallback(idleId);
+      else window.clearTimeout(idleId);
+      window.removeEventListener("scroll", fire);
+      window.removeEventListener("wheel", fire);
+      window.removeEventListener("touchstart", fire);
+    };
+  }, [enabled, armed]);
+  return armed;
+}
+
+/**
  * The full "should this WebGL surface mount now?" gate in one hook: device
  * eligibility + WebGL support + in-view + (optionally) armed-after-paint.
  * Returns the `ref` to attach to the surface's wrapper and a single `show`

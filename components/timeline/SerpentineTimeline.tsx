@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode, type RefObject } from "react";
 import { gsap, useGSAP, ScrollTrigger } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 import { type Beat, scoreForCount } from "./argmax";
+import type { SpineProgress } from "./flight-progress";
 
 /**
  * SerpentineTimeline — "The Constellation Spine". The ONE timeline engine, shared by the
@@ -49,6 +50,7 @@ export function SerpentineTimeline({
   beats: beatsProp,
   dimmed,
   className,
+  flightRef,
 }: {
   count: number;
   renderCard: RenderCard;
@@ -58,6 +60,9 @@ export function SerpentineTimeline({
   /** Optional filter spotlight (the /work pills): return true to dim milestone i. */
   dimmed?: (i: number) => boolean;
   className?: string;
+  /** Write-only side channel for the Flight backdrop (timelineplan.md §9): the engine
+   *  writes p/offsets/litCount here; the canvas reads them raw. Never read back. */
+  flightRef?: RefObject<SpineProgress>;
 }) {
   const n = count;
   const beats = beatsProp && beatsProp.length === n ? beatsProp : scoreForCount(n);
@@ -103,6 +108,7 @@ export function SerpentineTimeline({
         const measure = () => {
           const H = list.clientHeight || 1;
           offsets = itemRefs.current.map((li) => (li ? (li.offsetTop + MARKER_TOP) / H : 0));
+          if (flightRef?.current) flightRef.current.offsets = offsets.slice();
         };
         measure();
 
@@ -118,6 +124,7 @@ export function SerpentineTimeline({
           onRefresh: measure,
           onUpdate: (self) => {
             const p = self.progress;
+            if (flightRef?.current) flightRef.current.p = p;
             lit.style.strokeDashoffset = String(1 - p);
             gsap.set(head, {
               autoAlpha: p > 0.001 && p < 0.999 ? 1 : 0,
@@ -136,6 +143,7 @@ export function SerpentineTimeline({
             if (count !== lastLit.current) {
               lastLit.current = count;
               if (countRef.current) countRef.current.textContent = String(count).padStart(2, "0");
+              if (flightRef?.current) flightRef.current.litCount = count;
               setActive(count - 1);
             }
           },
@@ -232,10 +240,12 @@ export function SerpentineTimeline({
               strokeDashoffset={0}
             />
           </svg>
-          {/* head-dot — hidden until motion arms it; GSAP owns its transform */}
+          {/* head-dot — hidden until motion arms it; GSAP owns its transform. The
+              spine-head class lets a live Flight canvas borrow its outer bloom
+              (data-flight-live on the adapter root) — dot stays, glow hands off. */}
           <span
             ref={headRef}
-            className="invisible absolute left-1/2 top-0 size-2.5 rounded-full bg-accent-cyan shadow-[0_0_10px_2px_var(--color-accent-cyan),0_0_20px_6px_oklch(66%_0.19_285/0.5)]"
+            className="spine-head invisible absolute left-1/2 top-0 size-2.5 rounded-full bg-accent-cyan shadow-[0_0_10px_2px_var(--color-accent-cyan),0_0_20px_6px_oklch(66%_0.19_285/0.5)]"
           />
         </div>
 

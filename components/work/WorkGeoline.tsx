@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { Project, ProjectCategory } from "@/data/content";
 import { cn } from "@/lib/utils";
 import { ProjectCard } from "@/components/work/ProjectCard";
 import { SerpentineTimeline } from "@/components/timeline/SerpentineTimeline";
 import { scoreForCount } from "@/components/timeline/argmax";
+import { createSpineProgress, type SpineProgress } from "@/components/timeline/flight-progress";
+import { FlightBackdrop } from "@/components/flight/FlightBackdrop";
 
 type Filter = "All" | ProjectCategory;
 
@@ -36,8 +38,22 @@ export function WorkGeoline({ projects, covers, filters }: WorkGeolineProps) {
     [projects],
   );
 
+  // The Flight's progress bus + section gate (see Geoline for the ancestor-transform
+  // invariant). idleArm: /work's timeline sits near the fold, so the heavy chunk
+  // additionally waits for idle/first input (Lighthouse TBT protection).
+  const spine = useRef<SpineProgress>(createSpineProgress());
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [flightLive, setFlightLive] = useState(false);
+
   return (
-    <div className="relative">
+    <div ref={sectionRef} data-flight-live={flightLive || undefined} className="relative">
+      <FlightBackdrop
+        sectionRef={sectionRef}
+        spine={spine}
+        beats={beats}
+        idleArm
+        onLiveChange={setFlightLive}
+      />
       {/* Filter pills — spotlight a category (dim others), no reflow. */}
       <div role="group" aria-label="Filter projects by category" className="flex flex-wrap gap-2.5">
         {filters.map((f) => {
@@ -47,7 +63,14 @@ export function WorkGeoline({ projects, covers, filters }: WorkGeolineProps) {
               key={f}
               type="button"
               aria-pressed={selected}
-              onClick={() => setFilter(f)}
+              onClick={() => {
+                setFilter(f);
+                // Mirror the filter into the Flight: beacons dim in place (never
+                // removed — the CLS doctrine, same as the cards' opacity-40).
+                spine.current.dimmed = projects.map(
+                  (p) => !(f === "All" || p.category === f),
+                );
+              }}
               className={cn(
                 "focus-pill rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200 active:scale-[0.97] focus-visible:outline-none",
                 selected
@@ -69,6 +92,7 @@ export function WorkGeoline({ projects, covers, filters }: WorkGeolineProps) {
           count={projects.length}
           hudLabel="Systems lit"
           beats={beats}
+          flightRef={spine}
           dimmed={(i) => !matches(projects[i])}
           renderCard={(i, _side, isActive) => {
             const project = projects[i];

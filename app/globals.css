@@ -310,6 +310,27 @@ html {
   transform: translate(-50%, -50%) scale(0.6);
 }
 
+/* The Flight (timelineplan.md §12) — poster nebula behind /about + /work. Always
+   painted on md+; pure CSS radials capped ≤8% alpha so it can never cost text
+   contrast. This IS the reduced-motion / no-WebGL / post-context-loss state. */
+.flight-fallback {
+  background:
+    radial-gradient(60% 45% at 72% 30%, oklch(66% 0.19 285 / 0.07), transparent 70%),
+    radial-gradient(50% 40% at 64% 74%, oklch(86% 0.115 207 / 0.05), transparent 70%),
+    radial-gradient(42% 32% at 82% 52%, oklch(63% 0.21 272 / 0.06), transparent 70%);
+}
+
+/* Head-dot glow handoff: when the Flight canvas proves live (adapter sets
+   data-flight-live), the DOM keeps the precise instrument (the dot) and yields the
+   spectacle (the bloom) to the canvas — two glowing cyan travellers would read as a
+   bug and bust the ≤5% iridescent budget. Reverts the instant the canvas dies. */
+.spine-head {
+  transition: box-shadow 700ms var(--ease-out-expo);
+}
+[data-flight-live] .spine-head {
+  box-shadow: 0 0 6px 0 var(--color-accent-cyan);
+}
+
 .anim-char {
   display: inline-block;
   will-change: transform;
