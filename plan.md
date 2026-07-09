@@ -109,6 +109,30 @@ Legend: ⬜ todo · 🔶 in progress · ✅ done (build green)
 
 *(appended at each checkpoint — newest first)*
 
+- 2026-07-09 — **FLIGHT Phase 4 ✅ (full multi-rung tier ladder).** Shipped
+  `createTierLadder` in lib/webgl-governance.ts (additive; createFpsGuard untouched):
+  same rolling average + the e2f001f spike clamp (`ms>100 → return`), but walks DOWN
+  under sustained strain — soft shed at onset (uSize 30→22, the ONLY reversible step)
+  → one rung per 3s of *continuous* strain: T1 (uKeep 0.6, CoC 0.5, DPR [1,1.5]) →
+  T2 (composer unmounted one-way, uKeep 0.4, CoC 0, dust 800, tendrils dropped on
+  next rebuild, DPR [1,1.25]) → T3 (onDead — same latch as context loss: canvas
+  unmounts, poster + full Spine stay). Rung timer starts the tick AFTER onset
+  (else-if, exact ≥3s semantics) and resets on relief and per rung, so T3 needs ~9s+
+  of genuine slowness. FlightCanvas: mini-ladder replaced; `applyRung` module-scope
+  (ref-laundering); rungs cross-applied on jumps; `?flighttier=T1|T2` forced-start
+  override (also sets initial bloom state); beacon-field gained `tendrils:false`
+  build flag. VERIFIED: 8-scenario synthetic-load unit run on the bundled ladder
+  (steady-60 silent; walk shed→T1→T2→T3 each ≥3s apart; brief strain → shed+relief
+  only; 20×500ms stalls ignored; interrupted strain never demotes; startRung 1/2
+  walk correctly; post-T3 inert) ALL PASS; forced-tier production screenshots
+  (about T0/T1/T2 + work T2): T1 visibly sparser, T2 bloomless + 40% keep and still
+  legible, zero console errors; grep gates hold (ONE real `scrub:` in
+  timeline+flight = SerpentineTimeline scrub:0.4; flight-path's one `lerp` is the
+  spatial finale look-blend, pure in p). **LH: about 99/100/100/100 CLS 0.000, work
+  99/100/100/100 CLS 0.000 desktop; mobile 88/86 A11y 100 CLS 0.000 untouched.**
+  REMAINING: Phase 3 real-GPU feel pass (owner's eyes), Phase 5 PRODUCT.md/DESIGN.md
+  amendment + invariant suite (context-loss sim, route-flip memory, no-JS) + numbers.
+
 - 2026-07-09 — **FLIGHT Phase 2 ✅ (beacon particle glyphs + bloom pulled forward).**
   Shipped: `glyph-data.ts` (frozen lucide iconNode geometry for the 7 KIND icons,
   lockstep-asserted), `sample-points.ts` (stroke-rasterize → alpha-scan → seeded

@@ -37,6 +37,8 @@ export type BeaconFieldSpec = {
   /** World-space bounds to scatter dust through (from the path LUT). */
   dustBounds: { min: THREE.Vector3; max: THREE.Vector3 };
   seed: number;
+  /** T2 rebuilds drop ghost tendrils entirely (§13.1) — default true. */
+  tendrils?: boolean;
 };
 
 export type BeaconField = {
@@ -49,12 +51,13 @@ export type BeaconField = {
 
 export function buildBeaconField(spec: BeaconFieldSpec): BeaconField {
   const { anchors, beats, stationS, glyphLocals, dustCount, dustBounds, seed } = spec;
+  const withTendrils = spec.tendrils !== false;
   const n = anchors.length;
 
   // ── row budget ──
   let total = 0;
   for (const g of glyphLocals) total += g.length / 3;
-  const tendrilCounts = beats.map((b) => (b.weight >= 0.8 ? 2 : 1));
+  const tendrilCounts = beats.map((b): number => (withTendrils ? (b.weight >= 0.8 ? 2 : 1) : 0));
   const TENDRIL_PTS = 36;
   const tendrilTotal = tendrilCounts.reduce((s, c) => s + c, 0) * TENDRIL_PTS;
   total += tendrilTotal + dustCount;

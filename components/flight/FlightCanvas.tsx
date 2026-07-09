@@ -5,7 +5,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { silenceThreeClockDeprecation } from "@/lib/three-console";
-import { DPR_CAP, createFpsGuard } from "@/lib/webgl-governance";
+import { DPR_CAP, createTierLadder } from "@/lib/webgl-governance";
 import type { Beat } from "@/components/timeline/argmax";
 import type { SpineProgress } from "@/components/timeline/flight-progress";
 import {
@@ -72,10 +72,14 @@ type Sim = {
   anchorPts: THREE.Vector3[];
   dimmedId: boolean[] | undefined;
   tier: Tier;
+  /** Ladder rung (0=T0 … 3=dead) — a one-way ratchet (§13.3). */
+  rung: number;
+  /** Live fraction of particle rows (uKeep — flicker-free aCull shed). */
+  keep: number;
   strained: boolean;
 };
 
-/** Initial quality tier — decided once at mount (site precedent; ladder in Phase 4). */
+/** Initial quality tier — decided once at mount; the ladder only moves DOWN from here. */
 function pickTier(glyphSet: "icons" | "numerals"): Tier {
   const fine =
     typeof window !== "undefined" &&
@@ -86,6 +90,52 @@ function pickTier(glyphSet: "icons" | "numerals"): Tier {
   return fine
     ? { glyphN: icons ? 900 : 700, dustCount: 2000, coc: 1, baseSize: 30, post: true }
     : { glyphN: icons ? 540 : 420, dustCount: 1200, coc: 0.5, baseSize: 30, post: true };
+}
+
+/** `?flighttier=T1|T2` — forced start rung for tier screenshots / weak-GPU testing. */
+function readTierOverride(): 0 | 1 | 2 {
+  if (typeof window === "undefined") return 0;
+  const v = new URLSearchParams(window.location.search).get("flighttier");
+  return v === "T1" ? 1 : v === "T2" ? 2 : 0;
+}
+
+/** Demote to `rung`, applying every tier the jump crosses (§13.1). Module-scope on
+ *  purpose — mutates Sim + uniforms + renderer DPR (react-compiler ref-laundering). */
+function applyRung(
+  S: Sim,
+  rung: number,
+  setDpr: (dpr: [number, number]) => void,
+  setBloom: (b: boolean) => void,
+  onDead?: () => void,
+) {
+  if (rung <= S.rung) return;
+  if (S.rung < 1 && rung >= 1) {
+    // T1: shed 40% of rows, halve the fake-DoF, cap DPR at 1.5 (imperative — no remount)
+    S.keep = 0.6;
+    S.tier.coc = Math.min(S.tier.coc, 0.5);
+    S.tier.dustCount = Math.min(S.tier.dustCount, 1200);
+    setDpr([1, 1.5]);
+  }
+  if (S.rung < 2 && rung >= 2) {
+    // T2: composer unmounts (one-way), deeper shed, DoF off, DPR 1.25
+    S.keep = 0.4;
+    S.tier.coc = 0;
+    S.tier.dustCount = Math.min(S.tier.dustCount, 800);
+    S.tier.post = false;
+    setBloom(false);
+    setDpr([1, 1.25]);
+  }
+  S.rung = rung;
+  if (S.field) {
+    const U = S.field.material.uniforms;
+    U.uKeep.value = S.keep;
+    U.uCoc.value = S.tier.coc;
+    U.uPixelRatio.value = Math.min(window.devicePixelRatio || 1, rung >= 2 ? 1.25 : 1.5);
+  }
+  if (rung >= 3) {
+    // T3: same one-way exit as context loss — parent unmounts us, poster + Spine stay.
+    onDead?.();
+  }
 }
 
 /** Rebuild everything that depends on (rig, aspect): beacon anchors → field, ribbon.
@@ -146,24 +196,27 @@ function rebuildStage(
     dustCount: S.tier.dustCount,
     dustBounds: { min, max },
     seed: 7,
+    tendrils: S.rung < 2, // T2+: ghost tendrils dropped at build (§13.1)
   });
   S.field.material.uniforms.uPixelRatio.value = Math.min(dpr, 2);
   S.field.material.uniforms.uCoc.value = S.tier.coc;
+  S.field.material.uniforms.uKeep.value = S.keep;
   S.field.material.uniforms.uSize.value = S.strained ? 22 : S.tier.baseSize;
   if (S.dimmedId) S.field.setDimmed(S.dimmedId);
   group.add(S.field.points);
 }
 
-function Scene({ beats, spine, glyphSet, onLive }: FlightCanvasProps) {
+function Scene({ beats, spine, glyphSet, onLive, onDead }: FlightCanvasProps) {
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
   const dpr = useThree((s) => s.viewport.dpr);
+  const setDpr = useThree((s) => s.setDpr);
   const simRef = useRef<Sim | null>(null);
   const groupRef = useRef<THREE.Group>(null);
   const glyphLocalsRef = useRef<Float32Array[] | null>(null);
   const [glyphsReady, setGlyphsReady] = useState(false);
-  // Bloom is a one-way ratchet (arena doctrine): strain drops it for the session;
+  // Bloom is a one-way ratchet (arena doctrine): T2 drops it for the session;
   // flares survive bloomless via the size-pop + hot tint (palette rule 5).
-  const [bloom, setBloom] = useState(() => pickTier(glyphSet).post);
+  const [bloom, setBloom] = useState(() => pickTier(glyphSet).post && readTierOverride() < 2);
   const n = beats.length;
 
   // ── glyph prep: rasterize→sample ONCE per glyph; world-baking happens per rebuild ──
@@ -216,27 +269,31 @@ function Scene({ beats, spine, glyphSet, onLive }: FlightCanvasProps) {
   useFrame((state, delta) => {
     if (!simRef.current) {
       const tier = pickTier(glyphSet);
+      const startRung = readTierOverride();
       const S: Sim = {
         rig: buildRig(beats, spine.current?.offsets ?? []),
         offsetsId: spine.current?.offsets ?? [],
         aspect: state.size.width / Math.max(1, state.size.height),
-        guard: createFpsGuard({
-          // Mini-ladder (full multi-rung ladder is Phase 4): first sustained strain
-          // drops bloom (one-way), further strain sheds sprite fill (reversible).
-          onStrain: () => {
+        // The full ladder (§13.3): soft shed (uSize, reversible) → T1 → T2 → T3,
+        // one rung per 3s of *continuous* strain. Tiers are one-way ratchets.
+        guard: createTierLadder({
+          startRung,
+          onShed: () => {
             const s = simRef.current;
             if (!s) return;
-            if (!s.strained) {
-              s.strained = true;
-              setBloom(false);
-              if (s.field) s.field.material.uniforms.uSize.value = 22;
-            }
+            s.strained = true;
+            if (s.field) s.field.material.uniforms.uSize.value = 22;
           },
           onRelief: () => {
             const s = simRef.current;
             if (!s) return;
             s.strained = false;
             if (s.field) s.field.material.uniforms.uSize.value = s.tier.baseSize;
+          },
+          onTier: (rung) => {
+            const s = simRef.current;
+            if (!s) return;
+            applyRung(s, rung, setDpr, setBloom, onDead);
           },
         }),
         liveTicks: 0,
@@ -245,9 +302,12 @@ function Scene({ beats, spine, glyphSet, onLive }: FlightCanvasProps) {
         anchorPts: [],
         dimmedId: undefined,
         tier,
+        rung: 0,
+        keep: 1,
         strained: false,
       };
       simRef.current = S;
+      if (startRung > 0) applyRung(S, startRung, setDpr, setBloom, onDead);
       if (groupRef.current) {
         rebuildStage(S, groupRef.current, glyphLocalsRef.current, S.aspect, dpr);
       }

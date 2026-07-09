@@ -70,6 +70,65 @@ export function createFpsGuard(opts: {
   };
 }
 
+/**
+ * Multi-rung quality ladder (the Flight, timelineplan.md §13.3) — createFpsGuard's
+ * big sibling, same rolling average and spike clamp, but instead of one strain bit
+ * it walks DOWN a ladder of quality tiers under *sustained* strain:
+ *
+ *   strain onset  → onShed()          soft, REVERSIBLE (sprite size only)
+ *   +rungMs still strained → onTier(1)  T1: uKeep 0.6, CoC 0.5, DPR 1.5
+ *   +rungMs more           → onTier(2)  T2: composer off, uKeep 0.4, DPR 1.25
+ *   +rungMs more           → onTier(3)  T3: kill (canvas unmounts; poster + Spine)
+ *
+ * Tiers are ONE-WAY ratchets — re-promoting rebuilds the composer, which spikes a
+ * frame, which re-demotes: oscillation. Only the soft shed relieves. The rung timer
+ * resets on relief AND after each demotion, so reaching T3 takes ~3×rungMs of
+ * genuine continuous slowness — a single GC storm cannot cascade to death.
+ */
+export function createTierLadder(opts: {
+  budgetMs?: number;
+  /** Continuous strain required per rung demotion (default 3000ms). */
+  rungMs?: number;
+  /** Start below T0 (the `?flighttier` dev/test override). */
+  startRung?: 0 | 1 | 2;
+  onShed: () => void;
+  onRelief?: () => void;
+  onTier: (rung: 1 | 2 | 3) => void;
+}) {
+  const budget = opts.budgetMs ?? 20;
+  const rungMs = opts.rungMs ?? 3000;
+  let avg = 16.7;
+  let strained = false;
+  let strainMs = 0;
+  let rung: number = opts.startRung ?? 0;
+  return (deltaSeconds: number) => {
+    if (rung >= 3) return;
+    const ms = deltaSeconds * 1000;
+    // Same spike clamp as createFpsGuard (e2f001f): tab-return/GC/route-flip
+    // deliver one huge delta — a stall, not sustained strain. Never feed it in.
+    if (ms > 100) return;
+    avg += (ms - avg) * 0.1;
+    if (!strained && avg > budget) {
+      strained = true;
+      strainMs = 0;
+      opts.onShed();
+    } else if (strained && avg < budget * 0.7) {
+      strained = false;
+      strainMs = 0;
+      opts.onRelief?.(); // restores the soft shed ONLY — tiers never re-promote
+    } else if (strained) {
+      // (else-if: the onset tick itself doesn't count — a rung needs a FULL
+      // rungMs of strain after shed/the previous demotion)
+      strainMs += ms;
+      if (strainMs >= rungMs) {
+        strainMs = 0;
+        rung += 1;
+        opts.onTier(rung as 1 | 2 | 3);
+      }
+    }
+  };
+}
+
 /* ---------------------------------------------------------------------------
    Mount gating — the "should this heavy canvas exist right now?" decision.
    Every WebGL surface used to hand-roll the three pieces below (a cached WebGL
