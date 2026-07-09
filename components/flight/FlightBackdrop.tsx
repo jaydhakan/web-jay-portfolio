@@ -31,6 +31,7 @@ export function FlightBackdrop({
   sectionRef,
   spine,
   beats,
+  glyphSet,
   idleArm = false,
   onLiveChange,
 }: {
@@ -39,6 +40,8 @@ export function FlightBackdrop({
   sectionRef: RefObject<HTMLDivElement | null>;
   spine: RefObject<SpineProgress>;
   beats: Beat[];
+  /** Beacon glyphs: /about resolves the cards' lucide icons; /work resolves numerals. */
+  glyphSet: "icons" | "numerals";
   /** /work only: its timeline sits near the fold, so additionally wait for idle or
    *  first input before mounting (keeps the chunk out of Lighthouse's TBT window). */
   idleArm?: boolean;
@@ -79,6 +82,7 @@ export function FlightBackdrop({
             <FlightCanvas
               beats={beats}
               spine={spine}
+              glyphSet={glyphSet}
               running={inView}
               onLive={handleLive}
               onDead={handleDead}

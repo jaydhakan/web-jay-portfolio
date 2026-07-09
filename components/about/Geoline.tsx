@@ -55,6 +55,7 @@ export function Geoline({ entries }: { entries: TimelineEntry[] }) {
         sectionRef={sectionRef}
         spine={spine}
         beats={ABOUT_SCORE}
+        glyphSet="icons"
         onLiveChange={setFlightLive}
       />
       <SerpentineTimeline

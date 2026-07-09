@@ -191,6 +191,8 @@ const _tan = new THREE.Vector3();
 const _tan2 = new THREE.Vector3();
 const _ahead = new THREE.Vector3();
 const _look = new THREE.Vector3();
+const _right = new THREE.Vector3();
+const _aim = new THREE.Vector3();
 
 function lutAt(lut: Float32Array, s: number, out: THREE.Vector3) {
   const N = lut.length / 3 - 1;
@@ -204,8 +206,21 @@ function lutAt(lut: Float32Array, s: number, out: THREE.Vector3) {
   );
 }
 
-/** Poses `cam` for progress p. Returns the warped arc fraction s (for beacon uArc). */
-export function applyRig(cam: THREE.PerspectiveCamera, p: number, rig: FlightRig): number {
+/** Poses `cam` for progress p. Returns the warped arc fraction s (for beacon uArc).
+ *
+ *  `anchorPts` (optional): solved beacon anchor positions. Mid-gap, the aim blends
+ *  partially toward the beacon being APPROACHED so its resolving glyph is always
+ *  in-frame (without it, a bending path can leave the next anchor outside the
+ *  frustum — the "dead mid-gap" bug). The blend fades to ZERO near dwell centres,
+ *  so the anchor solver's exact-NDC pose still holds exactly where the right-45%
+ *  guarantee is asserted. The solver itself calls this WITHOUT anchors (pure path
+ *  aim) — the fixed-point geometry stays circular-dependency-free. */
+export function applyRig(
+  cam: THREE.PerspectiveCamera,
+  p: number,
+  rig: FlightRig,
+  anchorPts?: THREE.Vector3[],
+): number {
   const { path, warp, offsets, beats } = rig;
   const n = path.n;
   const s = warp(p);
@@ -220,8 +235,37 @@ export function applyRig(cam: THREE.PerspectiveCamera, p: number, rig: FlightRig
   const f = THREE.MathUtils.smoothstep(s, path.stationS[n - 1] ?? 0.85, 1);
   lutAt(path.posLut, Math.min(s + LOOK_AHEAD, 1), _ahead);
   _look.copy(_ahead).lerp(path.centroid, f);
+
   cam.up.set(0, 1, 0);
   cam.lookAt(_look);
+
+  if (anchorPts && f < 0.5) {
+    // the station being approached: first k with offsets[k] >= p (clamped to last)
+    let k = n - 1;
+    for (let i = 0; i < n; i++) {
+      if (p <= (offsets[i] ?? 1)) {
+        k = i;
+        break;
+      }
+    }
+    const prev = k === 0 ? 0 : offsets[k - 1];
+    const gap = Math.max(1e-4, (offsets[k] ?? 1) - prev);
+    const approach = THREE.MathUtils.smoothstep((p - prev) / gap, 0.15, 0.7);
+    const nearDwell = Math.exp(-Math.pow((p - (offsets[k] ?? 1)) / (FOV_SIGMA * 2), 2));
+    const blend = approach * (1 - nearDwell) * Math.max(0, 1 - f * 2);
+    const A = anchorPts[k];
+    if (blend > 1e-3 && A) {
+      // Aim not AT the anchor (that would centre it over the card column) but at a
+      // point offset camera-left of it, so the resolving glyph rides ~NDC +0.5 —
+      // the same right-of-centre lane the dwell pose guarantees.
+      _right.set(1, 0, 0).applyQuaternion(cam.quaternion);
+      const dist = Math.max(4, _aim.copy(A).sub(cam.position).length());
+      const R = BEACON_NDC_X * dist * Math.tan(THREE.MathUtils.degToRad(BASE_FOV / 2)) * cam.aspect;
+      _aim.copy(A).addScaledVector(_right, -R);
+      _look.lerp(_aim, blend);
+      cam.lookAt(_look);
+    }
+  }
 
   // banking from the horizontal turn rate (pure spatial derivative — not temporal)
   lutAt(path.tanLut, Math.min(s + 0.01, 1), _tan2);

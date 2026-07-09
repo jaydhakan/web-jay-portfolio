@@ -109,6 +109,37 @@ Legend: ⬜ todo · 🔶 in progress · ✅ done (build green)
 
 *(appended at each checkpoint — newest first)*
 
+- 2026-07-09 — **FLIGHT Phase 2 ✅ (beacon particle glyphs + bloom pulled forward).**
+  Shipped: `glyph-data.ts` (frozen lucide iconNode geometry for the 7 KIND icons,
+  lockstep-asserted), `sample-points.ts` (stroke-rasterize → alpha-scan → seeded
+  fixed-N resample; numerals via fillText + fonts.ready(1.5s cap); mulberry32),
+  `beacon-shaders.ts` (ONE program for beacons+tendrils+dust: per-row behavior in
+  aMeta attributes — u_i/weight/seed/kind — state machine DISTANT→APPROACH→ARRIVAL→
+  SETTLED pure in uArc; curl-noise swarm → glyph lock-in with seed stagger; flare =
+  arc-distance attack/decay envelope ×kind (tendrils/dust never flare); sprite-CoC
+  fake DoF; right-stage NDC gate; aCull/uKeep flicker-free shed), `beacon-field.ts`
+  (merged buffer: /about 7×900-pt icon glyphs + tendrils(1-2/beacon ×36) + 2000 dust
+  = ONE draw call + ribbon = 2 total; setDimmed writes aDim ranges for the /work
+  filter). Bloom+Vignette pulled forward from Phase 4 (arena config verbatim,
+  {bloom && composer} one-way ratchet on first strain; flares survive bloomless by
+  design). Iterated via headless screenshots: (1) stroke-icon glyphs dimmer than
+  filled numerals → floor 0.30→0.42, denser worldSize 2.3+0.9w, min size 1.5;
+  (2) DEAD MID-GAPS — settled beacon behind camera, next anchor outside the frustum
+  on /about's bendy gaps → widened approach window to a full gap (-1.5G) AND added
+  the camera AIM ASSIST: mid-gap the look blends toward the approached anchor OFFSET
+  camera-left so the resolving glyph rides ~NDC+0.5 (first attempt aimed AT the
+  anchor = centred it over the card column; fixed), blend fades to zero at dwell
+  centres so the solver's exact-NDC pose still holds where the guarantee is asserted.
+  Verified: /work numeral "08" resolves legibly beside its card; /about Compass glyph
+  resolves w/ bloom halo in the right lane; finale constellation (all beacons strung
+  along the receding path) reads behind the footer CTA. Zero console/shader errors
+  both routes. **LH: about 99/100/0, work 99/100/0 desktop; mobile 86-87/100/0
+  untouched.** REMAINING: Phase 3 real-GPU feel pass (dwell slopes, banking, flare
+  loudness — needs the owner's eyes), Phase 4 full multi-rung tier ladder
+  (createTierLadder; mini-ladder shipped: strain→bloom-off→uSize shed), Phase 5
+  PRODUCT.md/DESIGN.md licensed-exception amendment + full invariant suite
+  (context-loss sim, route-flip memory, no-JS re-verify) + audit numbers.
+
 - 2026-07-09 — **FLIGHT Phase 1 ✅ (skeleton + governance shell).** Owner answered
   timelineplan.md §16: GO / all 9 /work beacons / content frozen as-is / any-laptop
   floor (tier ladder guards). Shipped: `flight-progress.ts` (SpineProgress bus, types

@@ -51,6 +51,7 @@ export function WorkGeoline({ projects, covers, filters }: WorkGeolineProps) {
         sectionRef={sectionRef}
         spine={spine}
         beats={beats}
+        glyphSet="numerals"
         idleArm
         onLiveChange={setFlightLive}
       />
