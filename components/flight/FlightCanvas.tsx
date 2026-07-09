@@ -405,8 +405,12 @@ export default function FlightCanvas(props: FlightCanvasProps) {
           { once: true },
         );
         if (process.env.NODE_ENV !== "production") {
-          (window as unknown as Record<string, unknown>).__flightLoseContext = () =>
+          const w = window as unknown as Record<string, unknown>;
+          w.__flightLoseContext = () =>
             gl.getContext().getExtension("WEBGL_lose_context")?.loseContext();
+          // invariant suite: per-mount GPU resource counts must be identical on
+          // every visit (route-flip /about↔/work leaks show up as drift here)
+          w.__flightGlInfo = () => ({ ...gl.info.memory, calls: gl.info.render.calls });
         }
       }}
     >

@@ -116,6 +116,18 @@ isolation/mix-blend on a full-screen wrapper) — it would kill the
   `.hero-fallback` iridescent radials carry it until then and on mobile/no-WebGL/reduced-motion).
   The **drawn line** (DrawSVG contour ticks) is its sitewide echo. *Fold one is the one licensed
   exception to accent ≤ ~5% (P2 / new_plan Big Swing 1).*
+- **"The Flight"** (/about, /work) — the second licensed WebGL exception (see the
+  PRODUCT.md Anti-references amendment): a scroll-driven flythrough staged in the empty
+  right half behind the DOM timeline. The camera rides a spline past one particle
+  "beacon" per milestone — a curl-noise swarm that condenses into that milestone's own
+  glyph (the card's lucide icon on /about, JetBrains Mono numerals on /work), flares on
+  arrival, and settles into the constellation the finale pull-back reveals. Two draw
+  calls total (merged points buffer + path ribbon); every particle state and the camera
+  are pure functions of the Spine's scrubbed progress (`scrub: 0.4` stays the single
+  smoothing stage — no canvas-side lerp, ever); governed by the full mount gate +
+  `createTierLadder` (soft shed → T1 → T2 → dead poster). The DOM Constellation Spine
+  is byte-identical with the canvas on or off; spec + reconciliation history live in
+  `timelineplan.md`.
 - **Choreographed opening** (desktop only — `pointer:fine`, first visit): a
   session-once preloader scramble-decodes "JAY DHAKAN" from binary, then a `jdFlow`
   clip wipe reveals an orchestrated hero (nav slide → masked H1 line-rise → copy

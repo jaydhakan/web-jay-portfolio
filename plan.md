@@ -109,6 +109,29 @@ Legend: ⬜ todo · 🔶 in progress · ✅ done (build green)
 
 *(appended at each checkpoint — newest first)*
 
+- 2026-07-09 — **FLIGHT Phase 5 ✅ (docs + invariant suite + final audit) — THE FLIGHT
+  IS FULLY SHIPPED** (Phases 1/2/4/5; Phase 3 feel pass intentionally last, owner-gated).
+  Docs: PRODUCT.md Anti-references gained the §12.6 licensed-exception paragraph
+  verbatim (two surfaces, A11y 100/CLS 0/mobile untouched hard, desktop ≥85 relaxed);
+  DESIGN.md Signature section gained "The Flight" entry pointing at timelineplan.md.
+  INVARIANT SUITE (all pass): (1) no-JS — server HTML has full Spine (7/9 nodes, all
+  card content) and ZERO canvas; (2) Spine snapshot — canvas-on vs WebGL-stubbed-off
+  production loads, full-scroll settled, CANONICALIZED subtree (sorted attrs,
+  browser-parsed style declarations — raw outerHTML is formatting-sensitive to
+  whether SSR or JS serialized last, and naive style-splitting breaks on LQIP
+  url(data:;) semicolons) IDENTICAL on both routes, 182/296 nodes; (3) route-flip
+  memory — 3× client-side /about↔/work nav cycles, `__flightGlInfo` (new dev-only
+  hook next to __flightLoseContext) flat at g3/t17 every visit, canvas live every
+  visit; (4) context-loss sim — __flightLoseContext → canvas unmounts, data-flight-live
+  clears (head-dot glow handed back), poster stays, Spine 9/9 intact, zero page
+  errors. **FINAL AUDIT (prod): work-desktop 99 / about-desktop 88-96-99 across 3
+  runs (TBT Lantern flake — /about's canvas can't even mount in an unscrolled trace;
+  gate ≥85 holds every run) / mobile 87-89 / A11y 100 ALL / BP 100 / SEO 100 / CLS
+  0.000 ALL.** REMAINING: Phase 3 ONLY — the real-GPU feel pass (dwell slopes,
+  banking, flare loudness, glyph sizes; hard 3-session timebox; camera stays a pure
+  function of p — grep gate). Needs the owner scrolling /about + /work on real
+  hardware and giving feel notes.
+
 - 2026-07-09 — **FLIGHT Phase 4 ✅ (full multi-rung tier ladder).** Shipped
   `createTierLadder` in lib/webgl-governance.ts (additive; createFpsGuard untouched):
   same rolling average + the e2f001f spike clamp (`ms>100 → return`), but walks DOWN

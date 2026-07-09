@@ -23,6 +23,19 @@ Precise, confident, direct. "Boutique solo developer: focused output, no fluff, 
 - Agency-speak and filler verbs ("elevate", "seamless", "unleash"); fake-precise invented metrics.
 - Anything that reads "AI made this": effect-stacking, purple-gradient slop, dead placeholder content.
 
+> **Licensed exception — "The Flight" (/about, /work):** the one-hero-shader rule gains
+> exactly two more surfaces: a single governed, scroll-driven WebGL flythrough per
+> timeline route, staged in the empty right half of the viewport behind the DOM
+> timeline. It is progressive enhancement in the strict sense: the DOM Constellation
+> Spine remains the authoritative, complete experience — the canvas is `aria-hidden`,
+> `pointer-events-none`, position-fixed behind the page, mounts only on desktop-motion
+> devices with WebGL, and vanishes (poster restored, DOM untouched) on reduced motion,
+> mobile, no-JS, or GPU context loss. Hard gates for these two routes only:
+> Accessibility stays 100, CLS stays 0, mobile scores stay untouched, and desktop
+> Lighthouse Performance may relax from ≥95 to **≥85** — the cost of the one deliberate
+> set-piece, paid nowhere else on the site. Everything else in this document (real
+> numbers, no effect-stacking, motion as proof) still applies to it.
+
 ## Design Principles
 
 1. **Practice what you preach.** The site is the case study: performance, accessibility, and polish are the proof of engineering quality.
