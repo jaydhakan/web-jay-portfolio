@@ -51,7 +51,11 @@ export function WorkGeoline({ projects, covers, filters }: WorkGeolineProps) {
         sectionRef={sectionRef}
         spine={spine}
         beats={beats}
-        glyphSet="numerals"
+        holo={projects.map((p, i) => ({
+          kicker: `${String(i + 1).padStart(2, "0")} · ${p.category}`,
+          title: p.title,
+          line: p.result,
+        }))}
         idleArm
         onLiveChange={setFlightLive}
       />

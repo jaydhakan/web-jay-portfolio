@@ -18,10 +18,13 @@ const CHARS = "01<>-_/[]=+";
  * settle would push LCP out by seconds. Reduced motion / no-JS keep the static
  * text (and a screen reader always reads the real sr-only copy, never the glyphs).
  *
- * CLS 0: scramble glyphs are narrower than the real text, so mid-animation the
- * heading can rewrap and shift everything below it. An invisible copy of the
- * final text sits in the same grid cell and pins the box; the scrambling layer
- * paints over it without ever owning layout.
+ * CLS 0: mid-animation a random glyph string can wrap DIFFERENTLY than the real
+ * text, and a grid cell is as tall as its tallest item — so a same-cell scramble
+ * layer could still grow the heading for a few frames and shift the whole page
+ * below (caught by the /about CLS probe: two equal shifts ~40ms apart = wrap,
+ * then unwrap). The invisible copy of the final text owns the box ALONE; the
+ * scrambling layer is absolutely positioned over it (out of flow, overflow
+ * clipped) so no glyph frame can ever touch layout.
  */
 export function ScrambleHeading({
   text,
@@ -54,13 +57,13 @@ export function ScrambleHeading({
   );
 
   return (
-    <Tag className={cn("grid", className)}>
+    <Tag className={cn("relative grid", className)}>
       <span className="sr-only">{text}</span>
-      {/* Invisible sizer — the real text reserves the final box (CLS 0). */}
+      {/* Invisible sizer — the real text ALONE reserves the final box (CLS 0). */}
       <span aria-hidden className="invisible col-start-1 row-start-1 select-none">
         {text}
       </span>
-      <span ref={ref} aria-hidden className="col-start-1 row-start-1">
+      <span ref={ref} aria-hidden className="absolute inset-0 overflow-hidden">
         {text}
       </span>
     </Tag>

@@ -109,6 +109,28 @@ Legend: ⬜ todo · 🔶 in progress · ✅ done (build green)
 
 *(appended at each checkpoint — newest first)*
 
+- 2026-07-13 — **FLIGHT HOLO PIVOT ✅ (owner-directed: hologram cards replace glyphs).**
+  Owner feedback on the shipped Flight: timeline great, but numerals too abstract —
+  wants "the cards with those information" in the right lane; confirmed HOLOGRAPHIC
+  CARD option, applied to BOTH routes. Shipped (spec: timelineplan.md §17): procedural
+  halo sampler (ring+orbit+scan-ticks, glyph-data.ts + rasterization DELETED, no font
+  wait), `haloWorldSize 4.8+1.2w`; FlightBackdrop `HoloLayer` (DOM cards L3.5 inside
+  the aria-hidden wrapper: kicker/title/`text-ok` line, near-opaque gradient, glow
+  child); `driveHolo` in FlightCanvas projects anchors → transform/scale/opacity per
+  frame, card scale = 76% of the ring's projected width, `holoEnvelope` pure in the
+  warped arc (forms after the swarm, flare→glow, NDC gate + behind-camera guard
+  mirrored); glyphSet prop gone, adapters pass HoloItem[] (/work "06 · AI & Agents" +
+  result metric, /about "Award · 2024" + capability tags). Foam fix: flare size-pop
+  1.4→0.8, uSize 26, haloN 520. **BYCATCH — real CLS bug found+fixed:** /about
+  0.051 (3/6 REAL loads, not Lantern): ScrambleHeading's scramble layer shared the
+  grid cell with the sizer, random glyphs re-wrapped and grew the h1 for ~40ms
+  (grid row = tallest item); animated layer now absolute+overflow-hidden → 12/12
+  runs 0.000. VERIFIED: Spine hash byte-UNCHANGED from pre-pivot both routes;
+  route-flip gl.info flat g3/t17; context-loss kills canvas+holo together; **LH
+  about 99 / work 98 desktop, mobile 88/86, A11y 100 ALL, CLS 0.000 ALL.**
+  REMAINING: Phase 3 feel pass on the owner's real GPU (now including holo card
+  timing/size taste).
+
 - 2026-07-09 — **FLIGHT Phase 5 ✅ (docs + invariant suite + final audit) — THE FLIGHT
   IS FULLY SHIPPED** (Phases 1/2/4/5; Phase 3 feel pass intentionally last, owner-gated).
   Docs: PRODUCT.md Anti-references gained the §12.6 licensed-exception paragraph

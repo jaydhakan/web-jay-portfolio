@@ -1,12 +1,21 @@
 "use client";
 
-import { useCallback, useState, type RefObject } from "react";
+import { useCallback, useRef, useState, type RefObject } from "react";
 import dynamic from "next/dynamic";
 import { useArmedAfterIdle, useGovernedCanvas } from "@/lib/webgl-governance";
 import type { Beat } from "@/components/timeline/argmax";
 import type { SpineProgress } from "@/components/timeline/flight-progress";
 
 const FlightCanvas = dynamic(() => import("./FlightCanvas"), { ssr: false });
+
+/** Content of one hologram card (holo pivot): the readable form of a beacon. */
+export type HoloItem = {
+  /** mono eyebrow — "06 · AI & Agents" on /work, "Award · 2024" on /about */
+  kicker: string;
+  title: string;
+  /** one key line — the result metric (/work) or capability tags (/about) */
+  line?: string;
+};
 
 /**
  * FlightBackdrop — the governed mount shell for "The Flight" (timelineplan.md §12).
@@ -31,7 +40,7 @@ export function FlightBackdrop({
   sectionRef,
   spine,
   beats,
-  glyphSet,
+  holo,
   idleArm = false,
   onLiveChange,
 }: {
@@ -40,14 +49,16 @@ export function FlightBackdrop({
   sectionRef: RefObject<HTMLDivElement | null>;
   spine: RefObject<SpineProgress>;
   beats: Beat[];
-  /** Beacon glyphs: /about resolves the cards' lucide icons; /work resolves numerals. */
-  glyphSet: "icons" | "numerals";
+  /** Hologram card per beacon (index-locked to beats) — see HoloItem. */
+  holo: HoloItem[];
   /** /work only: its timeline sits near the fold, so additionally wait for idle or
    *  first input before mounting (keeps the chunk out of Lighthouse's TBT window). */
   idleArm?: boolean;
   /** Adapter mirrors this into data-flight-live (head-dot glow handoff). */
   onLiveChange?: (live: boolean) => void;
 }) {
+  // The canvas drives these DOM cards every frame (driveHolo) — no tweens, no state.
+  const holoLayerRef = useRef<HTMLDivElement>(null);
   const { show, inView } = useGovernedCanvas<HTMLDivElement>({
     ref: sectionRef,
     profile: "desktop-motion",
@@ -82,7 +93,7 @@ export function FlightBackdrop({
             <FlightCanvas
               beats={beats}
               spine={spine}
-              glyphSet={glyphSet}
+              holoLayer={holoLayerRef}
               running={inView}
               onLive={handleLive}
               onDead={handleDead}
@@ -92,6 +103,43 @@ export function FlightBackdrop({
           <div className="absolute inset-0 bg-base/25" />
           {/* L3 — left-column guard: extra darkening under the card column */}
           <div className="absolute inset-0 [background:linear-gradient(90deg,oklch(14.5%_0.012_278/0.40)_0%,oklch(14.5%_0.012_278/0.28)_50%,transparent_72%)]" />
+          {/* L3.5 — HOLOGRAM CARDS (holo pivot): child k is beacon k's readable card.
+              The canvas positions/scales/fades these every frame as a pure function
+              of scroll (driveHolo) — transform+opacity only, so no layout ever runs.
+              Inside the aria-hidden wrapper: duplicate content, invisible to AT. */}
+          <div ref={holoLayerRef} className="absolute inset-0 [perspective:1400px]">
+            {holo.map((item, i) => (
+              <div
+                key={i}
+                className="absolute left-0 top-0 w-[320px] rounded-[16px] p-[18px] opacity-0 will-change-[transform,opacity]
+                  bg-[linear-gradient(180deg,oklch(20%_0.016_278/0.86),oklch(14.5%_0.012_278/0.78))]
+                  shadow-[0_0_0_1px_oklch(66%_0.19_285/0.28),0_18px_50px_-22px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(235,236,250,0.10)]"
+              >
+                {/* glow layer — the canvas maps the arrival flare onto its opacity */}
+                <div
+                  aria-hidden
+                  className="absolute inset-0 rounded-[inherit] opacity-0
+                    shadow-[0_0_0_1px_oklch(86%_0.115_207/0.75),0_0_44px_-6px_oklch(86%_0.115_207/0.65),0_0_90px_-12px_oklch(66%_0.19_285/0.55)]"
+                />
+                {/* scan edge — thin cyan leading line, echoes the DOM cards */}
+                <span
+                  aria-hidden
+                  className="absolute left-[18px] top-0 h-[2px] w-[46px] rounded-[2px] bg-[linear-gradient(90deg,var(--color-accent),var(--color-accent-cyan))] opacity-90"
+                />
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent-cyan">
+                  {item.kicker}
+                </p>
+                <p className="mt-1.5 font-display text-[19px] font-semibold leading-[1.22] tracking-[-0.01em] text-ink">
+                  {item.title}
+                </p>
+                {item.line ? (
+                  <p className="mt-2 font-mono text-[11.5px] leading-snug text-ok">
+                    ↗ {item.line}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
         </>
       )}
 

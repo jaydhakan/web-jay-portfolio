@@ -294,6 +294,29 @@ export function applyRig(
   return s;
 }
 
+// ── Holo-card envelopes (holo pivot): DOM card timing, pure in the warped arc ──
+export type HoloEnvelope = {
+  /** Card presence 0→1 (opacity/scale driver). */
+  vis: number;
+  /** Arrival flare 0→1 (glow-layer driver; mirrors the shader's attack·decay). */
+  flare: number;
+};
+
+/**
+ * The DOM hologram locks in LATER than its particle halo (swarm condenses first,
+ * then the readable card "resolves" inside it) and dissolves once the camera flies
+ * past. Same arc-distance envelope family as the shader — spatial shape, pure in
+ * the warped arc s, so scrubbing backward replays it exactly. NOT a tween.
+ */
+export function holoEnvelope(s: number, stationS: number, gap: number, weight: number): HoloEnvelope {
+  const d = s - stationS;
+  const formIn = THREE.MathUtils.smoothstep(d, -0.55 * gap, -0.06 * gap);
+  const fadeOut = 1 - THREE.MathUtils.smoothstep(d, 0.30 * gap, 0.85 * gap);
+  const attack = THREE.MathUtils.smoothstep(d, -0.10 * gap, 0);
+  const flare = attack * Math.exp(-Math.max(d, 0) / (0.28 * gap)) * (0.6 + 0.9 * weight);
+  return { vis: formIn * fadeOut, flare: clamp01(flare) };
+}
+
 // ── Beacon anchors: the exact right-45% guarantee (timelineplan.md §10.4) ─────
 export type BeaconAnchor = {
   pos: THREE.Vector3;

@@ -109,7 +109,9 @@ export const BEACON_VERT = /* glsl */ `
     vFade = 1.0 / (1.0 + coc * coc * 2.5);
     vB = mix(0.42, 1.0, form) * mix(1.0, 0.55, behind) * mix(1.0, 0.22, aDim) * gate;
 
-    float sizeEnv = (0.75 + 0.6 * f + 1.4 * flare) * (1.0 + coc * 1.6) * aSizeJ;
+    // flare size-pop kept modest (0.8): the halo ring reads as fine luminous dust,
+    // not foam — brightness (vFlare in the fragment) carries the arrival, not girth
+    float sizeEnv = (0.75 + 0.6 * f + 0.8 * flare) * (1.0 + coc * 1.6) * aSizeJ;
     float persp = 24.0 / max(4.0, -mv.z);
     gl_PointSize = clamp(uSize * uPixelRatio * sizeEnv * persp * 0.14, 1.5, 64.0);
   }

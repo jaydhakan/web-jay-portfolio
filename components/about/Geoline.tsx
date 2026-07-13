@@ -55,7 +55,11 @@ export function Geoline({ entries }: { entries: TimelineEntry[] }) {
         sectionRef={sectionRef}
         spine={spine}
         beats={ABOUT_SCORE}
-        glyphSet="icons"
+        holo={entries.map((e, i) => ({
+          kicker: `${(KIND[i] ?? KIND[KIND.length - 1]).tag} · ${e.period}`,
+          title: e.title,
+          line: e.connections?.slice(0, 3).join(" · "),
+        }))}
         onLiveChange={setFlightLive}
       />
       <SerpentineTimeline

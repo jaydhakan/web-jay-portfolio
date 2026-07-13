@@ -18,6 +18,11 @@ const COL_A = "#6b7cff";
 const COL_B = "#8b7cff";
 const COL_C = "#67e8f9";
 
+/** Halo plane size in world units (holo pivot): the ring must FRAME the DOM
+ *  hologram card, so it's much wider than the old glyph plane was. Shared with
+ *  FlightCanvas's holo driver, which scales the card off this ring's projection. */
+export const haloWorldSize = (weight: number) => 4.8 + 1.2 * weight;
+
 /** indigo → violet → cyan (chronology = hue). */
 export function rampColor(t: number): THREE.Color {
   const a = new THREE.Color(COL_A);
@@ -113,9 +118,7 @@ export function buildBeaconField(spec: BeaconFieldSpec): BeaconField {
     const rng = mulberry32(0x9e3779b9 ^ (seed + k * 101));
     const A = anchors[k];
     const w = beats[k]?.weight ?? 0.5;
-    // slightly tighter than the spec's 2.6+1.0w: stroke icons are sparse, and a
-    // denser dot lattice reads brighter (the filled numerals were fine either way)
-    const worldSize = 2.3 + 0.9 * w;
+    const worldSize = haloWorldSize(w);
     const rampT = n <= 1 ? 1 : k / (n - 1);
     const locals = glyphLocals[k];
     const N = locals.length / 3;

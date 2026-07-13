@@ -452,3 +452,44 @@ entries are still `TODO(JAY)` placeholders).
    stable against wording, but the ORDER must freeze before Phase 2.
 4. **Reference laptop:** name the actual mid-range 60Hz machine the "no visible stutter"
    floor is graded on (otherwise it defaults to whatever Jay tests on, undocumented).
+
+## 17. Addendum — the HOLO pivot (2026-07-13, owner-confirmed)
+
+After scrolling the shipped Phases 1–5, the owner called the timeline great but the
+numeral glyphs too abstract: *"instead of numbers … the cards with those information
+come up."* Confirmed via option pick: **holographic card** (crisp DOM card materializes
+in the right lane; particles become its aura) on **both** routes (/about drops the icon
+glyphs too).
+
+What changed vs §11 (everything else in this spec still holds):
+
+- **Beacons no longer resolve into glyph/numeral shapes.** `glyph-data.ts` and the
+  rasterize→alpha-scan pipeline are deleted; `sample-points.ts` now generates a
+  procedural **halo**: main ellipse ring (62%) + tilted outer orbit (26%) + two scan
+  ticks (12%), pure math, no font wait. Plane size grew to `haloWorldSize(w) =
+  4.8 + 1.2w` so the ring FRAMES the card.
+- **The readable layer is DOM**: `FlightBackdrop` renders a `HoloLayer` (L3.5, inside
+  the aria-hidden fixed wrapper, only when the canvas is mounted) with one card per
+  beacon — mono kicker ("06 · AI & Agents" / "Award · 2024"), display title, one
+  `text-ok` result/tags line, near-opaque gradient panel (backdrop-blur stays banned),
+  pre-painted glow child. Adapters own the content mapping (HoloItem[]).
+- **`driveHolo` (FlightCanvas, module scope)** positions the cards every frame:
+  projects each anchor through the live camera → translate3d/scale/opacity; card scale
+  = 76% of the halo ring's PROJECTED width (nested on every viewport, grows on
+  approach); visibility = `holoEnvelope` in flight-path.ts (forms later than the
+  particles, dissolves past 0.85·gap, arrival flare drives the glow child); the
+  shader's right-stage NDC gate and behind-camera guard are mirrored. Transform +
+  opacity ONLY — the layer can never run layout. Pure in the warped arc: scroll back
+  replays it in reverse. glyphSet prop is gone.
+- **Foam fix:** flare size-pop 1.4→0.8, uSize 30→26, haloN 460→520 — the ring reads
+  as fine luminous dust at full flare, brightness carries the arrival.
+- **Bycatch:** the /about CLS probe caught a REAL pre-existing shift (0.051, 3/6 real
+  loads): ScrambleHeading's same-grid-cell scramble layer could re-wrap mid-animation
+  and grow the h1 (grid row = tallest item — the invisible sizer only set a floor).
+  Fixed: animated layer is now absolute+overflow-hidden over the sizer. 6/6 real
+  loads + 6/6 Lighthouse runs at 0.000 after.
+
+Verified (full battery): Spine subtree hash UNCHANGED from pre-pivot on both routes
+(canvas on vs WebGL off); gl.info flat g3/t17 over 3× route flips; context-loss kills
+canvas + holo layer together, Spine intact; LH about 99/work 98 desktop, mobile 88/86,
+A11y 100 all, CLS 0.000 all.

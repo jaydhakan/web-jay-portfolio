@@ -13,37 +13,43 @@ import {
   FOV_SIGMA,
   applyRig,
   buildRig,
+  holoEnvelope,
   solveBeaconAnchors,
   type FlightRig,
 } from "./flight-path";
-import { ABOUT_GLYPHS } from "./glyph-data";
-import { fontsReady, mulberry32, sampleGlyph, sampleNumeral } from "./sample-points";
-import { buildBeaconField, type BeaconField } from "./beacon-field";
+import { HALO_RING_RX, mulberry32, sampleHalo } from "./sample-points";
+import { buildBeaconField, haloWorldSize, type BeaconField } from "./beacon-field";
 
 silenceThreeClockDeprecation();
 
 /**
- * FlightCanvas — the live scene of "The Flight" (timelineplan.md §9–§13).
+ * FlightCanvas — the live scene of "The Flight" (timelineplan.md §9–§13; holo pivot
+ * plan.md 2026-07-13).
  *
- * Phase 2: the particle-glyph beacon field. Each milestone is a swarm that resolves
- * from curl-noise into its glyph (the SAME lucide icon its card wears; /work uses
- * JetBrains Mono numerals), flares on arrival, and settles into the constellation the
- * finale pull-back reveals. Beacons + ghost tendrils + ambient dust are ONE draw call
- * (merged buffer, beacon-field.ts); the path ribbon is the second; that's the scene.
+ * Each milestone is a curl-noise swarm that condenses into a luminous HALO ring and
+ * flares on arrival; the readable information rides a crisp DOM hologram card that
+ * this scene positions INSIDE the ring every frame (FlightBackdrop's HoloLayer —
+ * `driveHolo` below projects each beacon anchor to CSS pixels and drives the cards'
+ * transform/opacity; no tweens, ever). The settled halos string into the constellation
+ * the finale pull-back reveals. Halos + ghost tendrils + ambient dust are ONE draw
+ * call (merged buffer, beacon-field.ts); the path ribbon is the second; that's the
+ * scene.
  *
- * Hard rules (the ARGMAX postmortem): the camera and every particle state are PURE
- * functions of `spine.current.p` — no canvas-side lerp/warp-clock, ever. All mutable
- * sim state lives in lazily-created refs (react-compiler ref-laundering); scene
- * mutation helpers are module-scope.
+ * Hard rules (the ARGMAX postmortem): the camera, every particle state AND every
+ * holo card style are PURE functions of `spine.current.p` — no canvas-side
+ * lerp/warp-clock, ever. All mutable sim state lives in lazily-created refs
+ * (react-compiler ref-laundering); scene mutation helpers are module-scope.
  */
 
 const COL_B = "#8b7cff";
+/** Design width of a holo card at scale 1 (must match HoloLayer's w-[320px]). */
+const HOLO_BASE_W = 320;
 
 export type FlightCanvasProps = {
   beats: Beat[];
   spine: React.RefObject<SpineProgress>;
-  /** Which glyphs the beacons resolve into. */
-  glyphSet: "icons" | "numerals";
+  /** HoloLayer root — child k is beacon k's hologram card (see FlightBackdrop). */
+  holoLayer: React.RefObject<HTMLDivElement | null>;
   /** false = keep the context alive but stop the frameloop (off-view pause). */
   running?: boolean;
   /** Fires once after the first real frames render (head-dot glow handoff). */
@@ -53,7 +59,7 @@ export type FlightCanvasProps = {
 };
 
 type Tier = {
-  glyphN: number;
+  haloN: number;
   dustCount: number;
   coc: number;
   baseSize: number;
@@ -68,8 +74,12 @@ type Sim = {
   liveTicks: number;
   ribbon: THREE.Line | null;
   field: BeaconField | null;
-  /** Solved anchor positions (for the mid-gap aim assist). */
+  /** Cached local halo samples (procedural, per beacon). */
+  haloLocals: Float32Array[];
+  /** Solved anchor positions (aim assist + holo card projection). */
   anchorPts: THREE.Vector3[];
+  /** Last written per-card visibility (skip DOM writes while a card stays hidden). */
+  holoVis: number[];
   dimmedId: boolean[] | undefined;
   tier: Tier;
   /** Ladder rung (0=T0 … 3=dead) — a one-way ratchet (§13.3). */
@@ -80,16 +90,15 @@ type Sim = {
 };
 
 /** Initial quality tier — decided once at mount; the ladder only moves DOWN from here. */
-function pickTier(glyphSet: "icons" | "numerals"): Tier {
+function pickTier(): Tier {
   const fine =
     typeof window !== "undefined" &&
     window.matchMedia("(pointer: fine)").matches &&
     window.matchMedia("(hover: hover)").matches &&
     window.innerWidth >= 1280;
-  const icons = glyphSet === "icons";
   return fine
-    ? { glyphN: icons ? 900 : 700, dustCount: 2000, coc: 1, baseSize: 30, post: true }
-    : { glyphN: icons ? 540 : 420, dustCount: 1200, coc: 0.5, baseSize: 30, post: true };
+    ? { haloN: 520, dustCount: 2000, coc: 1, baseSize: 26, post: true }
+    : { haloN: 340, dustCount: 1200, coc: 0.5, baseSize: 26, post: true };
 }
 
 /** `?flighttier=T1|T2` — forced start rung for tier screenshots / weak-GPU testing. */
@@ -138,15 +147,82 @@ function applyRung(
   }
 }
 
+// ── the holo card driver: DOM styles as a pure function of the warped arc ──────
+const _hv = new THREE.Vector3();
+const _hp = new THREE.Vector3();
+
+/**
+ * Projects each beacon anchor through the LIVE camera and drives its hologram card
+ * (transform/opacity + glow-layer opacity). The card is designed at HOLO_BASE_W px
+ * and scaled to ~76% of its halo ring's PROJECTED width, so card and ring stay
+ * nested on every viewport and the card grows as the camera approaches — no
+ * layout writes, only transform/opacity (contained in the fixed backdrop layer).
+ * Module-scope on purpose: mutates DOM + reads Sim (react-compiler ref-laundering).
+ */
+function driveHolo(
+  S: Sim,
+  layer: HTMLDivElement,
+  camera: THREE.PerspectiveCamera,
+  s: number,
+  w: number,
+  h: number,
+  dimmed: boolean[] | undefined,
+) {
+  const cards = layer.children;
+  const stations = S.rig.path.stationS;
+  const gap = 1 / Math.max(1, stations.length);
+  camera.updateMatrixWorld();
+  for (let k = 0; k < cards.length && k < stations.length; k++) {
+    const weight = S.rig.beats[k]?.weight ?? 0.5;
+    const env = holoEnvelope(s, stations[k], gap, weight);
+    let vis = env.vis;
+
+    const A = S.anchorPts[k];
+    let x = 0;
+    let y = 0;
+    let scale = 1;
+    if (A && vis > 0.004) {
+      // hide when the anchor is behind/at the camera (projection would mirror)
+      _hv.copy(A).applyMatrix4(camera.matrixWorldInverse);
+      if (_hv.z > -0.5) {
+        vis = 0;
+      } else {
+        _hp.copy(A).project(camera);
+        x = (_hp.x * 0.5 + 0.5) * w;
+        y = (-_hp.y * 0.5 + 0.5) * h;
+        // same right-stage gate as the shader: never over the card column
+        vis *= THREE.MathUtils.smoothstep(_hp.x, -0.1, 0.15);
+        // ring's projected half-width → card scale (76% of ring width); measured
+        // along the CAMERA's right axis — exact at dwell, where the anchor plane
+        // faces the camera by construction (solver guarantee)
+        _hv.set(1, 0, 0).applyQuaternion(camera.quaternion);
+        _hv.multiplyScalar(HALO_RING_RX * haloWorldSize(weight)).add(A);
+        _hv.project(camera);
+        const ringPx = Math.abs(((_hv.x - _hp.x) * 0.5) * w);
+        scale = ((ringPx * 2 * 0.76) / HOLO_BASE_W) * (0.94 + 0.06 * env.vis);
+      }
+    } else {
+      vis = 0;
+    }
+    if (dimmed?.[k]) vis *= 0.22;
+
+    // skip DOM writes while a card stays hidden
+    if (vis < 0.004 && S.holoVis[k] < 0.004) continue;
+    S.holoVis[k] = vis;
+
+    const el = cards[k] as HTMLElement;
+    el.style.opacity = vis < 0.004 ? "0" : vis.toFixed(3);
+    if (vis >= 0.004) {
+      el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -50%) scale(${scale.toFixed(3)})`;
+      const glow = el.firstElementChild as HTMLElement | null;
+      if (glow) glow.style.opacity = Math.min(1, env.flare).toFixed(3);
+    }
+  }
+}
+
 /** Rebuild everything that depends on (rig, aspect): beacon anchors → field, ribbon.
  *  Module-scope on purpose: mutates scene objects (react-compiler ref-laundering). */
-function rebuildStage(
-  S: Sim,
-  group: THREE.Group,
-  glyphLocals: Float32Array[] | null,
-  aspect: number,
-  dpr: number,
-) {
+function rebuildStage(S: Sim, group: THREE.Group, aspect: number, dpr: number) {
   // path ribbon
   const geo = new THREE.BufferGeometry();
   geo.setAttribute("position", new THREE.BufferAttribute(S.rig.path.posLut.slice(), 3));
@@ -166,12 +242,12 @@ function rebuildStage(
     S.ribbon.geometry = geo;
   }
 
-  // beacon anchors (also feeds the camera's mid-gap aim assist)
+  // beacon anchors (aim assist + holo card projection)
   const anchors = solveBeaconAnchors(S.rig, aspect);
   S.anchorPts = anchors.map((a) => a.pos);
 
-  // beacon field (needs the cached local glyph samples)
-  if (!glyphLocals) return;
+  // halo field (local samples are procedural + cached in the Sim)
+  const glyphLocals = S.haloLocals;
   if (S.field) {
     group.remove(S.field.points);
     S.field.dispose();
@@ -206,51 +282,16 @@ function rebuildStage(
   group.add(S.field.points);
 }
 
-function Scene({ beats, spine, glyphSet, onLive, onDead }: FlightCanvasProps) {
+function Scene({ beats, spine, holoLayer, onLive, onDead }: FlightCanvasProps) {
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
   const dpr = useThree((s) => s.viewport.dpr);
   const setDpr = useThree((s) => s.setDpr);
   const simRef = useRef<Sim | null>(null);
   const groupRef = useRef<THREE.Group>(null);
-  const glyphLocalsRef = useRef<Float32Array[] | null>(null);
-  const [glyphsReady, setGlyphsReady] = useState(false);
   // Bloom is a one-way ratchet (arena doctrine): T2 drops it for the session;
   // flares survive bloomless via the size-pop + hot tint (palette rule 5).
-  const [bloom, setBloom] = useState(() => pickTier(glyphSet).post && readTierOverride() < 2);
+  const [bloom, setBloom] = useState(() => pickTier().post && readTierOverride() < 2);
   const n = beats.length;
-
-  // ── glyph prep: rasterize→sample ONCE per glyph; world-baking happens per rebuild ──
-  useEffect(() => {
-    let cancelled = false;
-    const tier = pickTier(glyphSet);
-    const prep = async () => {
-      if (glyphSet === "numerals") await fontsReady();
-      if (cancelled) return;
-      const locals: Float32Array[] = [];
-      for (let i = 0; i < n; i++) {
-        const rng = mulberry32(0x51f7 ^ (i * 977));
-        if (glyphSet === "icons") {
-          if (process.env.NODE_ENV !== "production" && n !== ABOUT_GLYPHS.length) {
-            console.warn(
-              `[flight] glyph lockstep: ${n} beats vs ${ABOUT_GLYPHS.length} glyphs — check data/content.ts timeline[] vs glyph-data.ts`,
-            );
-          }
-          const def = ABOUT_GLYPHS[Math.min(i, ABOUT_GLYPHS.length - 1)];
-          locals.push(sampleGlyph(def, tier.glyphN, rng));
-        } else {
-          locals.push(sampleNumeral(String(i + 1).padStart(2, "0"), tier.glyphN, rng));
-        }
-      }
-      if (!cancelled) {
-        glyphLocalsRef.current = locals;
-        setGlyphsReady(true);
-      }
-    };
-    void prep();
-    return () => {
-      cancelled = true;
-    };
-  }, [beats, glyphSet, n]);
 
   // Dispose imperative scene objects with the component.
   useEffect(() => {
@@ -268,12 +309,15 @@ function Scene({ beats, spine, glyphSet, onLive, onDead }: FlightCanvasProps) {
 
   useFrame((state, delta) => {
     if (!simRef.current) {
-      const tier = pickTier(glyphSet);
+      const tier = pickTier();
       const startRung = readTierOverride();
       const S: Sim = {
         rig: buildRig(beats, spine.current?.offsets ?? []),
         offsetsId: spine.current?.offsets ?? [],
         aspect: state.size.width / Math.max(1, state.size.height),
+        // procedural halo samples — pure math, no rasterization, no font wait
+        haloLocals: beats.map((_, i) => sampleHalo(tier.haloN, mulberry32(0x51f7 ^ (i * 977)))),
+        holoVis: beats.map(() => 0),
         // The full ladder (§13.3): soft shed (uSize, reversible) → T1 → T2 → T3,
         // one rung per 3s of *continuous* strain. Tiers are one-way ratchets.
         guard: createTierLadder({
@@ -309,7 +353,7 @@ function Scene({ beats, spine, glyphSet, onLive, onDead }: FlightCanvasProps) {
       simRef.current = S;
       if (startRung > 0) applyRung(S, startRung, setDpr, setBloom, onDead);
       if (groupRef.current) {
-        rebuildStage(S, groupRef.current, glyphLocalsRef.current, S.aspect, dpr);
+        rebuildStage(S, groupRef.current, S.aspect, dpr);
       }
     }
     const S = simRef.current;
@@ -320,17 +364,16 @@ function Scene({ beats, spine, glyphSet, onLive, onDead }: FlightCanvasProps) {
       if (S.liveTicks === 2) onLive?.();
     }
 
-    // Rebuild when the DOM re-measures / aspect flips / glyphs finish sampling.
+    // Rebuild when the DOM re-measures / the aspect flips.
     const sp = spine.current;
     const offs = sp?.offsets ?? [];
     const aspect = state.size.width / Math.max(1, state.size.height);
-    const needField = glyphsReady && !S.field;
-    if (offs !== S.offsetsId || Math.abs(aspect - S.aspect) > 1e-3 || needField) {
+    if (offs !== S.offsetsId || Math.abs(aspect - S.aspect) > 1e-3 || !S.field) {
       S.offsetsId = offs;
       S.aspect = aspect;
       S.rig = buildRig(beats, offs);
       if (groupRef.current) {
-        rebuildStage(S, groupRef.current, glyphLocalsRef.current, aspect, dpr);
+        rebuildStage(S, groupRef.current, aspect, dpr);
       }
     }
 
@@ -362,6 +405,11 @@ function Scene({ beats, spine, glyphSet, onLive, onDead }: FlightCanvasProps) {
         S.dimmedId = sp?.dimmed;
         S.field.setDimmed(S.dimmedId);
       }
+    }
+
+    // Hologram cards: DOM transforms/opacity, pure in the same warped arc.
+    if (holoLayer.current) {
+      driveHolo(S, holoLayer.current, camera, s, state.size.width, state.size.height, sp?.dimmed);
     }
   });
 
