@@ -6,7 +6,7 @@ import {
   ShieldCheck,
   type LucideIcon,
 } from "lucide-react";
-import { howIWork, profile, sections, seo, siteConfig, timeline } from "@/data/content";
+import { howIWork, profile, sections, seo, siteConfig } from "@/data/content";
 import { publicImageExists } from "@/lib/images";
 import { blurProps } from "@/lib/blur";
 import { GitHubIcon, LinkedInIcon, UpworkIcon } from "@/components/ui/BrandIcon";
@@ -16,10 +16,11 @@ import { ScrambleHeading } from "@/components/motion/ScrambleHeading";
 import { Teleprompter } from "@/components/motion/Teleprompter";
 import { ClipReveal } from "@/components/motion/ClipReveal";
 import { LineDraw } from "@/components/motion/LineDraw";
-import { Geoline } from "@/components/about/Geoline";
 import { SkillBag } from "@/components/about/SkillBag";
-import { TrainingRun } from "@/components/about/TrainingRun";
+import { FlightStage } from "@/components/flight/FlightStage";
+import { FlightFallback } from "@/components/flight/FlightFallback";
 import { CTABanner } from "@/components/sections/CTABanner";
+import { aboutFlightCopy, aboutFlightItems } from "@/data/about";
 
 export const metadata: Metadata = {
   title: seo.about.title,
@@ -52,7 +53,7 @@ export default function AboutPage() {
             as="h1"
             text={sections.aboutPage.heading}
             className="mt-4 font-display text-5xl font-bold tracking-[-0.03em] text-ink sm:text-6xl lg:text-7xl"
-          />
+        />
         </header>
 
         {/* Identity row — the headshot tile. */}
@@ -114,19 +115,35 @@ export default function AboutPage() {
           </RevealText>
           <SkillBag toolkit={profile.toolkit} />
         </section>
+      </div>
 
-        {/* Experience timeline (the only timeline on the site) */}
-        <section className="pb-24">
-          <SectionLabel>{sections.aboutPage.storyEyebrow}</SectionLabel>
-          <RevealText
-            as="h2"
-            className="mt-3 font-display text-4xl font-bold tracking-tight text-ink"
-          >
-            How I Got Here
-          </RevealText>
-          <Geoline entries={timeline} />
-        </section>
+      {/* ── The career as a training run ────────────────────────────────────
+          The Geoline timeline and the separate "Training Signal" loss curve
+          told the same story twice; they are ONE flight now. Full-bleed, so it
+          breaks out of the max-w-7xl column above and below.
 
+          The page already owns an h1, so the flight's intro heading is an h2
+          and the fallback list's is an h3 — one h1 per page, correctly nested. */}
+      <FlightStage
+        items={aboutFlightItems}
+        eyebrow={aboutFlightCopy.eyebrow}
+        headline={aboutFlightCopy.headline}
+        headingLevel="h2"
+        fallbackId="about-index"
+        />
+
+      <div className="relative z-10 bg-gradient-to-b from-transparent to-base to-[14%] pb-24 pt-[22vh]">
+        <FlightFallback
+          id="about-index"
+        items={aboutFlightItems}
+        eyebrow={aboutFlightCopy.indexEyebrow}
+          heading={aboutFlightCopy.indexHeading}
+          blurb={aboutFlightCopy.indexBlurb}
+        headingLevel="h2"
+        />
+      </div>
+
+      <div className="mx-auto max-w-7xl px-6">
         {/* How I Work — staggered left-wipe reveal + hover treatment */}
         <section className="pb-24">
           <RevealText
@@ -177,13 +194,6 @@ export default function AboutPage() {
           </div>
         </section>
       </div>
-
-      {/* The Training Signal — the epochs as a converging loss curve (plan.md P6). */}
-      <TrainingRun
-        eyebrow={sections.trainingRun.eyebrow}
-        heading={sections.trainingRun.heading}
-        epochs={sections.trainingRun.epochs}
-      />
 
       <CTABanner />
     </main>

@@ -139,6 +139,16 @@ html {
   @keyframes hero-float-a { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, -8px, 0); } }
   @keyframes hero-float-b { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, 7px, 0); } }
 
+  /* The Flight boot overlay sweep. FINITE (4 iterations) — the overlay is gone
+     in ~1.5s at the latest, and an infinite animation on a display:none node is
+     a needless compositor ticket. Killed under reduced motion below. */
+  --animate-boot-sweep: boot-sweep 1.1s linear 4;
+
+  @keyframes boot-sweep {
+    0%   { transform: translateX(-101%); }
+    100% { transform: translateX(101%); }
+  }
+
   /* Contact submit success (P8): the check pops in. Reduced motion shows it static
      (applied motion-safe in the markup). */
   @keyframes success-pop {
@@ -287,48 +297,15 @@ html {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Constellation Spine node markers. Default = LIT (the final / no-JS / reduced-motion
-   state): a filled iridescent dot with a soft glow. Under desktop motion the engine
-   adds `.is-pending` at runtime for the hollow-ring "not yet reached" start, and removes
-   it as the scroll head-dot ignites each node. Colour/glow is the only iridescent spend
-   here besides the 2px rail, so the duotone budget stays well under 5% of the viewport. */
-.spine-node {
-  transform: translate(-50%, -50%) scale(1);
-  background:
-    radial-gradient(closest-side, var(--color-accent-cyan), var(--color-accent-violet) 70%);
-  box-shadow:
-    0 0 8px -1px var(--color-accent-cyan),
-    0 0 16px -2px oklch(66% 0.19 285 / 0.55);
-  transition:
-    background 450ms var(--ease-out-expo),
-    box-shadow 450ms var(--ease-out-expo),
-    transform 450ms var(--ease-out-expo);
-}
-.spine-node.is-pending {
-  background: var(--base);
-  box-shadow: inset 0 0 0 1.5px oklch(72% 0.028 278 / 0.5);
-  transform: translate(-50%, -50%) scale(0.6);
-}
-
-/* The Flight (timelineplan.md §12) — poster nebula behind /about + /work. Always
-   painted on md+; pure CSS radials capped ≤8% alpha so it can never cost text
-   contrast. This IS the reduced-motion / no-WebGL / post-context-loss state. */
+/* The Flight — the nebula field behind the canvas on /work + /about. Pure CSS
+   radials capped ≤8% alpha so it can never cost text contrast. The engine
+   parallaxes it on the compositor (transform only, zero per-frame cost), and it
+   is also the reduced-motion / build-failed backdrop. */
 .flight-fallback {
   background:
     radial-gradient(60% 45% at 72% 30%, oklch(66% 0.19 285 / 0.07), transparent 70%),
     radial-gradient(50% 40% at 64% 74%, oklch(86% 0.115 207 / 0.05), transparent 70%),
     radial-gradient(42% 32% at 82% 52%, oklch(63% 0.21 272 / 0.06), transparent 70%);
-}
-
-/* Head-dot glow handoff: when the Flight canvas proves live (adapter sets
-   data-flight-live), the DOM keeps the precise instrument (the dot) and yields the
-   spectacle (the bloom) to the canvas — two glowing cyan travellers would read as a
-   bug and bust the ≤5% iridescent budget. Reverts the instant the canvas dies. */
-.spine-head {
-  transition: box-shadow 700ms var(--ease-out-expo);
-}
-[data-flight-live] .spine-head {
-  box-shadow: 0 0 6px 0 var(--color-accent-cyan);
 }
 
 .anim-char {
@@ -419,6 +396,7 @@ html {
 
   /* Safety net: JS hooks handle Motion/GSAP; this kills CSS-driven motion. */
   .animate-marquee,
+  .animate-boot-sweep,
   .animate-pulse-dot,
   .animate-orb-a,
   .animate-orb-b,
