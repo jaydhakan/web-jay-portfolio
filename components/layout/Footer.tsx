@@ -15,8 +15,8 @@ const footerNav = [
 ] as const;
 
 const iconLinkClasses =
-  "inline-flex size-9 items-center justify-center rounded-full text-ink-dim transition-colors duration-200 " +
-  "hover:bg-elevated hover:text-ink focus-visible:outline-none focus-visible:ring-2 " +
+  "inline-flex size-11 items-center justify-center rounded-full text-ink-dim transition-[color,background-color,scale] duration-[520ms] ease-spring " +
+  "active:scale-90 active:duration-100 hover:bg-elevated hover:text-ink focus-visible:outline-none focus-visible:ring-2 " +
   "focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base";
 
 export function Footer() {
@@ -54,11 +54,11 @@ export function Footer() {
             <a
               href={`mailto:${siteConfig.email}`}
               aria-label={`Email ${siteConfig.email}`}
-              className="mt-4 inline-flex items-center py-1.5 font-mono text-sm text-ink-dim transition-colors duration-200 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
+              className="mt-2 inline-flex items-center py-2.5 font-mono text-sm text-ink-dim transition-colors duration-200 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
             >
               <ScrambleText text={siteConfig.email} />
             </a>
-            <div className="mt-6 flex items-center gap-1">
+            <div className="mt-6 -ml-2.5 flex items-center gap-1">
               <a
                 href={siteConfig.githubUrl}
                 target="_blank"
@@ -88,12 +88,12 @@ export function Footer() {
           </div>
 
           <div className="flex items-start justify-between gap-10 md:justify-end md:gap-16">
-            <nav aria-label="Footer" className="flex flex-col gap-3">
+            <nav aria-label="Footer" className="flex flex-col gap-1 md:gap-3">
               {footerNav.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="group inline-flex w-fit items-center py-1.5 text-sm text-ink-dim transition-colors duration-200 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
+                  className="group inline-flex w-fit items-center py-2.5 text-sm text-ink-dim md:py-1.5 transition-colors duration-200 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
                 >
                   <SlideText>{link.label}</SlideText>
                 </Link>

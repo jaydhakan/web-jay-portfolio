@@ -58,7 +58,7 @@ export function CaseStudySidebar({ title, items }: CaseStudySidebarProps) {
         <span
           ref={indicatorRef}
           aria-hidden
-          className="absolute left-0 top-0 w-px bg-accent transition-[transform,height] duration-300 ease-out"
+          className="absolute left-0 top-0 w-px bg-accent transition-[transform,height] duration-[520ms] ease-spring"
           style={{ height: 0 }}
         />
         <ul ref={listRef} className="flex flex-col">

@@ -207,7 +207,7 @@ export function FlightStage({
                   aria-pressed={on}
                   onClick={() => setActive(option)}
                   className={cn(
-                    "focus-pill rounded-full border px-3.5 py-1.5 font-mono text-[10.5px] font-semibold tracking-[0.1em] transition-colors duration-300",
+                    "focus-pill rounded-full border px-4 py-2 font-mono text-[11px] font-semibold tracking-[0.1em] transition-[color,background-color,border-color,scale] duration-300 active:scale-95 active:duration-100",
                     on
                       ? "border-accent-cyan bg-accent-cyan/12 text-accent-cyan"
                       : "border-line bg-base/50 text-ink-dim hover:border-accent/40 hover:text-ink",

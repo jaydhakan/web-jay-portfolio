@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 type CommonProps = {
   variant?: "primary" | "ghost";
-  size?: "md" | "lg";
+  size?: "sm" | "md" | "lg";
   /** Renders a trailing arrow inside its own circular wrapper. */
   withArrow?: boolean;
   className?: string;
@@ -29,11 +29,17 @@ type AsButton = CommonProps & {
 
 export type ButtonProps = AsLink | AsButton;
 
+/* Press physics (Apple "Response"): the pill sinks to 0.97 on pointer-DOWN in
+   100ms (the :active state carries its own fast transition), then on release
+   the base transition springs it home with the critically damped --ease-spring.
+   scale + filter must be in the transition list or the press just snaps (Tailwind 4
+   emits the standalone `scale` property, not `transform`). */
 const baseClasses =
   "group relative inline-flex items-center justify-center gap-2 rounded-full font-semibold " +
-  "transition-[color,background-color,border-color] duration-200 ease-out select-none " +
+  "transition-[color,background-color,border-color,scale,filter] duration-[520ms] ease-spring select-none " +
   "focus-pill focus-visible:outline-none " +
-  "active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50";
+  "active:scale-[0.97] active:duration-100 active:ease-out " +
+  "disabled:pointer-events-none disabled:opacity-50";
 
 const variantClasses = {
   /* Controlled-neon glow: a pre-rendered blurred accent layer behind the pill,
@@ -46,14 +52,19 @@ const variantClasses = {
     "hover:before:opacity-90 hover:before:scale-110 " +
     "focus-visible:before:opacity-90 focus-visible:before:scale-110 motion-reduce:before:transition-none",
   /* Fill-wipe: scaleX from origin-left, transform-only (never a color fade). */
+  /* Hairline at 14% (not --line's 8%): at 8% the ghost pill all but vanished on
+     the dark canvas and read as plain text beside the primary. */
   ghost:
-    "border border-line text-ink overflow-hidden isolate " +
+    "border border-white/[0.14] text-ink overflow-hidden isolate " +
     "before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 " +
     "before:bg-elevated before:transition-transform before:duration-300 before:ease-out " +
     "hover:before:scale-x-100 hover:border-accent/40",
 } as const;
 
+/* sm is for persistent chrome (the header) — quieter than the page's own CTAs
+   so it never competes with the hero's primary action. */
 const sizeClasses = {
+  sm: "h-9 text-[13px]",
   md: "h-11 text-sm",
   lg: "h-12 text-base",
 } as const;
@@ -62,11 +73,12 @@ const sizeClasses = {
    own circle flush right with pr-1.5. Buttons without an arrow get symmetric
    padding instead. */
 const paddingClasses = {
-  withArrow: { md: "pl-6 pr-1.5", lg: "pl-7 pr-1.5" },
-  plain: { md: "px-6", lg: "px-7" },
+  withArrow: { sm: "pl-4 pr-1", md: "pl-6 pr-1.5", lg: "pl-7 pr-1.5" },
+  plain: { sm: "px-4", md: "px-6", lg: "px-7" },
 } as const;
 
 const arrowCircleClasses = {
+  sm: "size-7",
   md: "size-8",
   lg: "size-9",
 } as const;

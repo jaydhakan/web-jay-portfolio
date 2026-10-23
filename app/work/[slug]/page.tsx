@@ -8,6 +8,7 @@ import { publicImageExists } from "@/lib/images";
 import { blurProps } from "@/lib/blur";
 import { FlowImage } from "@/components/media/FlowImage";
 import { Tag } from "@/components/ui/Tag";
+import { Button } from "@/components/ui/Button";
 import { Counter } from "@/components/motion/Counter";
 import { RevealText } from "@/components/motion/RevealText";
 import { ScrubReveal } from "@/components/motion/ScrubReveal";
@@ -57,7 +58,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
       <div className="mx-auto max-w-7xl px-6">
         <Link
           href="/work"
-          className="group inline-flex items-center gap-1.5 rounded-full text-sm font-medium text-ink-dim transition-colors duration-200 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
+          className="group -my-2 inline-flex items-center gap-1.5 rounded-full py-2 text-sm font-medium text-ink-dim transition-colors duration-200 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
         >
           <ArrowLeft
             aria-hidden
@@ -136,7 +137,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
                 {labels.problem}
               </h2>
               {caseStudy.problem.map((paragraph) => (
-                <p key={paragraph} className="mt-4 leading-relaxed text-ink-dim">
+                <p key={paragraph} className="mt-4 max-w-[65ch] text-base leading-[1.7] text-ink-dim sm:text-[1.0625rem]">
                   {paragraph}
                 </p>
               ))}
@@ -147,7 +148,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
                 {labels.approach}
               </h2>
               {caseStudy.approach.map((paragraph) => (
-                <p key={paragraph} className="mt-4 leading-relaxed text-ink-dim">
+                <p key={paragraph} className="mt-4 max-w-[65ch] text-base leading-[1.7] text-ink-dim sm:text-[1.0625rem]">
                   {paragraph}
                 </p>
               ))}
@@ -160,8 +161,8 @@ export default async function CaseStudyPage({ params }: PageProps) {
               <ul className="mt-6 space-y-4">
                 {caseStudy.built.map((item) => (
                   <li key={item} className="flex items-start gap-3">
-                    <Check aria-hidden className="mt-1 size-4 shrink-0 text-accent" />
-                    <span className="leading-relaxed text-ink-dim">{item}</span>
+                    <Check aria-hidden className="mt-1.5 size-4 shrink-0 text-accent" />
+                    <span className="max-w-[62ch] text-base leading-[1.7] text-ink-dim sm:text-[1.0625rem]">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -195,9 +196,18 @@ export default async function CaseStudyPage({ params }: PageProps) {
               </section>
             )}
 
-            <p className="mt-12 text-lg font-medium leading-relaxed text-ink">
+            <p className="mt-12 max-w-[60ch] text-lg font-medium leading-relaxed text-ink sm:text-xl">
               {caseStudy.narrative}
             </p>
+
+            {/* Contact path below lg, where the sidebar (and its CTA) is hidden —
+                every case study should end on a way to start one. */}
+            <div className="mt-12 flex flex-col items-start gap-4 rounded-2xl bg-surface p-6 ring-1 ring-line sm:flex-row sm:items-center sm:justify-between lg:hidden">
+              <p className="font-display text-lg font-semibold text-ink">Building something similar?</p>
+              <Button href="/contact" size="md" withArrow>
+                Start a Similar Project
+              </Button>
+            </div>
 
             {/* Bold next-project card — chains case studies cinematically. */}
             <nav aria-label="Next project" className="mt-20 border-t border-line pt-10">

@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { SlideText } from "@/components/ui/SlideText";
 import { useLenisInstance } from "@/components/layout/SmoothScrollProvider";
+import { siteConfig } from "@/data/content";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -111,16 +112,48 @@ export function Header() {
     return () => window.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
+  // Dialog focus: move focus into the overlay when it opens, hand it back to the
+  // toggle when it closes, and keep Tab cycling inside while it is open.
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (menuOpen) {
+      wasOpen.current = true;
+      dialogRef.current?.querySelector<HTMLElement>("button, a")?.focus();
+      const onTab = (e: KeyboardEvent) => {
+        if (e.key !== "Tab" || !dialogRef.current) return;
+        const items = dialogRef.current.querySelectorAll<HTMLElement>("button, a");
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      };
+      window.addEventListener("keydown", onTab);
+      return () => window.removeEventListener("keydown", onTab);
+    }
+    if (wasOpen.current) {
+      wasOpen.current = false;
+      toggleRef.current?.focus({ preventScroll: true });
+    }
+  }, [menuOpen]);
+
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <>
       <header
         className={cn(
-          "fixed inset-x-0 top-0 z-40 transition-[transform,background-color,border-color] duration-300 ease-out",
-          scrolled || menuOpen
-            ? "border-b border-line bg-base/80 backdrop-blur-xl"
-            : "border-b border-transparent bg-transparent",
+          // Chrome rides the critically damped spring both ways (hide and reveal
+          // are the same path, mirrored). The material materializes — blur,
+          // tint and hairline ease in together — instead of switching on.
+          "fixed inset-x-0 top-0 z-40 transition-[translate,background-color,box-shadow,backdrop-filter] duration-[520ms] ease-spring motion-reduce:transition-[background-color,box-shadow]",
+          scrolled || menuOpen ? "material-chrome" : "bg-transparent",
           hidden && "-translate-y-full",
         )}
       >
@@ -147,7 +180,7 @@ export function Header() {
                 href={link.href}
                 aria-current={isActive(link.href) ? "page" : undefined}
                 className={cn(
-                  "group inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition-[color,background-color] duration-200",
+                  "group inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition-[color,background-color] duration-200 active:bg-white/[0.08] active:duration-75",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base",
                   isActive(link.href)
                     ? "text-accent"
@@ -157,8 +190,8 @@ export function Header() {
                 <SlideText>{link.label}</SlideText>
               </Link>
             ))}
-            <div className="ml-2 flex items-center gap-2">
-              <Button href="/contact" size="md">
+            <div className="ml-3 flex items-center gap-2">
+              <Button href="/contact" size="sm">
                 Let&apos;s Talk
               </Button>
             </div>
@@ -175,11 +208,12 @@ export function Header() {
 
           <div className="flex items-center gap-2 md:hidden">
             <button
+              ref={toggleRef}
               type="button"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((v) => !v)}
-              className="inline-flex size-9 items-center justify-center rounded-full text-ink transition-[color,background-color,transform] duration-200 hover:bg-elevated active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
+              className="inline-flex size-11 -mr-1.5 items-center justify-center rounded-full text-ink transition-[color,background-color,scale] duration-[520ms] ease-spring hover:bg-elevated active:scale-90 active:duration-100 active:ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
             >
               {menuOpen ? <X aria-hidden className="size-5" /> : <Menu aria-hidden className="size-5" />}
             </button>
@@ -189,17 +223,18 @@ export function Header() {
 
       {menuOpen && (
           <div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-label="Navigation"
-            className="anim-fade fixed inset-0 z-50 flex flex-col bg-base/95 backdrop-blur-xl md:hidden"
+            className="material-sheet anim-fade fixed inset-0 z-50 flex flex-col bg-base/95 backdrop-blur-xl md:hidden"
           >
             <div className="flex h-16 items-center justify-end px-6">
               <button
                 type="button"
                 aria-label="Close menu"
                 onClick={() => setMenuOpen(false)}
-                className="inline-flex size-9 items-center justify-center rounded-full text-ink transition-[color,background-color,transform] duration-200 hover:bg-elevated active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
+                className="inline-flex size-11 -mr-1.5 items-center justify-center rounded-full text-ink transition-[color,background-color,scale] duration-[520ms] ease-spring hover:bg-elevated active:scale-90 active:duration-100 active:ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
               >
                 <X aria-hidden className="size-5" />
               </button>
@@ -216,7 +251,7 @@ export function Header() {
                     onClick={() => setMenuOpen(false)}
                     aria-current={isActive(link.href) ? "page" : undefined}
                     className={cn(
-                      "block py-3 font-display text-4xl font-semibold transition-colors duration-200",
+                      "block py-3 font-display text-4xl font-semibold tracking-[-0.02em] transition-[color,opacity] duration-200 active:opacity-60 active:duration-75",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base rounded-lg",
                       isActive(link.href) ? "text-accent" : "text-ink hover:text-accent",
                     )}
@@ -232,6 +267,23 @@ export function Header() {
                 <Button href="/contact" size="lg" withArrow>
                   Let&apos;s Talk
                 </Button>
+              </div>
+              <div
+                className="anim-rise mt-10 border-t border-line pt-6"
+                style={{ animationDelay: `${0.05 + (navLinks.length + 1) * 0.06}s` }}
+              >
+                {siteConfig.isAvailable && (
+                  <p className="flex items-center gap-2 text-sm font-medium text-ok">
+                    <span aria-hidden className="size-2 animate-pulse-dot rounded-full bg-ok" />
+                    {siteConfig.availabilityNote}
+                  </p>
+                )}
+                <a
+                  href={`mailto:${siteConfig.email}`}
+                  className="mt-2 inline-flex py-2 font-mono text-sm text-ink-dim transition-colors duration-200 hover:text-ink active:opacity-60"
+                >
+                  {siteConfig.email}
+                </a>
               </div>
             </nav>
           </div>

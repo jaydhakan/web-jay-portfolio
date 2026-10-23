@@ -8,7 +8,7 @@ export function CTABanner() {
   const banner = sections.ctaBanner;
 
   return (
-    <section className="relative isolate overflow-hidden border-y border-line py-28">
+    <section className="relative isolate overflow-hidden border-t border-line py-28">
       {/* Ambient orb pair (catalog #36, plan §4.5) replaces the flat tint. Two
           pre-baked single-hue radials drift on transform only; corner-anchored
           so the central text column stays low-accent and high-contrast. One orb

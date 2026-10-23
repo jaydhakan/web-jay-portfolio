@@ -37,7 +37,8 @@ iridescent duotone (`--accent` → `--accent-violet` → `--accent-cyan`), kept 
 **adjacent cool hues so it reads as one shifting light**, scoped to The Field +
 hero glow, and still ≤ ~5% of any viewport; depth comes from cards + hairlines,
 never alternating section backgrounds. (`text-muted` is retired as a readable token
-— the lone `--color-muted` survivor is only the aria-hidden Process ghost number.)
+— `--color-muted` survives only for the Flight rail's idle ticks, whose numerals stay
+hidden until active.)
 
 > **Palette v2 (Direction A, "Electric Indigo+")** supersedes the original mono-indigo
 > D-3/D-6: indigo stays primary, the iridescent violet→cyan duotone is added for the
@@ -65,6 +66,16 @@ never alternating section backgrounds. (`text-muted` is retired as a readable to
   tweens use `ease:"none"`.
 - **Three durations:** `--dur-1` 0.4s / `--dur-2` 0.8s / `--dur-3` 1.2s. Ambient
   loops (marquee, orb drift, shader time) are documented exemptions.
+- **Spring micro-interactions:** `ease-spring` (`--ease-spring`) is a critically
+  damped spring (damping 1.0, response 0.35s) sampled into CSS `linear()`, always
+  paired with `duration-[520ms]` (its settle time). Use it for press release, hover
+  nudges, and chrome show/hide. Never hand-edit the stops; regenerate them. Presses
+  follow the Apple pattern: `active:scale-[0.97] active:duration-100 active:ease-out`,
+  sinking on pointer-down and springing home on release.
+- **Tailwind 4 gotcha:** `scale-*` / `translate-*` emit the standalone `scale` /
+  `translate` properties. A `transition-[transform,…]` list does NOT animate them
+  (the header smart-hide used to snap for this reason). List `scale` / `translate`
+  explicitly, or use `transition-transform`, which covers all of them.
 - **One reveal grammar:** "content emerges from behind an edge" — masked line
   rises (SplitText) + clip-path inset wipes, everywhere. Reveals always *enhance*
   already-visible content; start states are set at runtime via GSAP, never
@@ -83,7 +94,7 @@ never alternating section backgrounds. (`text-muted` is retired as a readable to
 
 - **Pill button** (`Button`): `rounded-full`, label + 36px arrow circle flush
   right (button-in-button) with a diagonal dual-swap on hover; ghost variant adds
-  a transform-only fill-wipe; `active:scale-[0.98]`. **Primary** carries a controlled-neon
+  a transform-only fill-wipe; `active:scale-[0.97]` (spring release). **Primary** carries a controlled-neon
   glow — a pre-rendered blurred accent layer behind the pill, animated by opacity + scale
   only (never a box-shadow tween), faint at rest and blooming on hover / `:focus-visible`
   (the crisp accent outline stays the a11y indicator). Renders `<button>` when no `href`.
@@ -91,6 +102,38 @@ never alternating section backgrounds. (`text-muted` is retired as a readable to
 - **Double-bezel card** (`Card`): 24px outer shell (`bg-white/[0.02]`, `p-1.5`,
   hairline ring) → 18px inner core + inset top highlight. Glow is a pre-rendered
   opacity layer, never a `box-shadow` tween. No backdrop-blur on scrolling content.
+- **Chrome material** (`.material-chrome`): the scrolled header is translucent
+  (base at 72%, `blur(20px) saturate(170%)`) with a hairline *shadow*, not a
+  border, so content stays faintly visible as it passes underneath. Persistent
+  chrome uses `Button size="sm"` so it never outranks the page's own CTA.
+- **Accessibility preferences:** `prefers-contrast: more` lifts `--line` to 24%
+  and `--ink-dim` toward ink (tokens only). `prefers-reduced-transparency` makes
+  `.material-chrome` / `.material-sheet` solid. Touch targets drop the tap-highlight
+  flash and use `touch-action: manipulation`, so there is no double-tap delay.
+- **Type scale tracking:** `text-xs`/`text-sm` carry slight positive tracking and
+  `text-3xl`…`text-6xl` carry progressively negative tracking, all set in `@theme`.
+  An explicit `tracking-*` utility still overrides.
+- **Honest affordance:** only things that ARE links lift/press on hover. Card
+  tiles that act as links use the stretched-link pattern: the h3's `<Link>` gets
+  `after:absolute after:inset-0`, and the h3 and its wrappers stay *static* so the
+  `::after` anchors to the card (lift text above motifs with an inner `relative`
+  span). The card shows focus with `has-[a:focus-visible]:ring-2`. Home bento
+  tiles go to /services, and /services tiles go to `/contact?type=<project type>`.
+  Static content (the metric tile, How I Work) does not respond to hover.
+- **Touch targets ≥ 44px:** icon buttons are `size-11`. Text links in lists use
+  `py-2.5` on touch. Inline text links widen their hit area with `-my-2 py-2`,
+  which keeps the layout unchanged.
+- **Forms:** validate `onTouched` (on first blur, then live while the visitor fixes
+  it). Fields are 16px below `sm`, because iOS zooms the page on smaller fields.
+  The invalid state is styled from `aria-invalid`. Requirements are stated up front
+  as hints, not only as errors. Custom selects always draw a chevron. Focus moves
+  to the success state after sending.
+- **Dialogs** (mobile menu): focus moves in on open, Tab is trapped inside, and
+  focus returns to the toggle on close.
+- **Long-form reading** (case studies): paragraphs capped at `65ch`, 17px from
+  `sm`, leading 1.7.
+- **Step numerals:** ordered flows (Process, contact "What happens next") use one
+  pattern: a small `font-mono text-xs text-accent` index above the title.
 - **Eyebrow** (`SectionLabel`): JetBrains Mono `text-xs uppercase tracking-[0.2em]
   text-ink-dim` + a 24px accent tick.
 - **Focus** (load-bearing — the custom cursor hides the pointer): global

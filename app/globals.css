@@ -70,8 +70,8 @@ html {
   --color-white:         #ffffff;
   --color-black:         #000000;
   --color-transparent:   transparent;
-  /* text-muted: kept solely for the aria-hidden Process ghost number (decorative,
-     not a readable token). Every other legacy alias was deleted in Phase 9. */
+  /* text-muted: decorative only — the Flight rail's idle ticks (its numerals stay
+     opacity-0 until active). Never a readable token (≈2.3:1 on base). */
   --color-muted:          oklch(40% 0.018 278);
 
   /* Font stacks — CSS vars set by next/font in layout.tsx */
@@ -82,6 +82,25 @@ html {
 
 @theme {
   --shadow-glow: var(--glow);
+
+  /* Spring easing (Apple "Designing Fluid Interfaces"): a critically damped
+     spring — damping 1.0, response 0.35s — sampled into CSS linear(). No
+     overshoot, and it settles like a physical object instead of a fixed bézier.
+     Pair with --dur-spring (the spring's settle time, ε = 0.001). Used for
+     micro-interactions: press release, hover lift, chrome show/hide. Generated,
+     not hand-tuned — regenerate rather than edit individual stops. */
+  --ease-spring: linear(0, 0.0586, 0.1833, 0.3254, 0.4607, 0.5788, 0.6769, 0.7554, 0.8169, 0.8642, 0.9, 0.9268, 0.9468, 0.9614, 0.9722, 0.98, 0.9857, 0.9898, 0.9927, 0.9948, 0.9963, 0.9974, 0.9982, 0.9987, 1);
+
+  /* Size-specific tracking (Apple UI typography): small text opens up slightly
+     for legibility on a dark canvas; large display text tightens as it grows.
+     Baked into the scale so every text-* gets it; an explicit tracking-*
+     utility still wins. */
+  --text-xs--letter-spacing:  0.012em;
+  --text-sm--letter-spacing:  0.006em;
+  --text-3xl--letter-spacing: -0.015em;
+  --text-4xl--letter-spacing: -0.02em;
+  --text-5xl--letter-spacing: -0.025em;
+  --text-6xl--letter-spacing: -0.03em;
 
   --animate-marquee:   marquee 30s linear infinite;
   --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
@@ -229,6 +248,18 @@ html {
    surface stays near-opaque over the field and the body copy stays readable.
    Hover/active accents are layered on per-component with Tailwind utilities. */
 @layer components {
+  /* Translucent chrome material (Apple materials): content scrolls UNDER the
+     header and stays faintly legible through it. Blur + saturation lift the
+     colour of what passes beneath; a soft hairline shadow replaces the hard
+     border-bottom. This is fixed chrome, not scrolling content, so it is the
+     one sanctioned backdrop-filter surface. Reduced-transparency → solid below. */
+  .material-chrome {
+    background-color: oklch(14.5% 0.012 278 / 0.72);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    backdrop-filter: blur(20px) saturate(170%);
+    box-shadow: 0 1px 0 0 var(--line);
+  }
+
   .surface-card {
     position: relative;
     border-radius: 18px;
@@ -249,9 +280,23 @@ html {
      (reduced motion). No CSS `scroll-behavior: smooth` — it double-smooths
      against Lenis and overrides the RM instant path (plan.md §6.2, risk #4). */
 
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-base font-body text-ink antialiased;
     background-color: var(--base);
+    font-optical-sizing: auto;
+  }
+
+  /* Touch: every interactive element draws its own pressed state, so drop the
+     grey tap-highlight flash, and `manipulation` removes the double-tap-zoom
+     delay so feedback lands on touch-down (pinch-zoom is unaffected). */
+  a, button, summary, label, select, input, textarea, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
   h1, h2, h3 {
@@ -386,6 +431,25 @@ html {
       transform-origin: center;
       will-change: transform;
     }
+  }
+}
+
+/* Increased contrast (prefers-contrast: more): hairlines become real rules and
+   secondary text moves toward primary. Tokens only — every surface inherits. */
+@media (prefers-contrast: more) {
+  :root {
+    --line:    oklch(94.5% 0.012 280 / 24%);
+    --ink-dim: oklch(84% 0.022 278);
+  }
+}
+
+/* Reduced transparency: translucent chrome goes solid — no blur, no see-through. */
+@media (prefers-reduced-transparency: reduce) {
+  .material-chrome,
+  .material-sheet {
+    background-color: var(--base);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }
 

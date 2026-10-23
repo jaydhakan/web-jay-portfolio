@@ -53,7 +53,7 @@ export function FlightFallback({
           const href = item.variant === "epoch" ? null : item.href;
           const body = (
             <>
-              <span className="shrink-0 font-mono text-[11px] font-semibold tabular-nums text-muted">
+              <span className="shrink-0 font-mono text-[11px] font-semibold tabular-nums text-ink-dim">
                 {item.num}
               </span>
               <span className="min-w-[240px] flex-1">
@@ -76,7 +76,7 @@ export function FlightFallback({
           );
 
           const shell =
-            "flex flex-wrap items-baseline gap-x-6 gap-y-3 rounded-2xl border border-line bg-surface px-6 py-5 transition-[border-color,transform] duration-300 ease-[cubic-bezier(.16,1,.3,1)]";
+            "flex flex-wrap items-baseline gap-x-6 gap-y-3 rounded-2xl border border-line bg-surface px-6 py-5 transition-[border-color,translate] duration-[520ms] ease-spring";
 
           return (
             <li key={item.id}>

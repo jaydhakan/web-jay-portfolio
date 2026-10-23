@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
+  ArrowUpRight,
   Bot,
   Check,
   Database,
@@ -25,6 +27,17 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = {
   title: seo.services.title,
   description: seo.services.description,
+};
+
+/* Each service tile opens the contact form with its project type pre-selected
+   (ContactForm reads ?type=). Keyed by icon, so data/content stays untouched. */
+const projectTypeFor: Record<string, string> = {
+  Bot: "AI Agent / Automation",
+  MessageSquareText: "LLM / RAG Chatbot",
+  Database: "Data Pipeline / Scraping",
+  Zap: "API Development",
+  Globe: "Web App / SaaS",
+  Server: "Other",
 };
 
 const iconMap: Record<string, LucideIcon> = {
@@ -99,7 +112,7 @@ export default function ServicesPage() {
                         </span>
                       )}
                     </div>
-                    <p className="mt-4 font-display text-3xl font-bold text-ink">{plan.price}</p>
+                    <p className="mt-5 font-display text-4xl font-bold tracking-[-0.03em] text-ink">{plan.price}</p>
                     <p className="mt-2 text-sm text-ink-dim">{plan.bestFor}</p>
                     <ul className="mt-7 flex-1 space-y-3">
                       {plan.features.map((feature) => (
@@ -134,8 +147,9 @@ export default function ServicesPage() {
           </RevealText>
 
           {/* Bento 2.0 (P7): a deliberately varied tile grid — a wide feature
-              tile + a wide footer tile + standard tiles — with neon-accent
-              tactile hover (lift + accent ring + glowing icon chip). */}
+              tile + a wide footer tile + standard tiles. Every tile links to the
+              contact form for that service, so the tactile hover (lift + accent
+              ring + glowing icon chip) promises a real action. */}
           <ClipReveal
             as="ul"
             stagger={0.09}
@@ -149,8 +163,11 @@ export default function ServicesPage() {
                 <li
                   key={service.title}
                   className={cn(
-                    "group relative flex flex-col overflow-hidden rounded-[1.25rem] bg-surface p-7 ring-1 ring-white/[0.06] transition duration-300 ease-out",
-                    "hover:-translate-y-1 hover:bg-elevated hover:ring-accent/30 active:scale-[0.99]",
+                    "group relative flex flex-col overflow-hidden rounded-[1.25rem] bg-surface p-7 ring-1 ring-white/[0.06]",
+                    "transition-[translate,scale,background-color,box-shadow] duration-[520ms] ease-spring",
+                    "hover:-translate-y-1 hover:bg-elevated hover:ring-accent/30",
+                    "active:scale-[0.985] active:duration-100 active:ease-out",
+                    "has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-accent",
                     span,
                   )}
                 >
@@ -170,8 +187,26 @@ export default function ServicesPage() {
                       <Icon aria-hidden strokeWidth={1.5} className="relative size-5 text-accent" />
                     </span>
                   )}
-                  <h3 className="relative mt-5 font-display text-lg font-semibold text-ink">{service.title}</h3>
+                  {/* Stretched link: the whole tile is the hit area, the title is
+                      the accessible name. */}
+                  {/* h3 + Link stay static so the ::after anchors to the <li>;
+                      the inner span is what lifts the text above the motif. */}
+                  <h3 className="mt-5 font-display text-lg font-semibold text-ink">
+                    <Link
+                      href={`/contact?type=${encodeURIComponent(projectTypeFor[service.icon] ?? "Other")}`}
+                      className="after:absolute after:inset-0 after:z-10 after:rounded-[1.25rem] after:content-[''] focus-visible:outline-none"
+                    >
+                      <span className="relative">{service.title}</span>
+                    </Link>
+                  </h3>
                   <p className="relative mt-2.5 max-w-2xl text-sm leading-relaxed text-ink-dim">{service.description}</p>
+                  <span
+                    aria-hidden
+                    className="relative mt-5 inline-flex items-center gap-1 text-sm font-medium text-ink-dim transition-colors duration-200 group-hover:text-accent"
+                  >
+                    Start this project
+                    <ArrowUpRight className="size-4 transition-transform duration-[520ms] ease-spring group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  </span>
                 </li>
               );
             })}

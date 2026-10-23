@@ -85,7 +85,7 @@ export function Hero() {
                   <p className="font-mono text-[1.6rem] font-semibold leading-none tracking-tight tabular-nums text-ink">
                     {metric.value}
                   </p>
-                  <p className="mt-2 text-xs leading-snug text-ink-dim">{metric.label}</p>
+                  <p className="mt-2 text-xs leading-snug text-ink-dim sm:text-[13px]">{metric.label}</p>
                 </li>
               ))}
             </ul>

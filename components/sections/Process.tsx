@@ -77,19 +77,20 @@ export function Process() {
             {processSteps.map((step) => (
               <li
                 key={step.step}
-                className="process-step relative isolate pl-8 lg:pl-0 lg:pt-10"
+                className="process-step relative pl-8 lg:pl-0 lg:pt-10"
               >
                 <span
                   aria-hidden
                   className="absolute left-0 top-1.5 block size-[11px] rounded-full border-2 border-accent bg-base lg:-top-[5px]"
                 />
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute -top-2 right-0 -z-10 select-none font-display text-7xl font-extrabold leading-none text-muted/20 lg:top-6"
-                >
+                {/* Step index: same mono-accent numeral as the contact page's
+                    "What happens next" (one pattern, one meaning). Replaced a
+                    giant ghost numeral that sat on the same baseline as the
+                    title and read as clutter behind it. */}
+                <p aria-hidden className="font-mono text-xs tabular-nums text-accent">
                   {step.step}
-                </span>
-                <h3 className="text-xl font-semibold text-ink">{step.title}</h3>
+                </p>
+                <h3 className="mt-2 text-xl font-semibold text-ink">{step.title}</h3>
                 <p className="mt-3 max-w-xs text-sm leading-relaxed text-ink-dim">
                   {step.description}
                 </p>

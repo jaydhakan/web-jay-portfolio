@@ -30,7 +30,7 @@ export function FeaturedWork() {
           </div>
           <Link
             href={sections.featuredWork.viewAll.href}
-            className="group inline-flex items-center gap-1.5 rounded-full text-sm font-semibold text-accent transition-colors duration-200 hover:text-ink"
+            className="group -my-2 inline-flex items-center gap-1.5 rounded-full py-2 text-sm font-semibold text-accent transition-colors duration-200 hover:text-ink"
           >
             {sections.featuredWork.viewAll.label}
             <ArrowRight

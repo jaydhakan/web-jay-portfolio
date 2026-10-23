@@ -58,7 +58,7 @@ export default function ContactPage() {
                 <li>
                   <a
                     href={`mailto:${siteConfig.email}`}
-                    className="group inline-flex items-center gap-3.5 rounded text-ink-dim transition-colors duration-200 hover:text-ink"
+                    className="group -my-2 inline-flex items-center gap-3.5 rounded py-2 text-ink-dim transition-colors duration-200 hover:text-ink"
                   >
                     <Mail aria-hidden className="size-5 text-accent" />
                     <span className="text-sm font-medium">{siteConfig.email}</span>
@@ -82,7 +82,7 @@ export default function ContactPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`${label} profile`}
-                    className="inline-flex size-10 items-center justify-center rounded-full border border-line text-ink-dim transition-colors duration-200 hover:border-accent/40 hover:text-ink"
+                    className="inline-flex size-11 items-center justify-center rounded-full border border-line text-ink-dim transition-[color,border-color,scale] duration-[520ms] ease-spring hover:border-accent/40 hover:text-ink active:scale-90 active:duration-100"
                   >
                     <Icon className="size-[18px]" />
                   </a>
@@ -102,10 +102,10 @@ export default function ContactPage() {
           <FadeUp as="ol" stagger={0.1} className="mt-10 grid gap-8 sm:grid-cols-3">
             {contact.whatNext.map((step, i) => (
               <li key={step.title}>
-                <span aria-hidden className="font-mono text-sm tabular-nums text-accent">
+                <span aria-hidden className="font-mono text-xs tabular-nums text-accent">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <h3 className="mt-3 font-display text-lg font-semibold text-ink">{step.title}</h3>
+                <h3 className="mt-2 font-display text-lg font-semibold text-ink">{step.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-ink-dim">{step.desc}</p>
               </li>
             ))}

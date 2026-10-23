@@ -121,7 +121,7 @@ export function WorkReel({
             <article
               key={project.slug}
               data-cursor="view"
-              className="reel-panel relative flex shrink-0 items-center motion-safe:md:h-full motion-safe:md:w-screen motion-safe:md:px-[7vw]"
+              className="reel-panel relative flex shrink-0 items-center px-6 md:px-[7vw] motion-safe:md:h-full motion-safe:md:w-screen"
             >
               {/* Giant ambient index — editorial depth, decorative. */}
               <span
@@ -170,7 +170,7 @@ export function WorkReel({
                   </p>
                   <Link
                     href={`/work/${project.slug}`}
-                    className="group mt-7 inline-flex items-center gap-1.5 rounded text-sm font-semibold text-ink transition-colors duration-200 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-4 focus-visible:ring-offset-base"
+                    className="group mt-5 inline-flex items-center gap-1.5 rounded py-2 text-sm font-semibold text-ink transition-colors duration-200 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-4 focus-visible:ring-offset-base"
                   >
                     View case study
                     <ArrowUpRight

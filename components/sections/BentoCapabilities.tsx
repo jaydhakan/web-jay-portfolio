@@ -27,8 +27,16 @@ const iconFor: Record<Capability["key"], typeof Bot> = {
 
 const tileBase =
   "group relative flex flex-col justify-end overflow-hidden rounded-[1.25rem] bg-surface p-6 " +
-  "ring-1 ring-white/[0.06] transition duration-300 ease-out will-change-transform " +
-  "hover:-translate-y-1 hover:ring-accent/30 hover:bg-elevated";
+  "ring-1 ring-white/[0.06]";
+
+/* Only tiles that ARE links lift and press — a card that rises under the cursor
+   promises an action, so the static metric tile stays still. The whole tile is
+   the hit area (stretched link in CapabilityBody). */
+const tileLinked =
+  "transition-[translate,scale,background-color,box-shadow] duration-[520ms] ease-spring " +
+  "hover:-translate-y-1 hover:ring-accent/30 hover:bg-elevated " +
+  "active:scale-[0.985] active:duration-100 active:ease-out " +
+  "has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-accent";
 
 /* Premium top hairline highlight, shared by every tile. */
 function TopHighlight() {
@@ -158,19 +166,28 @@ function TypingDots() {
   );
 }
 
-function CapabilityBody({ cap }: { cap: Capability }) {
+/* The wrapper and h3 stay static so the link's ::after anchors to the tile
+   <article>; each child is lifted above the SVG motif individually. */
+function CapabilityBody({ cap, href }: { cap: Capability; href: string }) {
   const Icon = iconFor[cap.key];
   return (
-    <div className="relative">
+    <div>
       <Icon
         aria-hidden
         strokeWidth={1.5}
-        className="size-5 text-accent transition-transform duration-300 ease-out group-hover:-translate-y-0.5"
+        className="relative size-5 text-accent transition-transform duration-[520ms] ease-spring group-hover:-translate-y-0.5"
       />
-      <h3 className="mt-4 font-display text-lg font-semibold text-ink">{cap.title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-ink-dim">{cap.blurb}</p>
+      <h3 className="mt-4 font-display text-lg font-semibold text-ink">
+        <Link
+          href={href}
+          className="after:absolute after:inset-0 after:z-10 after:rounded-[1.25rem] after:content-[''] focus-visible:outline-none"
+        >
+          <span className="relative">{cap.title}</span>
+        </Link>
+      </h3>
+      <p className="relative mt-2 text-sm leading-relaxed text-ink-dim">{cap.blurb}</p>
       {cap.metric && (
-        <p className="mt-4 font-mono text-xs text-ink-dim">
+        <p className="relative mt-4 font-mono text-xs text-ink-dim">
           <span className="text-ink">{cap.metric.value}</span> {cap.metric.label}
         </p>
       )}
@@ -202,7 +219,7 @@ export function BentoCapabilities() {
           </div>
           <Link
             href={sections.capabilities.viewAll.href}
-            className="group inline-flex shrink-0 items-center gap-1.5 rounded text-sm font-semibold text-ink transition-colors duration-200 hover:text-accent"
+            className="group -my-2 inline-flex shrink-0 items-center gap-1.5 rounded py-2 text-sm font-semibold text-ink transition-colors duration-200 hover:text-accent"
           >
             {sections.capabilities.viewAll.label}
             <ArrowUpRight
@@ -218,10 +235,10 @@ export function BentoCapabilities() {
           className="mt-14 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:auto-rows-[13.5rem]"
         >
           {/* Feature tile — AI agents */}
-          <article className={cn(tileBase, "min-h-[20rem] sm:col-span-2 lg:row-span-2")} data-cursor="view">
+          <article className={cn(tileBase, tileLinked, "min-h-[20rem] sm:col-span-2 lg:row-span-2")} data-cursor="view">
             <TopHighlight />
             <AgentGraph />
-            <CapabilityBody cap={agents} />
+            <CapabilityBody cap={agents} href={sections.capabilities.viewAll.href} />
           </article>
 
           {/* Live metric tile */}
@@ -255,25 +272,25 @@ export function BentoCapabilities() {
           </article>
 
           {/* Pipelines */}
-          <article className={cn(tileBase, "min-h-[13.5rem]")}>
+          <article className={cn(tileBase, tileLinked, "min-h-[13.5rem]")}>
             <TopHighlight />
             <PipelineFlow />
-            <CapabilityBody cap={pipelines} />
+            <CapabilityBody cap={pipelines} href={sections.capabilities.viewAll.href} />
           </article>
 
           {/* APIs */}
-          <article className={cn(tileBase, "min-h-[13.5rem]")}>
+          <article className={cn(tileBase, tileLinked, "min-h-[13.5rem]")}>
             <TopHighlight />
             <ApiPulse />
-            <CapabilityBody cap={apis} />
+            <CapabilityBody cap={apis} href={sections.capabilities.viewAll.href} />
           </article>
 
           {/* Chatbots — wide footer tile */}
           <article
-            className={cn(tileBase, "min-h-[12rem] sm:col-span-2 lg:col-span-4 lg:flex-row lg:items-center lg:justify-between lg:gap-8")}
+            className={cn(tileBase, tileLinked, "min-h-[12rem] sm:col-span-2 lg:col-span-4 lg:flex-row lg:items-center lg:justify-between lg:gap-8")}
           >
             <TopHighlight />
-            <CapabilityBody cap={chatbots} />
+            <CapabilityBody cap={chatbots} href={sections.capabilities.viewAll.href} />
             <div className="mt-6 flex items-center gap-4 lg:mt-0 lg:shrink-0">
               <div className="flex items-center gap-2 rounded-full bg-base px-4 py-2.5 ring-1 ring-white/[0.06]">
                 <TypingDots />

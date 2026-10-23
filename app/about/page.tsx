@@ -110,7 +110,7 @@ export default function AboutPage() {
         {/* Toolkit — throwable skill bag (V3 P8 / S11): grab, fling, self-heal.
             Plain wrap grid under mobile / touch / reduced motion / no-JS. */}
         <section className="pb-24">
-          <RevealText as="h2" className="font-display text-4xl font-bold tracking-tight text-ink">
+          <RevealText as="h2" className="font-display text-4xl font-bold tracking-tight text-ink md:text-5xl">
             What I Work With
           </RevealText>
           <SkillBag toolkit={profile.toolkit} />
@@ -144,11 +144,12 @@ export default function AboutPage() {
       </div>
 
       <div className="mx-auto max-w-7xl px-6">
-        {/* How I Work — staggered left-wipe reveal + hover treatment */}
+        {/* How I Work — staggered left-wipe reveal. Static items: no hover treatment,
+            since they are not interactive and shouldn't look it. */}
         <section className="pb-24">
           <RevealText
             as="h2"
-            className="font-display text-4xl font-bold tracking-tight text-ink"
+            className="font-display text-4xl font-bold tracking-tight text-ink md:text-5xl"
           >
             How I Work
           </RevealText>
@@ -156,15 +157,15 @@ export default function AboutPage() {
             {howIWork.map((value) => {
               const Icon = howIconMap[value.icon];
               return (
-                <li key={value.title} className="group">
+                <li key={value.title}>
                   {Icon && (
                     <Icon
                       aria-hidden
                       strokeWidth={1.5}
-                      className="size-6 text-accent transition-transform duration-300 ease-out group-hover:-translate-y-0.5"
+                      className="size-6 text-accent"
                     />
                   )}
-                  <h3 className="mt-4 text-lg font-semibold text-ink transition-[letter-spacing] duration-300 ease-out group-hover:tracking-wide">
+                  <h3 className="mt-4 text-lg font-semibold text-ink">
                     {value.title}
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-ink-dim">{value.description}</p>
@@ -185,7 +186,7 @@ export default function AboutPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={`${label} profile`}
-                  className="inline-flex size-10 items-center justify-center rounded-full text-ink-dim transition-colors duration-200 hover:bg-elevated hover:text-ink"
+                  className="inline-flex size-11 items-center justify-center rounded-full text-ink-dim transition-[color,background-color,scale] duration-[520ms] ease-spring hover:bg-elevated hover:text-ink active:scale-90 active:duration-100"
                 >
                   <Icon className="size-5" />
                 </a>

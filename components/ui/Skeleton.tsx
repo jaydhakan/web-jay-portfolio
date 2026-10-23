@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div aria-hidden className={cn("animate-pulse rounded-lg bg-elevated", className)} />;
+  return <div aria-hidden className={cn("animate-pulse rounded-lg bg-elevated motion-reduce:animate-none", className)} />;
 }
 
 /** Shared page-header shape: eyebrow, title, subtitle. */
