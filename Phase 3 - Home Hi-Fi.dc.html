@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+html{scroll-behavior:smooth}
+body{margin:0;background:#08080D;color:#F2F2F8;font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:#5BD9F0;text-decoration:none}a:hover{color:#9D5BF0}
+::selection{background:#5B5BF0;color:#fff}
+</style>
+</helmet>
+
+<div id="curring" style="position:fixed;left:0;top:0;width:40px;height:40px;margin:-20px 0 0 -20px;border:1.5px solid rgba(242,242,248,.55);border-radius:99px;pointer-events:none;z-index:999;mix-blend-mode:difference;display:flex;align-items:center;justify-content:center"><span id="curlabel" style="font:600 8px 'JetBrains Mono',monospace;letter-spacing:.12em;color:#fff;opacity:0">VIEW</span></div>
+<div id="curdot" style="position:fixed;left:0;top:0;width:5px;height:5px;margin:-2.5px 0 0 -2.5px;background:#5BD9F0;border-radius:99px;pointer-events:none;z-index:999"></div>
+<div id="progressbar" style="position:fixed;left:0;top:0;right:0;height:2px;background:linear-gradient(90deg,#5B5BF0,#9D5BF0,#5BD9F0);transform:scaleX(0);transform-origin:left;z-index:998"></div>
+
+<nav id="nav" data-screen-label="Nav" style="position:fixed;left:0;right:0;top:0;z-index:900;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;transition:background .4s,backdrop-filter .4s,border-color .4s;border-bottom:1px solid rgba(255,255,255,0)">
+  <a href="#top" style="font:700 17px 'Space Grotesk',sans-serif;color:#F2F2F8;letter-spacing:-.02em">JD<span style="color:#5BD9F0">◆</span></a>
+  <div style="display:flex;gap:34px;align-items:center">
+    <a href="#work" style="font:500 13px 'Space Grotesk',sans-serif;color:rgba(242,242,248,.72)" style-hover="color:#5BD9F0">Work</a>
+    <a href="#about" style="font:500 13px 'Space Grotesk',sans-serif;color:rgba(242,242,248,.72)" style-hover="color:#5BD9F0">About</a>
+    <a href="#services" style="font:500 13px 'Space Grotesk',sans-serif;color:rgba(242,242,248,.72)" style-hover="color:#5BD9F0">Services</a>
+    <a href="#contact" style="font:500 13px 'Space Grotesk',sans-serif;color:rgba(242,242,248,.72)" style-hover="color:#5BD9F0">Contact</a>
+    <a href="#cta" data-magnet="1" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:99px;background:#5B5BF0;color:#fff;font:600 13px 'Space Grotesk',sans-serif;box-shadow:0 0 24px rgba(91,91,240,.35);transition:box-shadow .3s,background .3s" style-hover="box-shadow:0 0 40px rgba(91,91,240,.65);background:#6B6BFF"><span data-pulse="1" style="width:7px;height:7px;border-radius:99px;background:#5BD9F0"></span>Start a project</a>
+  </div>
+</nav>
+
+<header id="hero" data-screen-label="01 Hero — The Search" style="position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;background:radial-gradient(120% 90% at 70% 20%,#0E0E1B 0%,#08080D 60%)">
+  <canvas id="field" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+  <div style="position:absolute;inset:0;background:radial-gradient(90% 70% at 30% 55%,rgba(8,8,13,.62) 0%,rgba(8,8,13,0) 65%);pointer-events:none"></div>
+  <div id="herocopy" style="position:relative;z-index:2;max-width:1280px;width:100%;margin:0 auto;padding:120px 64px 80px;pointer-events:none">
+    <div style="overflow:hidden;margin-bottom:22px"><div data-hero-rise="0" style="display:inline-flex;align-items:center;gap:9px;font:600 11px 'JetBrains Mono',monospace;letter-spacing:.22em;color:#5BD9F0"><span data-pulse="1" style="width:7px;height:7px;border-radius:99px;background:#5BD9F0"></span>{{ slotsLine }}</div></div>
+    <h1 style="margin:0;font:700 clamp(54px,6.6vw,92px)/1.02 'Space Grotesk',sans-serif;letter-spacing:-.035em">
+      <span style="display:block;overflow:hidden"><span data-hero-rise="1" style="display:block">I build AI systems</span></span>
+      <span style="display:block;overflow:hidden"><span data-hero-rise="2" style="display:block">that actually <span style="color:transparent;background:linear-gradient(100deg,#5B5BF0,#9D5BF0 50%,#5BD9F0);-webkit-background-clip:text;background-clip:text">ship.</span></span></span>
+    </h1>
+    <div style="overflow:hidden;margin:26px 0 0"><div data-hero-rise="3" style="font:500 13px 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(242,242,248,.55)">SHIPPING NOW ▸ <span id="rotor" style="display:inline-block;color:#5BD9F0">autonomous agents</span></div></div>
+    <div style="overflow:hidden"><p data-hero-rise="4" style="margin:18px 0 0;max-width:520px;font:400 17px/1.6 'Space Grotesk',sans-serif;color:rgba(242,242,248,.78)">Agents, pipelines and search APIs handling 15M+ queries a day — for teams that can't afford "almost done."</p></div>
+    <div style="overflow:hidden;margin-top:34px"><div data-hero-rise="5" style="display:flex;gap:14px;pointer-events:auto">
+      <a href="#cta" data-magnet="1" style="display:inline-flex;align-items:center;gap:10px;padding:16px 30px;border-radius:99px;background:#5B5BF0;color:#fff;font:600 15px 'Space Grotesk',sans-serif;box-shadow:0 0 32px rgba(91,91,240,.4);transition:box-shadow .3s,background .3s" style-hover="box-shadow:0 0 56px rgba(91,91,240,.75);background:#6B6BFF">Start a project <span style="font-family:'JetBrains Mono',monospace">↗</span></a>
+      <a href="#work" style="display:inline-flex;align-items:center;gap:10px;padding:16px 30px;border-radius:99px;border:1px solid rgba(242,242,248,.22);color:#F2F2F8;font:600 15px 'Space Grotesk',sans-serif;transition:border-color .3s,background .3s" style-hover="border-color:#5BD9F0;background:rgba(91,217,240,.06)">See the work</a>
+    </div></div>
+  </div>
+  <sc-if value="{{ showHud }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute;left:48px;bottom:36px;z-index:3;display:flex;align-items:center;gap:10px;font:500 10.5px 'JetBrains Mono',monospace;letter-spacing:.18em;color:rgba(91,217,240,.85);pointer-events:none"><span data-pulse="1" style="width:6px;height:6px;border-radius:99px;background:#5BD9F0"></span>LIVE — GRADIENT DESCENT RUNNING · CLICK THE TERRAIN TO DROP A PROBE</div>
+  </sc-if>
+  <div style="position:absolute;left:50%;bottom:28px;transform:translateX(-50%);z-index:3;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none"><span style="font:500 9px 'JetBrains Mono',monospace;letter-spacing:.3em;color:rgba(242,242,248,.4)">SCROLL</span><span data-scrollcue="1" style="width:1px;height:34px;background:linear-gradient(180deg,#5BD9F0,transparent);display:block"></span></div>
+</header>
+
+<section id="impact" data-screen-label="02 Impact" style="position:relative;padding:140px 64px;max-width:1280px;margin:0 auto">
+  <div data-skew="1"><div data-reveal="1" style="font:600 11px 'JetBrains Mono',monospace;letter-spacing:.24em;color:#9D5BF0;margin-bottom:14px">02 — IMPACT</div>
+  <h2 data-reveal="1" data-delay="80" style="margin:0 0 60px;font:700 clamp(34px,3.4vw,48px)/1.1 'Space Grotesk',sans-serif;letter-spacing:-.03em">The kind of numbers that ship.</h2></div>
+  <div data-reveal="1" style="display:flex;align-items:baseline;gap:34px;flex-wrap:wrap;padding:44px 48px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:#0E0E16;position:relative;overflow:hidden">
+    <canvas id="stream" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.5"></canvas>
+    <div style="position:relative;display:flex;align-items:baseline;gap:24px">
+      <span style="position:relative;font:600 64px/1 'Space Grotesk',sans-serif;color:rgba(242,242,248,.25);letter-spacing:-.03em">18h<span id="strike" style="position:absolute;left:-6%;top:52%;width:112%;height:3px;background:#9D5BF0;transform:scaleX(0);transform-origin:left;border-radius:2px"></span></span>
+      <span style="font:400 40px 'JetBrains Mono',monospace;color:#9D5BF0">→</span>
+      <span style="font:700 128px/1 'Space Grotesk',sans-serif;letter-spacing:-.04em;color:#5BD9F0;text-shadow:0 0 60px rgba(91,217,240,.35)"><span data-count="1.2" data-decimals="1">1.2</span>h</span>
+    </div>
+    <div style="position:relative;font:400 15px/1.55 'Space Grotesk',sans-serif;color:rgba(242,242,248,.62);max-width:260px">Manual document review at a US healthcare network — cut by 93%, overnight.</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px">
+    <div data-reveal="1" data-delay="0" style="padding:34px 32px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:#0E0E16;transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .4s" style-hover="transform:translateY(-4px);border-color:rgba(91,217,240,.35)"><div style="font:700 52px/1 'Space Grotesk',sans-serif;letter-spacing:-.03em"><span data-count="15" data-suffix="M+">15M+</span></div><div style="margin-top:10px;font:500 11px 'JetBrains Mono',monospace;letter-spacing:.16em;color:rgba(242,242,248,.5)">QUERIES HANDLED / DAY</div></div>
+    <div data-reveal="1" data-delay="120" style="padding:34px 32px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:#0E0E16;transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .4s" style-hover="transform:translateY(-4px);border-color:rgba(91,217,240,.35)"><div style="font:700 52px/1 'Space Grotesk',sans-serif;letter-spacing:-.03em"><span data-count="99.9" data-decimals="1" data-suffix="%">99.9%</span></div><div style="margin-top:10px;font:500 11px 'JetBrains Mono',monospace;letter-spacing:.16em;color:rgba(242,242,248,.5)">UPTIME ACROSS 9 SYSTEMS</div></div>
+    <div data-reveal="1" data-delay="240" style="padding:34px 32px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:#0E0E16;transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .4s" style-hover="transform:translateY(-4px);border-color:rgba(91,217,240,.35)"><div style="font:700 52px/1 'Space Grotesk',sans-serif;letter-spacing:-.03em"><span data-count="70" data-suffix="M+">70M+</span></div><div style="margin-top:10px;font:500 11px 'JetBrains Mono',monospace;letter-spacing:.16em;color:rgba(242,242,248,.5)">RECORDS MIGRATED, ZERO LOSS</div></div>
+  </div>
+</section>
+
+<div id="reelwrap" data-screen-label="03 Work reel" style="position:relative;height:280vh">
+  <div style="position:sticky;top:0;height:100vh;overflow:hidden;display:flex;flex-direction:column;justify-content:center">
+    <div style="max-width:1280px;width:100%;margin:0 auto;padding:0 64px 26px;display:flex;justify-content:space-between;align-items:flex-end">
+      <div data-skew="1"><div style="font:600 11px 'JetBrains Mono',monospace;letter-spacing:.24em;color:#9D5BF0;margin-bottom:12px">03 — SELECTED WORK</div>
+      <h2 id="work" style="margin:0;font:700 clamp(34px,3.4vw,48px)/1.1 'Space Grotesk',sans-serif;letter-spacing:-.03em">Outcomes first.<br>Screenshots second.</h2></div>
+      <div style="text-align:right"><div id="reelcount" style="font:600 13px 'JetBrains Mono',monospace;color:rgba(242,242,248,.6)">01 / 03</div><div style="width:180px;height:2px;background:rgba(255,255,255,.1);margin-top:10px;border-radius:2px"><div id="reelbar" style="height:100%;width:100%;background:linear-gradient(90deg,#5B5BF0,#5BD9F0);transform:scaleX(.02);transform-origin:left;border-radius:2px"></div></div></div>
+    </div>
+    <div id="reeltrack" style="display:flex;gap:28px;padding:0 64px;will-change:transform">
+      <article data-cursor="VIEW" style="flex:none;width:72vw;max-width:980px;display:grid;grid-template-columns:1.1fr 1fr;gap:40px;padding:48px;border:1px solid rgba(255,255,255,.08);border-radius:20px;background:#0E0E16;position:relative;overflow:hidden;transition:border-color .4s" style-hover="border-color:rgba(91,91,240,.5)">
+        <div data-ghost="1" style="position:absolute;right:-20px;top:-50px;font:700 260px/1 'Space Grotesk',sans-serif;color:rgba(91,91,240,.07);pointer-events:none">01</div>
+        <div style="position:relative;display:flex;flex-direction:column;justify-content:center;gap:14px">
+          <div style="font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.2em;color:#5BD9F0">AGENTS · DEEP DIVE</div>
+          <div style="font:700 96px/1 'Space Grotesk',sans-serif;letter-spacing:-.04em">90<span style="color:#5BD9F0">%</span></div>
+          <div style="font:500 13px 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(242,242,248,.55)">DEV-TIME SAVED</div>
+          <h3 style="margin:6px 0 0;font:600 26px/1.2 'Space Grotesk',sans-serif;letter-spacing:-.02em">WhatsApp Bot Creator</h3>
+          <p style="margin:0;font:400 15px/1.55 'Space Grotesk',sans-serif;color:rgba(242,242,248,.62)">Founders describe a bot in plain English; the system builds, tests and deploys it — no engineer in the loop.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><span style="padding:5px 12px;border:1px solid rgba(255,255,255,.14);border-radius:99px;font:500 11px 'JetBrains Mono',monospace;color:rgba(242,242,248,.6)">LangGraph</span><span style="padding:5px 12px;border:1px solid rgba(255,255,255,.14);border-radius:99px;font:500 11px 'JetBrains Mono',monospace;color:rgba(242,242,248,.6)">FastAPI</span><span style="padding:5px 12px;border:1px solid rgba(255,255,255,.14);border-radius:99px;font:500 11px 'JetBrains Mono',monospace;color:rgba(242,242,248,.6)">Redis</span></div>
+          <span style="font:600 14px 'Space Grotesk',sans-serif;color:#5BD9F0;margin-top:4px">Read the case study → <span style="font:400 11px 'JetBrains Mono',monospace;color:rgba(242,242,248,.4)">6 MIN · 5 SECTIONS</span></span>
+        </div>
+        <div style="position:relative;border-radius:12px;overflow:hidden;min-height:380px"><image-slot id="cover1" shape="rounded" radius="12" placeholder="Drop the Bot Creator cover"></image-slot></div>
+      </article>
+      <article data-cursor="VIEW" style="flex:none;width:72vw;max-width:980px;display:grid;grid-template-columns:1.1fr 1fr;gap:40px;padding:48px;border:1px solid rgba(255,255,255,.08);border-radius:20px;background:#0E0E16;position:relative;overflow:hidden;transition:border-color .4s" style-hover="border-color:rgba(91,91,240,.5)">
+        <div data-ghost="1" style="position:absolute;right:-20px;top:-50px;font:700 260px/1 'Space Grotesk',sans-serif;color:rgba(157,91,240,.07);pointer-events:none">02</div>
+        <div style="position:relative;display:flex;flex-direction:column;justify-content:center;gap:14px">
+          <div style="font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.2em;color:#5BD9F0">SEARCH · DEEP DIVE</div>
+          <div style="font:700 96px/1 'Space Grotesk',sans-serif;letter-spacing:-.04em">175<span style="font-size:44px;color:#5BD9F0"> QPS</span></div>
+          <div style="font:500 13px 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(242,242,248,.55)">SUSTAINED · P95 UNDER 80MS</div>
+          <h3 style="margin:6px 0 0;font:600 26px/1.2 'Space Grotesk',sans-serif;letter-spacing:-.02em">Vector Search API</h3>
+          <p style="margin:0;font:400 15px/1.55 'Space Grotesk',sans-serif;color:rgba(242,242,248,.62)">Semantic search over 70M records for a 6-figure-user SaaS — answers, not links.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><span style="padding:5px 12px;border:1px solid rgba(255,255,255,.14);border-radius:99px;font:500 11px 'JetBrains Mono',monospace;color:rgba(242,242,248,.6)">pgvector</span><span style="padding:5px 12px;border:1px solid rgba(255,255,255,.14);border-radius:99px;font:500 11px 'JetBrains Mono',monospace;color:rgba(242,242,248,.6)">Python</span><span style="padding:5px 12px;border:1px solid rgba(255,255,255,.14);border-radius:99px;font:500 11px 'JetBrains Mono',monospace;color:rgba(242,242,248,.6)">K8s</span></div>
+          <span style="font:600 14px 'Space Grotesk',sans-serif;color:#5BD9F0;margin-top:4px">Read the case study → <span style="font:400 11px 'JetBrains Mono',monospace;color:rgba(242,242,248,.4)">5 MIN · 4 SECTIONS</span></span>
+        </div>
+        <div style="position:relative;border-radius:12px;overflow:hidden;min-height:380px"><image-slot id="cover2" shape="rounded" radius="12" placeholder="Drop the Search API cover"></image-slot></div>
+      </article>
+      <article data-cursor="VIEW" style="flex:none;width:72vw;max-width:980px;display:grid;grid-template-columns:1.1fr 1fr;gap:40px;padding:48px;border:1px solid rgba(255,255,255,.08);border-radius:20px;background:#0E0E16;position:relative;overflow:hidden;transition:border-color .4s" style-hover="border-color:rgba(91,91,240,.5)">
+        <div data-ghost="1" style="position:absolute;right:-20px;top:-50px;font:700 260px/1 'Space Grotesk',sans-serif;color:rgba(91,217,240,.07);pointer-events:none">03</div>
+        <div style="position:relative;display:flex;flex-direction:column;justify-content:center;gap:14px">
+          <div style="font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.2em;color:#5BD9F0">PIPELINES · DEEP DIVE</div>
+          <div style="font:700 96px/1 'Space Grotesk',sans-serif;letter-spacing:-.04em">44k<span style="font-size:44px;color:#5BD9F0"> /day</span></div>
+          <div style="font:500 13px 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(242,242,248,.55)">DOCUMENTS PROCESSED, UNATTENDED</div>
+          <h3 style="margin:6px 0 0;font:600 26px/1.2 'Space Grotesk',sans-serif;letter-spacing:-.02em">Healthcare Doc Pipeline</h3>
+          <p style="margin:0;font:400 15px/1.55 'Space Grotesk',sans-serif;color:rgba(242,242,248,.62)">OCR → LLM extraction → validation for a US healthcare network. Zero missed SLAs since launch.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><span style="padding:5px 12px;border:1px solid rgba(255,255,255,.14);border-radius:99px;font:500 11px 'JetBrains Mono',monospace;color:rgba(242,242,248,.6)">Airflow</span><span style="padding:5px 12px;border:1px solid rgba(255,255,255,.14);border-radius:99px;font:500 11px 'JetBrains Mono',monospace;color:rgba(242,242,248,.6)">OCR</span><span style="padding:5px 12px;border:1px solid rgba(255,255,255,.14);border-radius:99px;font:500 11px 'JetBrains Mono',monospace;color:rgba(242,242,248,.6)">LLM extract</span></div>
+          <span style="font:600 14px 'Space Grotesk',sans-serif;color:#5BD9F0;margin-top:4px">Read the case study → <span style="font:400 11px 'JetBrains Mono',monospace;color:rgba(242,242,248,.4)">6 MIN · 5 SECTIONS</span></span>
+        </div>
+        <div style="position:relative;border-radius:12px;overflow:hidden;min-height:380px"><image-slot id="cover3" shape="rounded" radius="12" placeholder="Drop the Pipeline cover"></image-slot></div>
+      </article>
+    </div>
+  </div>
+</div>
+<x-import component-from-global-scope="image-slot" from="./image-slot.js" style="display:none" hint-size="1px,1px"></x-import>
+
+<section data-screen-label="04 Capabilities bento" style="padding:140px 64px;max-width:1280px;margin:0 auto">
+  <div data-skew="1"><div data-reveal="1" style="font:600 11px 'JetBrains Mono',monospace;letter-spacing:.24em;color:#9D5BF0;margin-bottom:14px">04 — CAPABILITIES</div>
+  <h2 data-reveal="1" data-delay="80" style="margin:0 0 60px;font:700 clamp(34px,3.4vw,48px)/1.1 'Space Grotesk',sans-serif;letter-spacing:-.03em">What I build.</h2></div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:220px;gap:14px">
+    <div data-reveal="1" style="grid-column:span 2;padding:32px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:#0E0E16;position:relative;overflow:hidden;transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .4s" style-hover="transform:translateY(-4px);border-color:rgba(91,91,240,.45)">
+      <svg viewBox="0 0 400 160" style="position:absolute;right:20px;top:24px;width:52%;height:75%;opacity:.9" aria-hidden="true">
+        <path data-dash="1" d="M40 80 L150 30 M40 80 L150 80 M40 80 L150 130 M150 30 L280 55 M150 80 L280 55 M150 130 L280 105 M280 55 L360 80 M280 105 L360 80" stroke="#5B5BF0" stroke-width="1.2" fill="none" stroke-dasharray="4 6"/>
+        <circle cx="40" cy="80" r="6" fill="#5B5BF0"/><circle cx="150" cy="30" r="4.5" fill="#9D5BF0"/><circle cx="150" cy="80" r="4.5" fill="#9D5BF0"/><circle cx="150" cy="130" r="4.5" fill="#9D5BF0"/><circle data-breathe="1" cx="280" cy="55" r="5" fill="#5BD9F0"/><circle data-breathe="1" cx="280" cy="105" r="5" fill="#5BD9F0"/><circle data-breathe="1" cx="360" cy="80" r="7" fill="#5BD9F0"/>
+      </svg>
+      <div style="position:relative;height:100%;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;max-width:46%"><h3 style="margin:0;font:600 22px 'Space Grotesk',sans-serif;letter-spacing:-.02em">Autonomous agents</h3><p style="margin:0;font:400 14px/1.5 'Space Grotesk',sans-serif;color:rgba(242,242,248,.6)">Multi-step reasoning that survives production, not just the demo.</p></div>
+    </div>
+    <div data-reveal="1" data-delay="100" style="padding:32px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:#0E0E16;position:relative;overflow:hidden;transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .4s" style-hover="transform:translateY(-4px);border-color:rgba(91,91,240,.45)">
+      <svg viewBox="0 0 300 60" style="position:absolute;right:24px;top:28px;width:65%;opacity:.9" aria-hidden="true">
+        <path data-dash="1" d="M0 10 H300" stroke="#5B5BF0" stroke-width="1.2" stroke-dasharray="10 8"/><path data-dash="1" d="M0 30 H300" stroke="#9D5BF0" stroke-width="1.2" stroke-dasharray="16 10"/><path data-dash="1" d="M0 50 H300" stroke="#5BD9F0" stroke-width="1.2" stroke-dasharray="6 12"/>
+      </svg>
+      <div style="position:relative;height:100%;display:flex;flex-direction:column;justify-content:flex-end;gap:8px"><h3 style="margin:0;font:600 22px 'Space Grotesk',sans-serif;letter-spacing:-.02em">Data pipelines</h3><p style="margin:0;font:400 14px/1.5 'Space Grotesk',sans-serif;color:rgba(242,242,248,.6)">From "nightly batch" to real-time.</p></div>
+    </div>
+    <div data-reveal="1" data-delay="60" style="padding:32px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:#0E0E16;position:relative;overflow:hidden;transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .4s" style-hover="transform:translateY(-4px);border-color:rgba(91,91,240,.45)">
+      <svg viewBox="0 0 120 120" style="position:absolute;right:22px;top:20px;width:44%;opacity:.9" aria-hidden="true">
+        <circle data-ring="0" cx="60" cy="60" r="26" stroke="#5BD9F0" stroke-width="1.2" fill="none"/><circle data-ring="1" cx="60" cy="60" r="26" stroke="#9D5BF0" stroke-width="1.2" fill="none"/><circle data-ring="2" cx="60" cy="60" r="26" stroke="#5B5BF0" stroke-width="1.2" fill="none"/><circle cx="60" cy="60" r="5" fill="#5BD9F0"/>
+      </svg>
+      <div style="position:relative;height:100%;display:flex;flex-direction:column;justify-content:flex-end;gap:8px"><h3 style="margin:0;font:600 22px 'Space Grotesk',sans-serif;letter-spacing:-.02em">Search &amp; RAG</h3><p style="margin:0;font:400 14px/1.5 'Space Grotesk',sans-serif;color:rgba(242,242,248,.6)">Answers, not links.</p></div>
+    </div>
+    <div data-reveal="1" data-delay="160" style="padding:32px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:#0E0E16;position:relative;overflow:hidden;transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .4s" style-hover="transform:translateY(-4px);border-color:rgba(91,91,240,.45)">
+      <div style="position:absolute;right:28px;top:32px;display:flex;gap:7px;padding:12px 16px;border-radius:14px;background:#161624"><span data-tdot="0" style="width:7px;height:7px;border-radius:99px;background:#9D5BF0;display:block"></span><span data-tdot="1" style="width:7px;height:7px;border-radius:99px;background:#9D5BF0;display:block"></span><span data-tdot="2" style="width:7px;height:7px;border-radius:99px;background:#9D5BF0;display:block"></span></div>
+      <div style="position:relative;height:100%;display:flex;flex-direction:column;justify-content:flex-end;gap:8px"><h3 style="margin:0;font:600 22px 'Space Grotesk',sans-serif;letter-spacing:-.02em">Chat interfaces</h3><p style="margin:0;font:400 14px/1.5 'Space Grotesk',sans-serif;color:rgba(242,242,248,.6)">Where your users already are.</p></div>
+    </div>
+    <div data-reveal="1" data-delay="220" style="padding:32px;border:1px solid rgba(91,217,240,.25);border-radius:16px;background:linear-gradient(140deg,#0E0E16,#12122a);position:relative;overflow:hidden;transition:transform .4s cubic-bezier(.16,1,.3,1)" style-hover="transform:translateY(-4px)">
+      <div style="height:100%;display:flex;flex-direction:column;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px;font:600 10px 'JetBrains Mono',monospace;letter-spacing:.18em;color:#5BD9F0"><span data-pulse="1" style="width:6px;height:6px;border-radius:99px;background:#5BD9F0"></span>LIVE SIMULATION</div>
+        <div><div id="ticker" style="font:700 44px/1 'JetBrains Mono',monospace;letter-spacing:-.02em;color:#5BD9F0">0</div><div style="margin-top:8px;font:400 12.5px/1.5 'Space Grotesk',sans-serif;color:rgba(242,242,248,.55)">requests one of my APIs handled while you've been on this page — at its measured 175 QPS.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="process" data-screen-label="05 Process" style="padding:60px 64px 140px;max-width:1280px;margin:0 auto">
+  <div data-skew="1"><div data-reveal="1" style="font:600 11px 'JetBrains Mono',monospace;letter-spacing:.24em;color:#9D5BF0;margin-bottom:14px">05 — PROCESS</div>
+  <h2 data-reveal="1" data-delay="80" style="margin:0 0 54px;font:700 clamp(34px,3.4vw,48px)/1.1 'Space Grotesk',sans-serif;letter-spacing:-.03em">Four steps. No surprises.</h2></div>
+  <div style="position:relative">
+    <div style="position:absolute;left:0;right:0;top:5px;height:1px;background:rgba(255,255,255,.1)"><div id="procline" style="height:100%;background:linear-gradient(90deg,#5B5BF0,#5BD9F0);transform:scaleX(0);transform-origin:left"></div></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px">
+      <div data-reveal="1" data-delay="0"><div style="width:11px;height:11px;border-radius:99px;background:#5B5BF0;box-shadow:0 0 16px rgba(91,91,240,.7)"></div><div style="margin-top:22px;font:600 11px 'JetBrains Mono',monospace;letter-spacing:.2em;color:rgba(242,242,248,.45)">01</div><h3 style="margin:8px 0 6px;font:600 19px 'Space Grotesk',sans-serif">Scope</h3><p style="margin:0;font:400 13.5px/1.55 'Space Grotesk',sans-serif;color:rgba(242,242,248,.6)">Fixed quote within 48 hours of our call.</p></div>
+      <div data-reveal="1" data-delay="140"><div style="width:11px;height:11px;border-radius:99px;background:#7B5BF0;box-shadow:0 0 16px rgba(123,91,240,.7)"></div><div style="margin-top:22px;font:600 11px 'JetBrains Mono',monospace;letter-spacing:.2em;color:rgba(242,242,248,.45)">02</div><h3 style="margin:8px 0 6px;font:600 19px 'Space Grotesk',sans-serif">Build</h3><p style="margin:0;font:400 13.5px/1.55 'Space Grotesk',sans-serif;color:rgba(242,242,248,.6)">Weekly ship days — you see progress running, not slide decks.</p></div>
+      <div data-reveal="1" data-delay="280"><div style="width:11px;height:11px;border-radius:99px;background:#9D5BF0;box-shadow:0 0 16px rgba(157,91,240,.7)"></div><div style="margin-top:22px;font:600 11px 'JetBrains Mono',monospace;letter-spacing:.2em;color:rgba(242,242,248,.45)">03</div><h3 style="margin:8px 0 6px;font:600 19px 'Space Grotesk',sans-serif">Ship</h3><p style="margin:0;font:400 13.5px/1.55 'Space Grotesk',sans-serif;color:rgba(242,242,248,.6)">In production from week one. Staging is where projects go to die.</p></div>
+      <div data-reveal="1" data-delay="420"><div style="width:11px;height:11px;border-radius:99px;background:#5BD9F0;box-shadow:0 0 16px rgba(91,217,240,.7)"></div><div style="margin-top:22px;font:600 11px 'JetBrains Mono',monospace;letter-spacing:.2em;color:rgba(242,242,248,.45)">04</div><h3 style="margin:8px 0 6px;font:600 19px 'Space Grotesk',sans-serif">Support</h3><p style="margin:0;font:400 13.5px/1.55 'Space Grotesk',sans-serif;color:rgba(242,242,248,.6)">30 days included. It's not shipped until it's stable.</p></div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="06 Proof" style="padding:0 64px 140px;max-width:1280px;margin:0 auto">
+  <div data-skew="1"><div data-reveal="1" style="font:600 11px 'JetBrains Mono',monospace;letter-spacing:.24em;color:#9D5BF0;margin-bottom:14px">06 — PROOF</div>
+  <h2 data-reveal="1" data-delay="80" style="margin:0 0 10px;font:700 clamp(34px,3.4vw,48px)/1.1 'Space Grotesk',sans-serif;letter-spacing:-.03em">Proof, not promises.</h2></div>
+  <p data-reveal="1" data-delay="140" style="margin:0 0 54px;font:400 15px/1.6 'Space Grotesk',sans-serif;color:rgba(242,242,248,.55);max-width:480px">Client quotes are on their way. Until then — only things you can verify yourself.</p>
+  <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:14px">
+    <div data-reveal="1" style="padding:30px 32px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:#0E0E16"><div style="font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.18em;color:rgba(242,242,248,.5);margin-bottom:18px">GITHUB — LAST 6 MONTHS</div><canvas id="ghgraph" style="width:100%;height:96px;display:block"></canvas><div style="margin-top:14px;font:500 12px 'JetBrains Mono',monospace;color:rgba(242,242,248,.45)"><a href="https://github.com/jaydhakan" style="color:#5BD9F0">@jaydhakan ↗</a></div></div>
+    <div data-reveal="1" data-delay="120" style="padding:30px 32px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:#0E0E16;display:flex;flex-direction:column;justify-content:space-between"><div style="font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.18em;color:rgba(242,242,248,.5)">UPWORK</div><div><div style="font:700 40px 'Space Grotesk',sans-serif;letter-spacing:-.03em">100<span style="color:#5BD9F0">%</span></div><div style="margin-top:6px;font:500 12px 'JetBrains Mono',monospace;letter-spacing:.1em;color:rgba(242,242,248,.55)">JOB SUCCESS · TOP RATED</div></div></div>
+    <div data-reveal="1" data-delay="240" style="padding:30px 32px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:#0E0E16;display:flex;flex-direction:column;justify-content:space-between"><div style="display:flex;align-items:center;gap:8px;font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.18em;color:rgba(242,242,248,.5)"><span data-pulse="1" style="width:6px;height:6px;border-radius:99px;background:#5BD9F0"></span>UPTIME-CHECKED HOURLY</div><div><div style="font:700 40px 'Space Grotesk',sans-serif;letter-spacing:-.03em">9<span style="font-size:20px;color:rgba(242,242,248,.5)"> systems</span></div><div style="margin-top:6px;font:500 12px 'JetBrains Mono',monospace;letter-spacing:.1em;color:#5BD9F0">ALL GREEN, RIGHT NOW</div></div></div>
+  </div>
+</section>
+
+<section id="cta" data-screen-label="07 CTA" style="padding:0 64px 140px;max-width:1280px;margin:0 auto">
+  <div data-reveal="1" style="position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:24px;background:#0E0E16;padding:90px 72px;text-align:center">
+    <div data-orb="1" style="position:absolute;left:-120px;top:-120px;width:420px;height:420px;border-radius:99em;background:radial-gradient(circle,rgba(91,91,240,.28),transparent 65%);filter:blur(10px);pointer-events:none"></div>
+    <div data-orb="2" style="position:absolute;right:-140px;bottom:-160px;width:480px;height:480px;border-radius:99em;background:radial-gradient(circle,rgba(91,217,240,.18),transparent 65%);filter:blur(10px);pointer-events:none"></div>
+    <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:22px">
+      <div style="display:inline-flex;align-items:center;gap:9px;font:600 11px 'JetBrains Mono',monospace;letter-spacing:.22em;color:#5BD9F0"><span data-pulse="1" style="width:7px;height:7px;border-radius:99px;background:#5BD9F0"></span>{{ slotsLine }}</div>
+      <h2 style="margin:0;font:700 clamp(40px,4.6vw,64px)/1.05 'Space Grotesk',sans-serif;letter-spacing:-.035em;max-width:700px">Let's build something<br>that <span style="color:transparent;background:linear-gradient(100deg,#5B5BF0,#9D5BF0 50%,#5BD9F0);-webkit-background-clip:text;background-clip:text">ships.</span></h2>
+      <div style="font:500 12px 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(242,242,248,.5)">ENGAGEMENTS FROM $2,500 · TYPICAL BUILD $5K–15K</div>
+      <a href="mailto:jay@vectanix.com" data-magnet="1" style="display:inline-flex;align-items:center;gap:10px;padding:18px 38px;border-radius:99px;background:#5B5BF0;color:#fff;font:600 16px 'Space Grotesk',sans-serif;box-shadow:0 0 40px rgba(91,91,240,.45);transition:box-shadow .3s,background .3s;margin-top:8px" style-hover="box-shadow:0 0 70px rgba(91,91,240,.8);background:#6B6BFF">Start a project ↗</a>
+      <div style="font:400 11.5px 'JetBrains Mono',monospace;color:rgba(242,242,248,.4)">I reply within one business day.</div>
+    </div>
+  </div>
+</section>
+
+<footer data-screen-label="Footer" style="border-top:1px solid rgba(255,255,255,.08);padding:56px 64px 40px">
+  <div style="max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap">
+    <div><div style="font:700 17px 'Space Grotesk',sans-serif">JD<span style="color:#5BD9F0">◆</span></div><a href="mailto:jay@vectanix.com" style="display:block;margin-top:14px;font:600 26px 'Space Grotesk',sans-serif;letter-spacing:-.02em;color:#F2F2F8;transition:color .3s" style-hover="color:#5BD9F0">jay@vectanix.com</a><div style="margin-top:10px;font:400 12px 'JetBrains Mono',monospace;color:rgba(242,242,248,.4)">Built like everything else here: shipped.</div></div>
+    <div style="display:flex;gap:26px;font:500 13px 'JetBrains Mono',monospace"><a href="https://github.com/jaydhakan" style="color:rgba(242,242,248,.6)" style-hover="color:#5BD9F0">@github</a><a href="https://linkedin.com" style="color:rgba(242,242,248,.6)" style-hover="color:#5BD9F0">@linkedin</a><a href="https://upwork.com" style="color:rgba(242,242,248,.6)" style-hover="color:#5BD9F0">@upwork</a></div>
+  </div>
+</footer>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;slotsFilled&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:2,&quot;min&quot;:0,&quot;max&quot;:3,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Availability&quot;},&quot;probeCount&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:14,&quot;min&quot;:4,&quot;max&quot;:30,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Hero terrain&quot;},&quot;showHud&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Hero terrain&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const filled = this.props.slotsFilled ?? 2;
+    return {
+      slotsLine: `${filled} OF 3 AUGUST SLOTS FILLED`,
+      showHud: this.props.showHud ?? true
+    };
+  }
+  componentDidMount() {
+    if (!this._init) this.setupOnce();
+    cancelAnimationFrame(this.raf);
+    this._loop = this.loop.bind(this);
+    this.raf = requestAnimationFrame(this._loop);
+  }
+  setupOnce() {
+    this._init = true;
+    this.rm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.setupField(); this.setupStream(); this.setupCursor(); this.setupReveals();
+    this.setupPulses(); this.setupRotator(); this.setupMagnets(); this.setupGraph(); this.heroEntrance();
+    this.skews = [...document.querySelectorAll('[data-skew]')].map(e => ({ e, v: 0 }));
+    this.dashes = [...document.querySelectorAll('[data-dash]')]; this.dashOff = 0;
+    this.lastY = scrollY; this.tick = 0; this.lastT = performance.now();
+    this._onResize = () => { this.sizeField(); this.sizeStream(); };
+    addEventListener('resize', this._onResize);
+  }
+  componentWillUnmount() { cancelAnimationFrame(this.raf); removeEventListener('resize', this._onResize); clearInterval(this.rotInt); }
+
+  /* ---------- hero terrain sim — 3D descent arena ---------- */
+  setupField() {
+    const c = document.getElementById('field'); if (!c) return;
+    this.fc = c; this.fx = c.getContext('2d');
+    this.wells = [
+      { x: 320, z: 980, a: 200, s: 270 }, { x: -480, z: 1180, a: 140, s: 220 },
+      { x: -150, z: 620, a: 115, s: 175 }, { x: 560, z: 520, a: 95, s: 160 }
+    ];
+    this.cur = { on: false, mx: .5 }; this.mScreen = null; this.curWorld = null;
+    this.probes = []; this.flares = [];
+    const n = this.props.probeCount ?? 14;
+    for (let i = 0; i < n; i++) this.probes.push(this.spawn());
+    this.sizeField();
+    const hero = document.getElementById('hero');
+    hero.addEventListener('mousemove', e => {
+      const r = c.getBoundingClientRect();
+      this.mScreen = { x: (e.clientX - r.left) * this.fd, y: (e.clientY - r.top) * this.fd };
+      this.cur.mx = (e.clientX - r.left) / r.width; this.cur.on = true;
+    });
+    hero.addEventListener('mouseleave', () => { this.cur.on = false; this.curWorld = null; });
+    hero.addEventListener('mouseenter', () => {
+      if (!this._rippled && this.curWorld) { this._rippled = true; this.flares.push({ x: this.curWorld.x, z: this.curWorld.z, r: 10, max: 320 }); }
+    });
+    hero.addEventListener('click', e => {
+      if (e.target.closest('a,button') || !this.curWorld) return;
+      this.probes.push({ x: this.curWorld.x, z: this.curWorld.z, vx: 0, vz: 0, trail: [] });
+      this.flares.push({ x: this.curWorld.x, z: this.curWorld.z, r: 8, max: 260 });
+    });
+  }
+  sizeField() {
+    const c = this.fc; if (!c) return;
+    const r = c.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+    c.width = r.width * d; c.height = r.height * d; this.fd = d;
+  }
+  spawn() { return { x: (Math.random() * 2 - 1) * 850, z: 200 + Math.random() * 1450, vx: 0, vz: 0, trail: [] }; }
+  hgt(x, z, t) {
+    let h = 26 * Math.sin(x * .006 + t * .0004) * Math.sin(z * .005 - t * .0003) + 13 * Math.sin(x * .013 - t * .00025);
+    for (const w of this.wells) { const dx = x - w.x, dz = z - w.z; h -= w.a * Math.exp(-(dx * dx + dz * dz) / (2 * w.s * w.s)); }
+    if (this.curWorld) { const dx = x - this.curWorld.x, dz = z - this.curWorld.z; h += 130 * Math.exp(-(dx * dx + dz * dz) / (2 * 135 * 135)); }
+    return h;
+  }
+  grd(x, z, t) { const e = 5; return { x: (this.hgt(x + e, z, t) - this.hgt(x - e, z, t)) / (2 * e), z: (this.hgt(x, z + e, t) - this.hgt(x, z - e, t)) / (2 * e) }; }
+  stepField(t) {
+    const ctx = this.fx; if (!ctx) return;
+    const W = this.fc.width, H = this.fc.height, d = this.fd;
+    ctx.clearRect(0, 0, W, H);
+    const scrollT = Math.max(0, Math.min(1, scrollY / Math.max(1, innerHeight)));
+    // camera pulls up + tilts toward top-down as you scroll; sways with cursor
+    const camY = 340 + scrollT * 680, camZ = -430;
+    const camX = ((this.cur.on ? this.cur.mx : .5) - .5) * 130;
+    const pitch = .40 + scrollT * .58, cp = Math.cos(pitch), sp = Math.sin(pitch);
+    const F = .95 * H, cy = H * .48;
+    const proj = (x, h, z) => {
+      const px = x - camX, py = h - camY, pz = z - camZ;
+      const zc = pz * cp - py * sp; if (zc < 70) return null;
+      const s = F / zc;
+      return { x: W / 2 + px * s, y: cy - (py * cp + pz * sp) * s, s, zc };
+    };
+    // unproject cursor onto terrain plane (h = -40)
+    if (this.cur.on && this.mScreen) {
+      const xd = (this.mScreen.x - W / 2) / F, yd = (cy - this.mScreen.y) / F;
+      const pyd = yd * cp - sp, pzd = cp + yd * sp;
+      if (pyd < -.02) {
+        const tt = (-40 - camY) / pyd;
+        this.curWorld = { x: Math.max(-880, Math.min(880, camX + tt * xd)), z: Math.max(120, Math.min(1650, camZ + tt * pzd)) };
+      }
+    }
+    const fog = zc => Math.max(0, Math.min(1, 1.45 - zc / (F * 2.4)));
+    // wireframe rows (far → near)
+    for (let z = 1720; z >= 90; z -= 46) {
+      ctx.beginPath(); let on = false, rowFog = 0;
+      for (let x = -920; x <= 920; x += 40) {
+        const q = proj(x, this.hgt(x, z, t), z);
+        if (!q) { on = false; continue; }
+        rowFog = fog(q.zc);
+        if (!on) { ctx.moveTo(q.x, q.y); on = true; } else ctx.lineTo(q.x, q.y);
+      }
+      ctx.strokeStyle = `rgba(112,105,245,${.05 + rowFog * .14})`; ctx.lineWidth = 1 * d; ctx.stroke();
+    }
+    // sparse column lines
+    for (let x = -920; x <= 920; x += 160) {
+      ctx.beginPath(); let on = false;
+      for (let z = 1720; z >= 90; z -= 46) {
+        const q = proj(x, this.hgt(x, z, t), z);
+        if (!q) { on = false; continue; }
+        if (!on) { ctx.moveTo(q.x, q.y); on = true; } else ctx.lineTo(q.x, q.y);
+      }
+      ctx.strokeStyle = 'rgba(91,91,240,.07)'; ctx.lineWidth = 1 * d; ctx.stroke();
+    }
+    // depth-lit basin points
+    for (let z = 1650; z >= 120; z -= 60) for (let x = -900; x <= 900; x += 52) {
+      const h = this.hgt(x, z, t), depth = Math.max(0, Math.min(1, -h / 200));
+      if (depth < .12) continue;
+      const q = proj(x, h, z); if (!q) continue;
+      const a = depth * .75 * fog(q.zc);
+      ctx.fillStyle = `rgba(${Math.round(91 + 30 * depth)},${Math.round(105 + 112 * depth)},240,${a})`;
+      const sz = (1 + depth * 3.2) * q.s * 340 * d / F;
+      ctx.fillRect(q.x - sz / 2, q.y - sz / 2, sz, sz);
+    }
+    // cursor lens ring on terrain
+    if (this.curWorld) {
+      ctx.beginPath(); let on = false;
+      for (let i = 0; i <= 26; i++) {
+        const a = i / 26 * 6.283, rx = this.curWorld.x + Math.cos(a) * 120, rz = this.curWorld.z + Math.sin(a) * 120;
+        const q = proj(rx, this.hgt(rx, rz, t) + 4, rz);
+        if (!q) { on = false; continue; }
+        if (!on) { ctx.moveTo(q.x, q.y); on = true; } else ctx.lineTo(q.x, q.y);
+      }
+      ctx.strokeStyle = 'rgba(157,91,240,.5)'; ctx.lineWidth = 1.2 * d; ctx.stroke();
+    }
+    // probes: live gradient descent
+    if (!this.rm) for (const p of this.probes) {
+      const g = this.grd(p.x, p.z, t);
+      p.vx = (p.vx - g.x * .55) * .92 + (Math.random() - .5) * .12;
+      p.vz = (p.vz - g.z * .55) * .92 + (Math.random() - .5) * .12;
+      const spd = Math.hypot(p.vx, p.vz), cap = 7.5;
+      if (spd > cap) { p.vx *= cap / spd; p.vz *= cap / spd; }
+      p.x += p.vx; p.z += p.vz;
+      p.trail.push([p.x, p.z]); if (p.trail.length > 46) p.trail.shift();
+      for (const w of this.wells) {
+        if (Math.hypot(p.x - w.x, p.z - w.z) < 34 && Math.hypot(p.vx, p.vz) < 2.2) {
+          this.flares.push({ x: p.x, z: p.z, r: 8, max: 200 });
+          Object.assign(p, this.spawn(), { trail: [] }); break;
+        }
+      }
+      if (p.x < -960 || p.x > 960 || p.z < 90 || p.z > 1780) Object.assign(p, this.spawn(), { trail: [] });
+    }
+    // trails + probe glows
+    ctx.lineWidth = 1.3 * d;
+    for (const p of this.probes) {
+      for (let i = 1; i < p.trail.length; i++) {
+        const a0 = p.trail[i - 1], a1 = p.trail[i];
+        const q0 = proj(a0[0], this.hgt(a0[0], a0[1], t) + 6, a0[1]);
+        const q1 = proj(a1[0], this.hgt(a1[0], a1[1], t) + 6, a1[1]);
+        if (!q0 || !q1) continue;
+        ctx.strokeStyle = `rgba(91,217,240,${(i / p.trail.length) * .5 * fog(q1.zc)})`;
+        ctx.beginPath(); ctx.moveTo(q0.x, q0.y); ctx.lineTo(q1.x, q1.y); ctx.stroke();
+      }
+      const q = proj(p.x, this.hgt(p.x, p.z, t) + 8, p.z); if (!q) continue;
+      const fg = fog(q.zc), r0 = Math.max(2, q.s * 300 * d / F);
+      ctx.fillStyle = `rgba(91,217,240,${.16 * fg})`; ctx.beginPath(); ctx.arc(q.x, q.y, r0 * 4, 0, 7); ctx.fill();
+      ctx.fillStyle = `rgba(91,217,240,${.95 * fg})`; ctx.beginPath(); ctx.arc(q.x, q.y, r0 * 1.15, 0, 7); ctx.fill();
+    }
+    // arrival / click flares: world-space rings hugging the terrain
+    this.flares = this.flares.filter(f => f.r < f.max);
+    for (const f of this.flares) {
+      f.r += 5.5; const alpha = (1 - f.r / f.max) * .8;
+      ctx.beginPath(); let on = false;
+      for (let i = 0; i <= 30; i++) {
+        const a = i / 30 * 6.283, rx = f.x + Math.cos(a) * f.r, rz = f.z + Math.sin(a) * f.r;
+        const q = proj(rx, this.hgt(rx, rz, t) + 5, rz);
+        if (!q) { on = false; continue; }
+        if (!on) { ctx.moveTo(q.x, q.y); on = true; } else ctx.lineTo(q.x, q.y);
+      }
+      ctx.strokeStyle = `rgba(91,217,240,${alpha})`; ctx.lineWidth = 1.6 * d; ctx.stroke();
+    }
+  }
+
+  /* ---------- impact data stream ---------- */
+  setupStream() {
+    const c = document.getElementById('stream'); if (!c) return;
+    this.sc = c; this.sx = c.getContext('2d');
+    this.sparts = Array.from({ length: 40 }, () => ({ x: Math.random(), y: Math.random(), v: .002 + Math.random() * .004 }));
+    this.sizeStream();
+  }
+  sizeStream() {
+    const c = this.sc; if (!c) return;
+    const r = c.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+    c.width = Math.max(1, r.width * d); c.height = Math.max(1, r.height * d); this.sd = d;
+  }
+  stepStream() {
+    const ctx = this.sx; if (!ctx || this.rm) return;
+    const W = this.sc.width, H = this.sc.height;
+    ctx.clearRect(0, 0, W, H);
+    for (const p of this.sparts) {
+      p.x += p.v; if (p.x > 1.02) { p.x = -.02; p.y = Math.random(); }
+      ctx.fillStyle = `rgba(91,217,240,${.1 + p.v * 40})`;
+      ctx.fillRect(p.x * W, p.y * H, 8 * this.sd * p.v * 200, 1.2 * this.sd);
+    }
+  }
+
+  /* ---------- cursor ---------- */
+  setupCursor() {
+    this.ring = document.getElementById('curring'); this.dotEl = document.getElementById('curdot'); this.lbl = document.getElementById('curlabel');
+    this.mt = { x: innerWidth / 2, y: innerHeight / 2 }; this.rp = { ...this.mt }; this.dp = { ...this.mt }; this.hover = null;
+    if (matchMedia('(pointer:fine)').matches === false) { this.ring.style.display = 'none'; this.dotEl.style.display = 'none'; return; }
+    document.addEventListener('mousemove', e => { this.mt = { x: e.clientX, y: e.clientY }; });
+    document.addEventListener('mouseover', e => {
+      const t = e.target.closest && e.target.closest('a,button,[data-cursor]');
+      this.hover = t;
+      this.lbl.style.opacity = t && t.dataset && t.dataset.cursor ? '1' : '0';
+      if (t && t.dataset && t.dataset.cursor) this.lbl.textContent = t.dataset.cursor;
+    });
+  }
+
+  /* ---------- reveals + counters ---------- */
+  setupReveals() {
+    const ease = 'cubic-bezier(.16,1,.3,1)';
+    const els = [...document.querySelectorAll('[data-reveal]')];
+    if (this.rm) { return; }
+    els.forEach(el => { el.style.opacity = '0'; el.style.translate = '0 26px'; });
+    this.io = new IntersectionObserver(ents => ents.forEach(en => {
+      if (!en.isIntersecting) return;
+      const el = en.target, d = +(el.dataset.delay || 0);
+      el.style.transition = `opacity .8s ${ease} ${d}ms, translate .8s ${ease} ${d}ms`;
+      el.style.opacity = '1'; el.style.translate = '0 0';
+      el.querySelectorAll('[data-count]').forEach(c => this.runCounter(c));
+      if (el.contains(document.getElementById('strike'))) setTimeout(() => { const s = document.getElementById('strike'); s.style.transition = 'transform .7s cubic-bezier(.7,0,.18,1)'; s.style.transform = 'scaleX(1)'; }, 500);
+      this.io.unobserve(el);
+    }), { threshold: .18 });
+    els.forEach(el => this.io.observe(el));
+    // process line
+    const proc = document.getElementById('process'), line = document.getElementById('procline');
+    if (proc && line) new IntersectionObserver((es, o) => { if (es[0].isIntersecting) { line.style.transition = 'transform 1.4s cubic-bezier(.7,0,.18,1) .3s'; line.style.transform = 'scaleX(1)'; o.disconnect(); } }, { threshold: .3 }).observe(proc);
+    // gh graph trigger
+    const gg = document.getElementById('ghgraph');
+    if (gg) new IntersectionObserver((es, o) => { if (es[0].isIntersecting) { this.ghT0 = performance.now(); o.disconnect(); } }, { threshold: .4 }).observe(gg);
+  }
+  runCounter(el) {
+    if (el._ran) return; el._ran = true;
+    const end = +el.dataset.count, dec = +(el.dataset.decimals || 0), suf = el.dataset.suffix || (el.dataset.decimals ? 'h' : '');
+    const sufTxt = el.dataset.suffix || ''; const t0 = performance.now(), dur = 1500;
+    const step = n => {
+      const p = Math.min(1, (n - t0) / dur), v = end * (1 - Math.pow(1 - p, 3));
+      el.textContent = v.toFixed(dec) + sufTxt;
+      if (p < 1) requestAnimationFrame(step);
+      else el.animate([{ textShadow: '0 0 30px rgba(91,217,240,.9)' }, { textShadow: '0 0 0px rgba(91,217,240,0)' }], { duration: 450, easing: 'cubic-bezier(.34,1.56,.64,1)' });
+    };
+    requestAnimationFrame(step);
+  }
+
+  /* ---------- ambient WAAPI loops ---------- */
+  setupPulses() {
+    if (this.rm) return;
+    document.querySelectorAll('[data-pulse]').forEach(d => d.animate(
+      [{ boxShadow: '0 0 0 0 rgba(91,217,240,.55)' }, { boxShadow: '0 0 0 9px rgba(91,217,240,0)' }], { duration: 1700, iterations: Infinity }));
+    document.querySelectorAll('[data-ring]').forEach(el => {
+      el.style.transformBox = 'fill-box'; el.style.transformOrigin = 'center';
+      el.animate([{ transform: 'scale(.35)', opacity: .85 }, { transform: 'scale(1.9)', opacity: 0 }], { duration: 2400, delay: (+el.dataset.ring) * 800, iterations: Infinity, easing: 'ease-out' });
+    });
+    document.querySelectorAll('[data-tdot]').forEach(el => el.animate(
+      [{ transform: 'translateY(0)' }, { transform: 'translateY(-6px)' }, { transform: 'translateY(0)' }], { duration: 900, delay: (+el.dataset.tdot) * 160, iterations: Infinity, easing: 'ease-in-out' }));
+    document.querySelectorAll('[data-breathe]').forEach((el, i) => {
+      el.style.transformBox = 'fill-box'; el.style.transformOrigin = 'center';
+      el.animate([{ transform: 'scale(1)', opacity: .7 }, { transform: 'scale(1.5)', opacity: 1 }, { transform: 'scale(1)', opacity: .7 }], { duration: 2600, delay: i * 500, iterations: Infinity, easing: 'ease-in-out' });
+    });
+    document.querySelectorAll('[data-orb]').forEach(el => el.animate(
+      [{ transform: 'translate(0,0)' }, { transform: el.dataset.orb === '1' ? 'translate(90px,60px)' : 'translate(-80px,-70px)' }, { transform: 'translate(0,0)' }], { duration: el.dataset.orb === '1' ? 26000 : 32000, iterations: Infinity, easing: 'ease-in-out' }));
+    document.querySelectorAll('[data-scrollcue]').forEach(el => { el.style.transformOrigin = 'top'; el.animate([{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }, { transform: 'scaleY(0)' }], { duration: 1800, iterations: Infinity, easing: 'ease-in-out' }); });
+  }
+
+  /* ---------- hero entrance ---------- */
+  heroEntrance() {
+    if (this.rm) return;
+    document.querySelectorAll('[data-hero-rise]').forEach(el => {
+      const i = +el.dataset.heroRise;
+      el.animate([{ transform: 'translateY(115%)' }, { transform: 'translateY(0)' }], { duration: 1100, delay: 120 + i * 110, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' });
+    });
+  }
+
+  /* ---------- rotator ---------- */
+  setupRotator() {
+    const el = document.getElementById('rotor'); if (!el || this.rm) return;
+    const words = ['autonomous agents', 'RAG that answers', 'pipelines that scale', 'chatbots that convert'];
+    let i = 0;
+    this.rotInt = setInterval(() => {
+      el.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: 'translateY(-100%)', opacity: 0 }], { duration: 300, easing: 'ease-in', fill: 'forwards' }).onfinish = () => {
+        i = (i + 1) % words.length; el.textContent = words[i];
+        el.animate([{ transform: 'translateY(100%)', opacity: 0 }, { transform: 'translateY(0)', opacity: 1 }], { duration: 350, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'forwards' });
+      };
+    }, 2600);
+  }
+
+  /* ---------- magnetic buttons ---------- */
+  setupMagnets() {
+    if (this.rm) return;
+    document.querySelectorAll('[data-magnet]').forEach(el => {
+      el.addEventListener('mousemove', e => {
+        const r = el.getBoundingClientRect();
+        const dx = (e.clientX - r.left - r.width / 2) * .22, dy = (e.clientY - r.top - r.height / 2) * .3;
+        el.style.transform = `translate(${dx}px,${dy}px)`;
+      });
+      el.addEventListener('mouseleave', () => {
+        el.style.transform = '';
+        el.animate([{ transform: el.style.transform || 'translate(0,0)' }, { transform: 'translate(0,0)' }], { duration: 500, easing: 'cubic-bezier(.34,1.56,.64,1)' });
+      });
+    });
+  }
+
+  /* ---------- contribution graph ---------- */
+  setupGraph() {
+    const c = document.getElementById('ghgraph'); if (!c) return;
+    this.gg = c; this.ggx = c.getContext('2d');
+    let seed = 7;
+    const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    this.ggData = Array.from({ length: 26 }, () => Array.from({ length: 7 }, () => { const r = rnd(); return r < .18 ? 0 : r * r; }));
+    this.ghT0 = null;
+  }
+  drawGraph() {
+    const c = this.gg; if (!c || !this.ghT0) return;
+    const d = Math.min(devicePixelRatio || 1, 2);
+    const r = c.getBoundingClientRect();
+    if (c.width !== r.width * d) { c.width = r.width * d; c.height = r.height * d; }
+    const ctx = this.ggx, W = c.width, H = c.height;
+    const p = this.rm ? 1 : Math.min(1, (performance.now() - this.ghT0) / 1400);
+    ctx.clearRect(0, 0, W, H);
+    const cols = 26, rows = 7, cw = W / cols, ch = H / rows;
+    for (let x = 0; x < cols; x++) for (let y = 0; y < rows; y++) {
+      if (x / cols > p) continue;
+      const v = this.ggData[x][y];
+      ctx.fillStyle = v === 0 ? 'rgba(255,255,255,.05)' : `rgba(91,${140 + Math.round(80 * v)},240,${.18 + v * .8})`;
+      ctx.fillRect(x * cw + d, y * ch + d, cw - 3 * d, ch - 3 * d);
+    }
+  }
+
+  /* ---------- main loop ---------- */
+  loop(t) {
+    const dt = Math.min(50, t - this.lastT); this.lastT = t;
+    this.stepField(t); this.stepStream(); this.drawGraph();
+    // ticker
+    this.tick += dt * .175;
+    const tk = document.getElementById('ticker'); if (tk) tk.textContent = Math.floor(this.tick).toLocaleString();
+    // scroll-derived
+    const sy = scrollY, vh = innerHeight;
+    const pb = document.getElementById('progressbar');
+    if (pb) pb.style.transform = `scaleX(${sy / Math.max(1, document.documentElement.scrollHeight - vh)})`;
+    const nav = document.getElementById('nav');
+    if (nav) { const on = sy > 40; nav.style.background = on ? 'rgba(8,8,13,.72)' : 'transparent'; nav.style.backdropFilter = on ? 'blur(16px)' : 'none'; nav.style.borderColor = on ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,0)'; }
+    const hc = document.getElementById('herocopy');
+    if (hc && sy < vh && !this.rm) { hc.style.transform = `translateY(${sy * .26}px)`; hc.style.opacity = Math.max(0, 1 - sy / (vh * .75)); }
+    // reel
+    const wrap = document.getElementById('reelwrap'), track = document.getElementById('reeltrack');
+    if (wrap && track) {
+      const top = wrap.offsetTop, range = wrap.offsetHeight - vh;
+      const prog = Math.max(0, Math.min(1, (sy - top) / range));
+      const max = track.scrollWidth - innerWidth + 64;
+      track.style.transform = `translateX(${-prog * Math.max(0, max)}px)`;
+      const bar = document.getElementById('reelbar'); if (bar) bar.style.transform = `scaleX(${.02 + prog * .98})`;
+      const rc = document.getElementById('reelcount'); if (rc) rc.textContent = `0${Math.min(3, 1 + Math.floor(prog * 2.999))} / 03`;
+      document.querySelectorAll('[data-ghost]').forEach(g => { g.style.transform = `translateX(${prog * -90}px)`; });
+    }
+    // velocity skew
+    if (!this.rm) {
+      const vel = sy - this.lastY; this.lastY = sy;
+      const target = Math.max(-4, Math.min(4, vel * .09));
+      for (const s of this.skews) { s.v += (target - s.v) * .1; s.e.style.transform = Math.abs(s.v) < .01 ? '' : `skewY(${s.v.toFixed(2)}deg)`; }
+    }
+    // svg dashes
+    this.dashOff -= .4;
+    for (const p of this.dashes) p.style.strokeDashoffset = this.dashOff;
+    // cursor
+    if (this.ring && this.ring.style.display !== 'none') {
+      this.rp.x += (this.mt.x - this.rp.x) * .14; this.rp.y += (this.mt.y - this.rp.y) * .14;
+      this.dp.x += (this.mt.x - this.dp.x) * .55; this.dp.y += (this.mt.y - this.dp.y) * .55;
+      const hoverScale = this.hover ? (this.hover.dataset && this.hover.dataset.cursor ? 2.1 : 1.6) : 1;
+      this.ring.style.transform = `translate(${this.rp.x}px,${this.rp.y}px) scale(${hoverScale})`;
+      this.ring.style.borderColor = this.hover ? 'rgba(91,217,240,.9)' : 'rgba(242,242,248,.55)';
+      this.dotEl.style.transform = `translate(${this.dp.x}px,${this.dp.y}px)`;
+    }
+    this.raf = requestAnimationFrame(this._loop);
+  }
+}
+</script>
+</body>
+</html>

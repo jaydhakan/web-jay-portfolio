@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+html{scroll-behavior:smooth}
+body{margin:0;background:#08080D;color:#F2F2F8;font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:#5BD9F0;text-decoration:none}a:hover{color:#9D5BF0}
+::selection{background:#5B5BF0;color:#fff}
+</style>
+</helmet>
+
+<div id="progressbar" style="position:fixed;left:0;top:0;right:0;height:2px;background:linear-gradient(90deg,#5B5BF0,#9D5BF0,#5BD9F0);transform:scaleX(0);transform-origin:left;z-index:998"></div>
+<canvas id="flight" aria-hidden="true" style="position:fixed;top:0;right:0;width:52vw;height:100vh;pointer-events:none;z-index:0"></canvas>
+<div style="position:fixed;top:0;right:0;width:52vw;height:100vh;pointer-events:none;z-index:1;background:linear-gradient(90deg,#08080D 0%,rgba(8,8,13,0) 30%)"></div>
+
+<nav data-screen-label="Nav" style="position:fixed;left:0;right:0;top:0;z-index:900;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:rgba(8,8,13,.72);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.07)">
+  <div style="display:flex;align-items:center;gap:26px">
+    <a href="Phase 3 — Home Hi-Fi.dc.html" style="font:700 17px 'Space Grotesk',sans-serif;color:#F2F2F8;letter-spacing:-.02em">JD<span style="color:#5BD9F0">◆</span></a>
+    <span style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:.22em;color:rgba(242,242,248,.4)">SPINE + FLIGHT — GEO TIMELINE</span>
+  </div>
+  <div style="display:flex;gap:8px;padding:5px;border:1px solid rgba(255,255,255,.12);border-radius:99px">
+    <button onClick="{{ goWork }}" style="{{ wBtn }}">Work</button>
+    <button onClick="{{ goAbout }}" style="{{ aBtn }}">About</button>
+  </div>
+</nav>
+
+<sc-if value="{{ isWork }}" hint-placeholder-val="{{ true }}">
+<main data-screen-label="Work — The Evidence" style="position:relative;z-index:2;max-width:820px;padding:150px 0 40px 64px">
+  <div style="font:600 11px 'JetBrains Mono',monospace;letter-spacing:.24em;color:#9D5BF0;margin-bottom:14px">WORK — THE EVIDENCE</div>
+  <h1 style="margin:0 0 18px;font:700 clamp(38px,4vw,58px)/1.06 'Space Grotesk',sans-serif;letter-spacing:-.03em">9 systems in production.<br><span style="color:transparent;background:linear-gradient(100deg,#5B5BF0,#9D5BF0 50%,#5BD9F0);-webkit-background-clip:text;background-clip:text">15M queries a day</span> between them.</h1>
+  <p style="margin:0 0 28px;max-width:440px;font:400 15px/1.6 'Space Grotesk',sans-serif;color:rgba(242,242,248,.6)">Three deep dives, six log entries. The flight on the right follows your scroll — one beacon per system.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:56px">
+    <sc-for list="{{ cats }}" as="c" hint-placeholder-count="4">
+      <button onClick="{{ c.set }}" style="{{ c.style }}">{{ c.name }}</button>
+    </sc-for>
+  </div>
+</main>
+</sc-if>
+
+<sc-if value="{{ isAbout }}" hint-placeholder-val="{{ false }}">
+<main data-screen-label="About — The Training Run" style="position:relative;z-index:2;max-width:820px;padding:150px 0 40px 64px">
+  <div style="font:600 11px 'JetBrains Mono',monospace;letter-spacing:.24em;color:#9D5BF0;margin-bottom:14px">ABOUT — THE TRAINING RUN</div>
+  <h1 style="margin:0 0 18px;font:700 clamp(38px,4vw,58px)/1.06 'Space Grotesk',sans-serif;letter-spacing:-.03em">Seven epochs.<br>One <span style="color:transparent;background:linear-gradient(100deg,#5B5BF0,#9D5BF0 50%,#5BD9F0);-webkit-background-clip:text;background-clip:text">converging</span> curve.</h1>
+  <p style="margin:0 0 56px;max-width:440px;font:400 15px/1.6 'Space Grotesk',sans-serif;color:rgba(242,242,248,.6)">The rail below is my career plotted as a training loss curve — noisy at epoch one, converged by now. Scroll to run it.</p>
+</main>
+</sc-if>
+
+<div id="tl" style="position:relative;z-index:2;max-width:820px;padding:0 0 140px 64px">
+  <svg id="railsvg" style="position:absolute;left:64px;top:0;width:110px;height:100%;overflow:visible" preserveAspectRatio="none" aria-hidden="true">
+    <defs><linearGradient id="railgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5B5BF0"/><stop offset=".5" stop-color="#9D5BF0"/><stop offset="1" stop-color="#5BD9F0"/></linearGradient></defs>
+    <path id="railbase" d="" stroke="rgba(255,255,255,.09)" stroke-width="1.5" fill="none"/>
+    <path id="raildraw" d="" stroke="url(#railgrad)" stroke-width="2" fill="none" style="filter:drop-shadow(0 0 6px rgba(157,91,240,.6))"/>
+  </svg>
+  <div id="head" style="position:absolute;left:64px;top:0;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:99px;background:#5BD9F0;box-shadow:0 0 18px #5BD9F0,0 0 40px rgba(91,217,240,.5);opacity:0;z-index:3"></div>
+
+  <sc-for list="{{ items }}" as="it" hint-placeholder-count="4">
+    <div style="display:flex;margin-bottom:16px;opacity:{{ it.op }};transition:opacity .4s">
+      <div style="width:110px;flex:none;position:relative">
+        <span id="{{ it.mid }}" data-mx="{{ it.mx }}" style="position:absolute;top:30px;left:{{ it.mxpx }};width:12px;height:12px;margin-left:-6px;border-radius:99px;border:2px solid rgba(157,91,240,.55);background:#08080D;transition:background .45s cubic-bezier(.34,1.56,.64,1),box-shadow .45s,border-color .45s"></span>
+      </div>
+      <sc-if value="{{ it.deep }}" hint-placeholder-val="{{ true }}">
+        <article data-cursor="VIEW" style="flex:1;padding:30px 34px;border:1px solid rgba(255,255,255,.09);border-radius:16px;background:#0E0E16;transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .4s" style-hover="transform:translateY(-4px);border-color:rgba(91,91,240,.5)">
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline">
+            <span style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:.2em;color:#5BD9F0">{{ it.tag }}</span>
+            <span style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.12em;color:rgba(242,242,248,.4)">{{ it.meta }}</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:14px;margin-top:14px">
+            <span style="font:700 54px/1 'Space Grotesk',sans-serif;letter-spacing:-.035em;color:#F2F2F8">{{ it.metric }}</span>
+            <span style="font:500 11px 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(242,242,248,.5)">{{ it.metricLabel }}</span>
+          </div>
+          <h3 style="margin:12px 0 6px;font:600 22px 'Space Grotesk',sans-serif;letter-spacing:-.02em">{{ it.title }}</h3>
+          <p style="margin:0 0 14px;font:400 14px/1.55 'Space Grotesk',sans-serif;color:rgba(242,242,248,.6)">{{ it.desc }}</p>
+          <span style="font:600 13px 'Space Grotesk',sans-serif;color:#5BD9F0">{{ it.link }}</span>
+        </article>
+      </sc-if>
+      <sc-if value="{{ it.log }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 24px;border:1px solid rgba(255,255,255,.06);border-radius:12px;background:rgba(14,14,22,.6);transition:border-color .3s" style-hover="border-color:rgba(91,217,240,.35)">
+          <div><span style="font:600 15px 'Space Grotesk',sans-serif">{{ it.title }}</span><span style="margin-left:12px;font:500 10px 'JetBrains Mono',monospace;letter-spacing:.16em;color:rgba(242,242,248,.38)">{{ it.tag }}</span></div>
+          <span style="font:600 13px 'JetBrains Mono',monospace;color:#5BD9F0;white-space:nowrap">{{ it.metric }}</span>
+        </div>
+      </sc-if>
+      <sc-if value="{{ it.epoch }}" hint-placeholder-val="{{ false }}">
+        <article style="flex:1;padding:24px 30px;border:1px solid rgba(255,255,255,.09);border-radius:16px;background:#0E0E16;transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .4s" style-hover="transform:translateY(-4px);border-color:rgba(157,91,240,.5)">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+            <span style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:.2em;color:#9D5BF0">{{ it.tag }}</span>
+            <span style="font:600 10.5px 'JetBrains Mono',monospace;color:#5BD9F0">LOSS {{ it.loss }}</span>
+          </div>
+          <h3 style="margin:10px 0 6px;font:600 20px 'Space Grotesk',sans-serif;letter-spacing:-.02em">{{ it.title }}</h3>
+          <p style="margin:0;font:400 13.5px/1.55 'Space Grotesk',sans-serif;color:rgba(242,242,248,.6)">{{ it.desc }}</p>
+        </article>
+      </sc-if>
+    </div>
+  </sc-for>
+
+  <div style="display:flex;margin-top:44px"><div style="width:110px;flex:none"></div>
+    <a href="Phase 3 — Home Hi-Fi.dc.html#cta" style="display:inline-flex;align-items:center;gap:10px;padding:16px 30px;border-radius:99px;background:#5B5BF0;color:#fff;font:600 15px 'Space Grotesk',sans-serif;box-shadow:0 0 32px rgba(91,91,240,.4);transition:box-shadow .3s" style-hover="box-shadow:0 0 56px rgba(91,91,240,.75)">{{ ctaLabel }} ↗</a>
+  </div>
+</div>
+
+<div style="position:fixed;left:48px;bottom:32px;z-index:5;display:flex;align-items:center;gap:14px;pointer-events:none">
+  <span style="width:6px;height:6px;border-radius:99px;background:#5BD9F0;box-shadow:0 0 10px #5BD9F0"></span>
+  <span id="hudcount" style="font:600 11px 'JetBrains Mono',monospace;letter-spacing:.2em;color:rgba(242,242,248,.65)">01 / 09</span>
+  <span style="width:140px;height:2px;background:rgba(255,255,255,.1);border-radius:2px;display:block"><span id="hudbar" style="display:block;height:100%;width:100%;background:linear-gradient(90deg,#5B5BF0,#5BD9F0);transform:scaleX(0);transform-origin:left;border-radius:2px"></span></span>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = { view: 'work', filter: 'All' };
+  work = [
+    { deep: 1, cat: 'Pipelines', tag: 'PIPELINES · DEEP DIVE', metric: '18h → 1.2h', metricLabel: 'REVIEW TIME, CUT 93%', title: 'Healthcare Doc Pipeline', desc: 'OCR → LLM extraction → validation for a US healthcare network. 44k documents a day, zero missed SLAs since launch.', meta: '6 MIN · 5 SECTIONS', mx: 50 },
+    { deep: 1, cat: 'Agents', tag: 'AGENTS · DEEP DIVE', metric: '90%', metricLabel: 'DEV-TIME SAVED', title: 'WhatsApp Bot Creator', desc: 'Founders describe a bot in plain English; the system builds, tests and deploys it — no engineer in the loop.', meta: '6 MIN · 5 SECTIONS', mx: 50 },
+    { deep: 1, cat: 'Search', tag: 'SEARCH · DEEP DIVE', metric: '175 QPS', metricLabel: 'SUSTAINED · P95 < 80MS', title: 'Vector Search API', desc: 'Semantic search over 70M records for a 6-figure-user SaaS — answers, not links.', meta: '5 MIN · 4 SECTIONS', mx: 50 },
+    { cat: 'Agents', tag: 'AGENTS', title: 'Fintech reconciliation agent', metric: '12k txns/night', mx: 50 },
+    { cat: 'Pipelines', tag: 'PIPELINES', title: 'ETL migration, zero loss', metric: '70M records', mx: 50 },
+    { cat: 'Search', tag: 'SEARCH', title: 'Support RAG bot', metric: '61% deflection', mx: 50 },
+    { cat: 'Pipelines', tag: 'PIPELINES', title: 'Lead-scoring pipeline', metric: '3× SQL conv.', mx: 50 },
+    { cat: 'Agents', tag: 'AGENTS', title: 'Voice agent, POC → prod', metric: '4-week ship', mx: 50 },
+    { cat: 'Search', tag: 'SEARCH', title: 'Catalog dedupe search', metric: '8M SKUs', mx: 50 }
+  ];
+  about = [
+    { epoch: 1, tag: 'EPOCH 01 · 2019', loss: '2.41', title: 'First script that mattered', desc: 'Automated a family business inventory count. Ugly code, real hours saved — the hook set.', mx: 82 },
+    { epoch: 1, tag: 'EPOCH 02 · 2020', loss: '1.63', title: 'First backend role', desc: 'Production Python and Postgres. Learned that "works on my machine" is a confession, not a status.', mx: 24 },
+    { epoch: 1, tag: 'EPOCH 03 · 2021', loss: '1.12', title: 'First system with my name on the pager', desc: 'On-call taught me more than any course. Uptime became a personality trait.', mx: 68 },
+    { epoch: 1, tag: 'EPOCH 04 · 2022', loss: '0.71', title: 'Scaled to 15M queries/day', desc: 'Rebuilt a search stack under live traffic. The 175 QPS number on the Work page comes from here.', mx: 34 },
+    { epoch: 1, tag: 'EPOCH 05 · 2023', loss: '0.38', title: 'Lead engineer at BotPro', desc: 'Owned delivery for client systems end to end — scoping, building, shipping, supporting.', mx: 58 },
+    { epoch: 1, tag: 'EPOCH 06 · 2024', loss: '0.17', title: 'Delivery-quality award', desc: 'Youngest engineer at BotPro to win the annual award — for shipping every project on time, in production.', mx: 44 },
+    { epoch: 1, tag: 'EPOCH 07 · NOW', loss: '0.09', title: 'Independent', desc: '9 systems in production for founders and agencies. Converged — but still descending.', mx: 50 }
+  ];
+  renderVals() {
+    const { view, filter } = this.state, isWork = view === 'work';
+    const btn = on => `padding:8px 20px;border-radius:99px;border:none;cursor:pointer;font:600 13px 'Space Grotesk',sans-serif;transition:background .3s,color .3s;background:${on ? '#5B5BF0' : 'transparent'};color:${on ? '#fff' : 'rgba(242,242,248,.6)'}`;
+    const pill = on => `padding:7px 16px;border-radius:99px;cursor:pointer;font:600 11px 'JetBrains Mono',monospace;letter-spacing:.12em;transition:all .3s;border:1px solid ${on ? '#5BD9F0' : 'rgba(255,255,255,.16)'};background:${on ? 'rgba(91,217,240,.1)' : 'transparent'};color:${on ? '#5BD9F0' : 'rgba(242,242,248,.55)'}`;
+    const src = isWork ? this.work : this.about;
+    const items = src.map((it, i) => ({
+      ...it, deep: !!it.deep, log: !it.deep && !it.epoch && isWork, epoch: !!it.epoch,
+      mid: `mk-${view}-${i}`, mxpx: it.mx + 'px',
+      link: 'Read the case study →',
+      op: (isWork && filter !== 'All' && it.cat !== filter) ? .22 : 1
+    }));
+    this.itemsNow = items;
+    return {
+      isWork, isAbout: !isWork, items,
+      goWork: () => this.setState({ view: 'work' }, () => this.rebuild()),
+      goAbout: () => this.setState({ view: 'about' }, () => this.rebuild()),
+      wBtn: btn(isWork), aBtn: btn(!isWork),
+      cats: ['All', 'Agents', 'Pipelines', 'Search'].map(name => ({ name, style: pill(filter === name), set: () => this.setState({ filter: name }) })),
+      ctaLabel: isWork ? 'Have something like these? Start a project' : 'Work with me — start a project'
+    };
+  }
+  componentDidMount() {
+    if (!this._init) this.setupOnce();
+    cancelAnimationFrame(this.raf);
+    this._loop = this.loop.bind(this);
+    this.raf = requestAnimationFrame(this._loop);
+  }
+  setupOnce() {
+    this._init = true;
+    this.rm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.cv = document.getElementById('flight'); this.cx = this.cv.getContext('2d');
+    this.dust = Array.from({ length: 120 }, () => ({ x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, z: Math.random() }));
+    this._onResize = () => this.rebuild();
+    addEventListener('resize', this._onResize);
+    this.rebuild();
+  }
+  componentWillUnmount() { cancelAnimationFrame(this.raf); removeEventListener('resize', this._onResize); }
+  rebuild() {
+    // rail path from actual marker positions
+    setTimeout(() => {
+      const svg = document.getElementById('railsvg'), tl = document.getElementById('tl');
+      if (!svg || !tl) return;
+      const H = tl.offsetHeight; svg.setAttribute('viewBox', `0 0 110 ${H}`); svg.style.height = H + 'px';
+      const tlTop = tl.getBoundingClientRect().top;
+      this.marks = this.itemsNow.map((it, i) => {
+        const el = document.getElementById(it.mid); if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return { el, x: +el.dataset.mx, y: r.top - tlTop + 6, lit: false };
+      }).filter(Boolean);
+      if (!this.marks.length) return;
+      let d = `M ${this.marks[0].x} 0 L ${this.marks[0].x} ${this.marks[0].y}`;
+      for (let i = 1; i < this.marks.length; i++) {
+        const a = this.marks[i - 1], b = this.marks[i], my = (a.y + b.y) / 2;
+        d += ` C ${a.x} ${my}, ${b.x} ${my}, ${b.x} ${b.y}`;
+      }
+      d += ` L ${this.marks[this.marks.length - 1].x} ${H}`;
+      document.getElementById('railbase').setAttribute('d', d);
+      const draw = document.getElementById('raildraw'); draw.setAttribute('d', d);
+      this.railLen = draw.getTotalLength();
+      draw.style.strokeDasharray = this.railLen; draw.style.strokeDashoffset = this.railLen;
+      this.drawPath = draw; this.tlEl = tl;
+      // beacons
+      const n = this.marks.length;
+      this.beacons = Array.from({ length: n }, (_, i) => {
+        const parts = Array.from({ length: 80 }, () => { const th = Math.random() * 6.283, ph = Math.acos(2 * Math.random() - 1), r = 30 + Math.random() * 55; return { x: r * Math.sin(ph) * Math.cos(th), y: r * Math.sin(ph) * Math.sin(th), z: r * Math.cos(ph), tw: Math.random() * 6.28 }; });
+        return { x: Math.sin(i * 2.1) * 200, y: Math.cos(i * 1.6) * 130, z: i * 420, parts };
+      });
+      // canvas size
+      const dpr = Math.min(devicePixelRatio || 1, 2), rc = this.cv.getBoundingClientRect();
+      this.cv.width = rc.width * dpr; this.cv.height = rc.height * dpr; this.dpr = dpr;
+      this.cv.style.display = innerWidth < 1100 ? 'none' : 'block';
+    }, 60);
+  }
+  loop(t) {
+    const vh = innerHeight, sy = scrollY;
+    const pb = document.getElementById('progressbar');
+    if (pb) pb.style.transform = `scaleX(${sy / Math.max(1, document.documentElement.scrollHeight - vh)})`;
+    if (this.tlEl && this.railLen) {
+      const r = this.tlEl.getBoundingClientRect();
+      const p = Math.max(0, Math.min(1, (vh * .62 - r.top) / r.height));
+      this.p = p;
+      this.drawPath.style.strokeDashoffset = this.railLen * (1 - p);
+      // head dot
+      const pt = this.drawPath.getPointAtLength(this.railLen * p);
+      const head = document.getElementById('head');
+      head.style.transform = `translate(${pt.x}px,${pt.y}px)`;
+      head.style.opacity = p > .005 && p < .995 ? 1 : 0;
+      // node ignition
+      const headY = pt.y;
+      for (const m of this.marks) {
+        const on = m.y <= headY + 4;
+        if (on !== m.lit) {
+          m.lit = on;
+          m.el.style.background = on ? '#9D5BF0' : '#08080D';
+          m.el.style.borderColor = on ? '#5BD9F0' : 'rgba(157,91,240,.55)';
+          m.el.style.boxShadow = on ? '0 0 14px rgba(157,91,240,.9),0 0 30px rgba(91,217,240,.4)' : 'none';
+        }
+      }
+      // HUD
+      const n = this.marks.length, idx = Math.min(n, 1 + Math.floor(p * n));
+      const hc = document.getElementById('hudcount');
+      if (hc) hc.textContent = `${String(idx).padStart(2, '0')} / ${String(n).padStart(2, '0')}`;
+      const hb = document.getElementById('hudbar'); if (hb) hb.style.transform = `scaleX(${p})`;
+      this.drawFlight(t, p);
+    }
+    this.raf = requestAnimationFrame(this._loop);
+  }
+  drawFlight(t, p) {
+    const cx = this.cx; if (!cx || this.cv.style.display === 'none' || !this.beacons) return;
+    const W = this.cv.width, H = this.cv.height, d = this.dpr || 1;
+    cx.clearRect(0, 0, W, H);
+    const n = this.beacons.length, span = (n - 1) * 420;
+    const camZ = p * span - 300, F = 500 * d;
+    const proj = (x, y, z) => { const dz = z - camZ; if (dz < 40) return null; const s = F / dz; return { x: W / 2 + x * s * d, y: H / 2 + y * s * d, s }; };
+    // dust
+    for (const s of this.dust) {
+      const z = ((s.z * span * 1.4 - camZ * .6) % (span * 1.4) + span * 1.4) % (span * 1.4) + 120;
+      const q = proj(s.x * 600, s.y * 400, camZ + z - 120 + 160);
+      if (q) { cx.fillStyle = `rgba(242,242,248,${Math.min(.28, q.s * .3)})`; cx.fillRect(q.x, q.y, 1.2 * d, 1.2 * d); }
+    }
+    // ribbon
+    cx.beginPath(); let started = false;
+    for (const b of this.beacons) { const q = proj(b.x, b.y, b.z); if (!q) { started = false; continue; } if (!started) { cx.moveTo(q.x, q.y); started = true; } else cx.lineTo(q.x, q.y); }
+    cx.strokeStyle = 'rgba(157,91,240,.35)'; cx.lineWidth = 1.2 * d; cx.stroke();
+    // beacons
+    const filter = this.state.filter, isWork = this.state.view === 'work';
+    this.beacons.forEach((b, i) => {
+      const q = proj(b.x, b.y, b.z); if (!q) return;
+      const it = this.itemsNow[i];
+      const dim = isWork && filter !== 'All' && it && it.cat !== filter ? .22 : 1;
+      const dz = Math.abs(b.z - camZ - 300);
+      const near = Math.max(0, 1 - dz / 900);          // 0 far → 1 at camera
+      const condense = .35 + .65 * Math.min(1, dz / 700); // swarm tightens as camera nears
+      const flare = dz < 120 ? (1 - dz / 120) : 0;
+      const hue = i / (n - 1);
+      const col = a => `rgba(${Math.round(91 + 66 * hue)},${Math.round(91 + 126 * hue)},240,${a})`;
+      if (!this.rm) for (const pp of b.parts) {
+        const wob = Math.sin(t * .0012 + pp.tw) * 6;
+        const q2 = proj(b.x + (pp.x + wob) * condense, b.y + pp.y * condense, b.z + pp.z * condense);
+        if (!q2) continue;
+        cx.fillStyle = col((.1 + near * .5) * dim);
+        const sz = Math.min(3, .6 + q2.s * 1.6) * d;
+        cx.fillRect(q2.x, q2.y, sz, sz);
+      }
+      // core
+      cx.fillStyle = col((.5 + near * .5) * dim);
+      cx.beginPath(); cx.arc(q.x, q.y, (2 + near * 4 + flare * 5) * d, 0, 7); cx.fill();
+      if (flare > 0) {
+        cx.strokeStyle = `rgba(91,217,240,${flare * .8 * dim})`; cx.lineWidth = 1.5 * d;
+        cx.beginPath(); cx.arc(q.x, q.y, (10 + (1 - flare) * 50) * d, 0, 7); cx.stroke();
+      }
+      // label
+      if (near > .25 && it) {
+        cx.font = `600 ${11 * d}px JetBrains Mono, monospace`;
+        cx.fillStyle = `rgba(242,242,248,${near * .85 * dim})`;
+        cx.fillText((it.metric || '').toString(), q.x + 16 * d, q.y - 10 * d);
+        cx.font = `500 ${9 * d}px JetBrains Mono, monospace`;
+        cx.fillStyle = `rgba(91,217,240,${near * .7 * dim})`;
+        cx.fillText((it.title || '').toUpperCase().slice(0, 28), q.x + 16 * d, q.y + 4 * d);
+      }
+    });
+    // vignette
+    const g = cx.createRadialGradient(W / 2, H / 2, H * .3, W / 2, H / 2, H * .85);
+    g.addColorStop(0, 'rgba(8,8,13,0)'); g.addColorStop(1, 'rgba(8,8,13,.8)');
+    cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+  }
+}
+</script>
+</body>
+</html>
